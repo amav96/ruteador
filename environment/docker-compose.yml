@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ruteador-node:
+    build:
+      context: ../
+      dockerfile: ./environment/app/node/Dockerfile
+    container_name: ruteador-node
+    volumes:
+      - ../application/:/var/www/html
+    ports:
+      - "3000:3000"
+    command: sh /var/www/html/node_start.sh
+    networks:
+      - laguagua-ai-network
+
+networks:
+  laguagua-ai-network:
+    external: true
+    name: laguagua-ai-network
