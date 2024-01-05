@@ -8,6 +8,7 @@
         rounded 
         outlined 
         ref="pacInput" 
+        id="test"
       >
         <template v-slot:prepend>
           <q-icon @click="$emit('goBack', true)"  name="arrow_back" />
@@ -17,9 +18,24 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, toValue } from 'vue';
    // @ts-ignore
-  import { formatAddress } from '@/utils/google'
+import { toRefs, computed } from 'vue';
+  import { formatAddress } from '../../utils/google'
+  const props = defineProps({
+    defaultAddress: {
+      type: String,
+    },
+    index: {
+      type: Number
+    }
+  })
+
+  const {
+    defaultAddress,
+    index
+  } = toRefs(props);
+
   const emit = defineEmits(['goBack', 'selectedAddress'])
   
   // Acceso a la API de Google Maps
@@ -43,10 +59,13 @@
     const place = autocomplete.getPlace();
     const formattedAddress = formatAddress(place.address_components);
     // address.value = formattedAddress;
+    place.customName = formattedAddress
+    if(isEditMode.value){
+      place.index = index.value
+    }
     emit('selectedAddress', place)
-    emit('goBack', true)
+   
   };
-  
   
   // Función para inicializar el autocompletado
   const autocompleteLocation = () => {
@@ -56,8 +75,24 @@
   };
   
   onMounted(async () => {
+    
+    if(!isEditMode.value){
+      pacInput.value.getNativeElement().focus()
+    }
     autocompleteLocation();
   });
+
+  const isEditMode = computed(() => defaultAddress.value && (index.value || index.value === 0))
+
+  onMounted(() => {
+    if(isEditMode.value){
+      address.value = defaultAddress.value 
+      setTimeout(() => {
+        pacInput.value.getNativeElement().focus()
+      }, 300);
+    }
+  })
+
   
   </script>
 

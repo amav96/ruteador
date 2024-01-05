@@ -31,9 +31,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/RecorridoPage.vue'), 
         children: [
           {
-            path: 'buscar-direccion',
+            path: 'buscar-direccion/:addressValue?/:index?',
             name: 'buscar-direccion',
             component: () => import('components/recorridos/ModalBuscador.vue'), 
+            
           }
         ]
       },
