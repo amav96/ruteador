@@ -1,15 +1,83 @@
+import { RecorridoModel } from 'src/models/recorrido';
+import request from '../utils/apiResponse.helper';
+import { Preferences } from '@capacitor/preferences';
+
+const _RECORRIDO = '_recorrido';
+
+interface Recorrido {
+  intermediates: any[];
+  origin: {
+    auto?: boolean;
+    formatted_address?: string;
+  };
+  destination: object;
+}
+
 export default class RecorridoRepository {
+  async setRecorrido(data: any): Promise<void> {
+    await Preferences.set({
+      key: _RECORRIDO,
+      value: JSON.stringify(data),
+    });
+  }
 
-    set(data: any){
-        localStorage.setItem('_recorrido', JSON.stringify(data))
-    } 
+  async getRecorrido(): Promise<Recorrido | null> {
+    const ret = await Preferences.get({ key: _RECORRIDO });
 
-    findAll(){
-        const recorrido = localStorage.getItem('_recorrido')
-        if(recorrido){
-            return JSON.parse(recorrido);
-        }
+    // @ts-ignore
+    const recorrido = JSON.parse(ret.value);
+    
+    return recorrido;
+  }
 
-        return recorrido
+  async setOrigin(data: any): Promise<void> {
+    const storage_recorrido = await this.getRecorrido();
+    await this.setRecorrido({
+      ...storage_recorrido,
+      origin: data,
+    });
+  }
+
+  async removeOrigin(): Promise<void> {
+    const storage_recorrido = await this.getRecorrido();
+    if (storage_recorrido) {
+        // @ts-ignore
+      delete storage_recorrido.origin;
+      await this.setRecorrido({
+        ...storage_recorrido,
+      });
     }
+  }
+
+  async setDestination(data: any): Promise<void> {
+    const storage_recorrido = await this.getRecorrido();
+    await this.setRecorrido({
+      ...storage_recorrido,
+      destination: data,
+    });
+  }
+
+  async removeDestination(): Promise<void> {
+    const storage_recorrido = await this.getRecorrido();
+    if (storage_recorrido) {
+        // @ts-ignore
+      delete storage_recorrido.destination;
+      await this.setRecorrido({
+        ...storage_recorrido,
+      });
+    }
+  }
+
+  async obtenerRecorrido(data: any): Promise<RecorridoModel | any> {
+    try {
+        return await request({
+            url: 'api/armar-recorrido',
+            method: 'POST',
+            data,
+          });
+    } catch (error) {
+        throw error
+    }
+
+  }
 }

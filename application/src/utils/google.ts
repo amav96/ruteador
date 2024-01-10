@@ -1,3 +1,5 @@
+import request from './apiResponse.helper'
+
 export const formatAddress = (addressComponents: any[]) => {
     const ShouldBeComponent : any = {
       home: ["street_number"],
@@ -41,4 +43,35 @@ export const formatAddress = (addressComponents: any[]) => {
     });
   
     return `${formattedAddress.street} ${formattedAddress.home}, ${formattedAddress.postal_code ?? ''} ${formattedAddress.city ?? formattedAddress.region}`;
+};
+
+export const GPS = () => {
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0,
   };
+  return new Promise(((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  }));
+};
+
+export const obtenerInformacionUbicacion = async (lat: string, lng: string) => {
+  try {
+    const queryString = `latlng=${lat},${lng}&key=AIzaSyAD2gY2H88XBrGUz8sJVWYpAWkkz6n38Ds`; // Reemplaza con tu clave API de Google Maps
+
+    const searchParams = new URLSearchParams(queryString);
+
+    const response = await request({
+      url: 'https://maps.googleapis.com/maps/api/geocode/json',
+      method: 'GET',
+      params: searchParams
+    })
+    console.log(response)
+    return response
+
+  } catch (error) {
+    
+    console.error('Error al obtener información de la ubicación:', error);
+  }
+};

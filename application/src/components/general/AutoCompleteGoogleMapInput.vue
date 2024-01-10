@@ -14,6 +14,7 @@
           <q-icon @click="$emit('goBack', true)"  name="arrow_back" />
         </template>
       </q-input>
+      <!-- <div id="map"></div> -->
     </div>
   </template>
   
@@ -26,14 +27,15 @@ import { toRefs, computed } from 'vue';
     defaultAddress: {
       type: String,
     },
-    index: {
-      type: Number
+    id: {
+      type: [String, null as any],
+      default: '',
     }
   })
 
   const {
     defaultAddress,
-    index
+    id
   } = toRefs(props);
 
   const emit = defineEmits(['goBack', 'selectedAddress'])
@@ -41,18 +43,13 @@ import { toRefs, computed } from 'vue';
   // Acceso a la API de Google Maps
   const { google }: any = window;
   
-  const address = ref('');
+  const address = ref<string>('');
   
   // Ref para el input de búsqueda
-  const pacInput = ref<HTMLInputElement | null>(null);
+  const pacInput = ref<HTMLInputElement | null | any>(null);
   
   // Opciones de configuración para el autocompletado
-  const options = {
-    componentRestrictions: { country: 'ar' },
-    types: ['address'],
-    fields: ['address_components', 'geometry', 'icon', 'name'],
-    strictBounds: false,
-  };
+
   
   // Función principal llamada al seleccionar un lugar en el autocompletado
   const callbackFunction = (autocomplete: any) => {
@@ -61,31 +58,44 @@ import { toRefs, computed } from 'vue';
     // address.value = formattedAddress;
     place.customName = formattedAddress
     if(isEditMode.value){
-      place.index = index.value
+      place.id = id.value
     }
+    console.log(place)
     emit('selectedAddress', place)
    
   };
   
   // Función para inicializar el autocompletado
   const autocompleteLocation = () => {
+
+    // const map = new google.maps.Map(document.getElementById('map'), {
+    //   center: { lat: -34.607831971928825, lng: -58.41476810199054 },
+    //   zoom: 13,
+    // });
+
+    const options = {
+      componentRestrictions: { country: 'ar' },
+    };
+
     // @ts-ignore
-    const autocomplete = new google.maps.places.Autocomplete(pacInput.value.getNativeElement(), options);
+    const autocomplete = new google.maps.places.Autocomplete(pacInput.value.getNativeElement() , options);
+    autocomplete.setFields(['geometry', 'formatted_address', 'name', 'url', 'icon', 'address_components']);
     autocomplete.addListener('place_changed', () => callbackFunction(autocomplete));
+    // autocomplete.bindTo('bounds', map);
   };
   
   onMounted(async () => {
     
-    if(!isEditMode.value){
+    if(!isEditMode.value && pacInput.value){
       pacInput.value.getNativeElement().focus()
     }
     autocompleteLocation();
   });
 
-  const isEditMode = computed(() => defaultAddress.value && (index.value || index.value === 0))
+  const isEditMode = computed(() => defaultAddress?.value && (id.value || id.value === 0))
 
   onMounted(() => {
-    if(isEditMode.value){
+    if(isEditMode.value && defaultAddress?.value ){
       address.value = defaultAddress.value 
       setTimeout(() => {
         pacInput.value.getNativeElement().focus()
@@ -107,5 +117,10 @@ import { toRefs, computed } from 'vue';
     font-size: 17px !important;
   }
 
+
+  /* #map {
+            width: 100%;
+            height: 400px;
+        } */
 
 </style>

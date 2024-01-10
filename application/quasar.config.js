@@ -11,9 +11,21 @@
 
 const { configure } = require('quasar/wrappers');
 const path = require('path');
+require('dotenv').config()
+
+console.log(process.env.VUE_ROUTER_MODE)
 
 module.exports = configure(function (/* ctx */) {
   return {
+
+    bin: {
+      
+     
+      // linuxAndroidStudio: '/home/amav96/Android/Sdk',
+      linuxAndroidStudio: '/home/amav96/android-studio/bin/studio.sh',
+      
+      // ...
+    },
     
 
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -52,8 +64,9 @@ module.exports = configure(function (/* ctx */) {
         browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
         node: 'node16'
       },
-
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      env: require('dotenv').config().parsed,
+      vueRouterMode: process.env.VUE_ROUTER_MODE,
+     
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -91,7 +104,8 @@ module.exports = configure(function (/* ctx */) {
     devServer: {
       // https: true
       open: true, // opens browser window automatically
-      port: 3000
+      port: 3000,
+      
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -109,7 +123,10 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+        'Loading'
+      ]
     },
 
     // animations: 'all', // --- includes all animations

@@ -1,28 +1,10 @@
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
+ 
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
-      { 
-        path: 'recorridos', 
-        name: 'recorridos',
-        component: () => import('pages/RecorridoPage.vue'), 
-        children: [
-          {
-            path: 'buscar-direccion',
-            name: 'buscar-direccion',
-            component: () => import('components/recorridos/ModalBuscador.vue'), 
-          }
-        ]
-      },
-
-    ],
-  },
-  {
-    path: '/',
+    redirect: '/recorridos',
     component: () => import('layouts/NavegadorLayout.vue'),
     children: [
       { 
@@ -31,9 +13,9 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/RecorridoPage.vue'), 
         children: [
           {
-            path: 'buscar-direccion/:addressValue?/:index?',
+            path: 'buscar-direccion/:addressValue?/:id?/:origin?/:destination?',
             name: 'buscar-direccion',
-            component: () => import('components/recorridos/ModalBuscador.vue'), 
+            component: () => import('components/recorridos/BuscarDireccion.vue'), 
             
           }
         ]

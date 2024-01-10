@@ -12,10 +12,10 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Ruteador
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <!-- <div>Quasar v{{ $q.version }}</div> -->
       </q-toolbar>
     </q-header>
 
@@ -28,7 +28,7 @@
         <q-item-label
           header
         >
-          Essential Links
+          Modulos
         </q-item-label>
 
         <EssentialLink
@@ -50,48 +50,48 @@ import { ref } from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
 
 const essentialLinks: EssentialLinkProps[] = [
+  // {
+  //   title: 'Docs',
+  //   caption: 'quasar.dev',
+  //   icon: 'school',
+  //   link: 'https://quasar.dev'
+  // },
+  // {
+  //   title: 'Github',
+  //   caption: 'github.com/quasarframework',
+  //   icon: 'code',
+  //   link: 'https://github.com/quasarframework'
+  // },
+  // {
+  //   title: 'Discord Chat Channel',
+  //   caption: 'chat.quasar.dev',
+  //   icon: 'chat',
+  //   link: 'https://chat.quasar.dev'
+  // },
+  // {
+  //   title: 'Forum',
+  //   caption: 'forum.quasar.dev',
+  //   icon: 'record_voice_over',
+  //   link: 'https://forum.quasar.dev'
+  // },
+  // {
+  //   title: 'Twitter',
+  //   caption: '@quasarframework',
+  //   icon: 'rss_feed',
+  //   link: 'https://twitter.quasar.dev'
+  // },
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
+    title: 'Recorridos',
+    // caption: '@QuasarFramework',
     icon: 'public',
-    link: 'https://facebook.quasar.dev'
+    link: '/recorridos'
   },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
+  // {
+  //   title: 'Quasar Awesome',
+  //   caption: 'Community Quasar projects',
+  //   icon: 'favorite',
+  //   link: 'https://awesome.quasar.dev'
+  // }
 ];
 
 const leftDrawerOpen = ref(false)
