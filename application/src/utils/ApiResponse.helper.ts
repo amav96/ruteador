@@ -5,6 +5,7 @@ import axios, {
     AxiosResponseHeaders,
     ResponseType
 } from 'axios';
+import { Preferences } from '@capacitor/preferences';
 
 export interface ApiRequest<T = any> {
     url: string;
@@ -25,7 +26,7 @@ export interface ApiResponse<T = any> {
 const instance = axios.create({ baseURL: process.env.API_BASE_URL || 'http://localhost:10002/' });
 
 const request = (call: ApiRequest): Promise<ApiResponse> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const onSuccess = (response: AxiosResponse) => {
             resolve({
                 data: response.data,
@@ -56,6 +57,12 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
                 ...call.extraHeaders
             }
         };
+
+        let tokenAutenticado = await Preferences.get({ key: "_token" });
+
+        if (tokenAutenticado.value && axiosCall.headers) {
+            axiosCall.headers['Authorization'] = `Bearer ${tokenAutenticado.value}`;
+        }
 
         instance(axiosCall).then(onSuccess).catch(onError);
     });

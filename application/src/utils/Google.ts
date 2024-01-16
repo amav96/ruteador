@@ -1,4 +1,4 @@
-import request from './apiResponse.helper'
+import request from './ApiResponse.helper'
 
 export const formatAddress = (addressComponents: any[]) => {
     const ShouldBeComponent : any = {

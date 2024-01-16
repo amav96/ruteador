@@ -8,6 +8,8 @@ import {
 
 import routes from './routes';
 
+import { useUsuarioStore } from 'src/stores/Usuario'
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -18,7 +20,6 @@ import routes from './routes';
  */
 
 export default route(function (/* { store, ssrContext } */) {
-  console.log(process.env.VUE_ROUTER_MODE)
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
@@ -32,6 +33,26 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
+
+  Router.beforeEach(async (to, from, next) => {
+    const usuarioStore = useUsuarioStore()
+    const {
+      usuarioAutenticado,
+      getUsuario
+    } = usuarioStore
+    if(to.meta.requiresAuth ){
+
+      if(await usuarioAutenticado()){
+        await getUsuario()
+        next()
+      } else {
+        next('/autenticacion/login')
+      }
+    } else {
+      next();
+    }
+   
+  })
 
   return Router;
 });

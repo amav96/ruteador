@@ -22,7 +22,7 @@
   import { ref, onMounted, toValue } from 'vue';
    // @ts-ignore
 import { toRefs, computed } from 'vue';
-  import { formatAddress } from '../../utils/google'
+  import { formatAddress } from 'src/utils/Google'
   const props = defineProps({
     defaultAddress: {
       type: String,

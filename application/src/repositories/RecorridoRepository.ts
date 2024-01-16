@@ -1,5 +1,5 @@
 import { RecorridoModel } from 'src/models/recorrido';
-import request from '../utils/apiResponse.helper';
+import request from '../utils/ApiResponse.helper';
 import { Preferences } from '@capacitor/preferences';
 
 const _RECORRIDO = '_recorrido';
@@ -7,10 +7,13 @@ const _RECORRIDO = '_recorrido';
 interface Recorrido {
   intermediates: any[];
   origin: {
-    auto?: boolean;
+    data: any
     formatted_address?: string;
   };
-  destination: object;
+  destination: {
+    data: any
+    formatted_address?: string;
+  };
 }
 
 export default class RecorridoRepository {

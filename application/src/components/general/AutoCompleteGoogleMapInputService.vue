@@ -34,7 +34,7 @@
 const { google }: any = window;
 
 import { ref, onMounted, toRefs, defineProps, defineEmits, computed } from 'vue';
-import { formatAddress } from '../../utils/google'
+import { formatAddress } from 'src/utils/Google'
 import ListAutoCompleteGoogle from './ListAutoCompleteGoogle.vue'
 import { onUnmounted } from 'vue';
 
@@ -148,4 +148,4 @@ if (isEditMode.value && addressValue?.value) {
   padding: 6px 5px;
   font-size: 17px !important;
 }
-</style>
+</style>../../utils/Google

@@ -1,19 +1,28 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
+  <q-layout  view="lHh Lpr lFf" >
+    <q-header >
+      <q-toolbar class="bg-grey-2 flex row justify-between no-border">
         <q-btn
           flat
           dense
           round
           icon="menu"
           aria-label="Menu"
+          color="deep-purple-13"
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Ruteador
-        </q-toolbar-title>
+        <q-img
+          :src="logo"
+          style="max-width: 100px"
+        />
+        
+        <q-btn
+          flat
+          dense
+          round
+          color="deep-purple-13"
+        />
 
         <!-- <div>Quasar v{{ $q.version }}</div> -->
       </q-toolbar>
@@ -48,6 +57,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import logo from 'src/assets/logo.jpg'
 
 const essentialLinks: EssentialLinkProps[] = [
   // {
@@ -100,3 +110,12 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+
+<style>
+.q-layout__section--marginal{
+  background-color: #fafafa !important;
+}
+.q-toolbar {
+  padding: 0 9px;
+}
+</style>

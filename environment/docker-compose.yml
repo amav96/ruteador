@@ -12,9 +12,9 @@ services:
       - "3000:3000"
     command: sh /var/www/html/node_start.sh
     networks:
-      - laguagua-ai-network
+      - db_center_net
 
 networks:
-  laguagua-ai-network:
+  db_center_net:
     external: true
-    name: laguagua-ai-network
+    name: db_center_net
