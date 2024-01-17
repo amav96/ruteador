@@ -56,7 +56,7 @@ export const GPS = () => {
   }));
 };
 
-export const obtenerInformacionUbicacion = async (lat: string, lng: string) => {
+export const geoposicionar = async (lat: string, lng: string) => {
   try {
     const queryString = `latlng=${lat},${lng}&key=AIzaSyAD2gY2H88XBrGUz8sJVWYpAWkkz6n38Ds`; // Reemplaza con tu clave API de Google Maps
 
@@ -67,11 +67,20 @@ export const obtenerInformacionUbicacion = async (lat: string, lng: string) => {
       method: 'GET',
       params: searchParams
     })
-    console.log(response)
-    return response
+
+    return response.data
 
   } catch (error) {
     
     console.error('Error al obtener información de la ubicación:', error);
   }
 };
+
+export const formatearGeposiciones = (data: any) => {
+  const [item] = data.results;
+  return {
+    formatted_address : item.formatted_address,
+    lat: item.geometry.location.lat,
+    lng: item.geometry.location.lng,
+  }
+}

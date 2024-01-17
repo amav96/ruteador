@@ -10,7 +10,8 @@ export default class AutenticacionRepository {
             return await request({
                 url: '/api/auth/login',
                 method: 'POST',
-                data: form
+                data: form,
+                
               });
         } catch (error: any) {
             throw error
@@ -23,6 +24,7 @@ export default class AutenticacionRepository {
             const response =  await request({
                 url: '/api/auth/autenticado',
                 method: 'GET',
+                auth: true
               });
               
             return response.data;

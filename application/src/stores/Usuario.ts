@@ -52,6 +52,8 @@ export const useUsuarioStore = defineStore('usuario', {
         } catch (error) {
             console.log(error)
         }
+      } else {
+        return this.usuario
       }
 
     },

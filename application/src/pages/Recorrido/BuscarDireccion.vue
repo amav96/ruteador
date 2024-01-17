@@ -5,7 +5,6 @@
       :maximized="maximizedToggle"
       transition-show="slide-up"
       transition-hide="slide-down"
-      
     >
       <q-card class="text-black">
           <auto-complete-google-map-input-service
@@ -13,7 +12,7 @@
           :id="id as string ?? ''"
           :origin="Number(origin) ?? 0"
           :destination="Number(destination) ?? 0"
-          @go-back="router.push({name: 'recorridos'})"
+          @go-back="router.push({name: 'recorrido'})"
           @selected-address="selectedAddress"
           @select-origin="selectOrigin"
           @select-destination="selectDestination"
@@ -23,9 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
-import AutoCompleteGoogleMapInputService from 'components/general/AutoCompleteGoogleMapInputService.vue';
+import AutoCompleteGoogleMapInputService from 'components/General/AutoCompleteGoogleMapInputService.vue';
+import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
 
 const route = useRoute();
 // query params
@@ -38,7 +38,11 @@ const {
 } = route.query
 
 
-const emit = defineEmits(['selectedAddress','selectOrigin', 'selectDestination'])
+const emit = defineEmits<{
+  (e: 'selectedAddress', data: GooglePlacesAutocompleteResponseModel): void
+  (e: 'selectOrigin', value: GooglePlacesAutocompleteResponseModel | AutoGpsModel): void
+  (e: 'selectDestination', value: GooglePlacesAutocompleteResponseModel): void
+}>()
 
 const dialog =  ref(true)
 const maximizedToggle =  ref(true)
@@ -53,20 +57,20 @@ const selectedAddress = (data: any) => {
     selectDestination(data)
   } else {
     emit('selectedAddress', data)
-    router.push({name: 'recorridos'})
+    router.push({name: 'recorrido'})
   }
   
  
 }
 
-const selectOrigin = (value: object) => {
+const selectOrigin = (value: GooglePlacesAutocompleteResponseModel | AutoGpsModel) => {
   emit('selectOrigin', value)
-  router.push({name: 'recorridos'})
+  router.push({name: 'recorrido'})
 }
 
-const selectDestination = (value: object) => {
+const selectDestination = (value: GooglePlacesAutocompleteResponseModel) => {
   emit('selectDestination', value)
-  router.push({name: 'recorridos'})
+  router.push({name: 'recorrido'})
 }
 
 

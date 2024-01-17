@@ -3,20 +3,20 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
  
   {
-    path: '/',
-    redirect: '/recorridos',
+    path: '/recorridos',
+    redirect: '/crear-recorrido',
     meta: { requiresAuth: true},
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { 
-        path: 'recorridos', 
-        name: 'recorridos',
+        path: ':recorrido_id', 
+        name: 'recorrido',
         component: () => import('pages/Recorrido/RecorridoPage.vue'), 
         children: [
           {
             path: 'buscar-direccion/:addressValue?/:id?/:origin?/:destination?',
             name: 'buscar-direccion',
-            component: () => import('components/recorridos/BuscarDireccion.vue'), 
+            component: () => import('pages/Recorrido/BuscarDireccion.vue'), 
             
           }
         ]
@@ -24,15 +24,8 @@ const routes: RouteRecordRaw[] = [
       { 
         path: 'crear-recorrido', 
         name: 'crear-recorrido',
-        component: () => import('pages/Recorrido/RecorridoPage.vue'), 
-        children: [
-          {
-            path: 'buscar-direccion/:addressValue?/:id?/:origin?/:destination?',
-            name: 'buscar-direccion',
-            component: () => import('components/recorridos/BuscarDireccion.vue'), 
-            
-          }
-        ]
+        meta: { requiresAuth: true},
+        component: () => import('pages/Recorrido/CrearRecorridoPage.vue'), 
       },
 
     ],

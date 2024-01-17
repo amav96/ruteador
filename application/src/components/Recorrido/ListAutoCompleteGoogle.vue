@@ -9,7 +9,7 @@
       @click="selectAutoOrigin"
       >
         <q-item-section avatar>
-          <q-icon color="primary" name="location_on" />
+          <q-icon color="deep-purple-13" name="location_on" />
         </q-item-section>
         <q-item-section class="text-body1">
            Mi ubicación
@@ -17,7 +17,7 @@
         <q-item-section
         
         avatar>
-          <q-icon color="primary" name="gps_fixed" />
+          <q-icon color="deep-purple-13" name="gps_fixed" />
         </q-item-section>
       </q-item>
 
@@ -29,7 +29,7 @@
       @click="selected(item)"
       >
         <q-item-section avatar>
-          <q-icon color="primary" name="location_on" />
+          <q-icon color="deep-purple-13" name="location_on" />
         </q-item-section>
         <q-item-section class="text-body1">
           {{ item.description }}
@@ -40,19 +40,14 @@
 </template>
 
 <script setup lang="ts">
+import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
 import { toRefs, watch } from 'vue';
 
-interface ListAutocompleteGoogle {
-  description: string,
-  matched_substrings: any[],
-  place_id: string,
-  reference: string,
-  structured_formatting: any,
-  terms: any[],
-  types: any[]
-}
-
-const emit = defineEmits(['selectedAddress', 'selectOrigin', 'selectDestination'])
+const emit = defineEmits<{
+  (e: 'selectedAddress', data: GooglePlacesAutocompleteResponseModel): void
+  (e: 'selectOrigin', value: GooglePlacesAutocompleteResponseModel | AutoGpsModel): void
+  (e: 'selectDestination', value: GooglePlacesAutocompleteResponseModel): void
+}>()
 
 // @ts-ignore
 const geocoder = new google.maps.Geocoder();
@@ -65,7 +60,7 @@ const props = defineProps({
 
 const { prediction, origin, destination } = toRefs(props);
 
-const selected = (item: ListAutocompleteGoogle) => {
+const selected = (item: GooglePlacesAutocompleteResponseModel) => {
   const {
     place_id
   } = item

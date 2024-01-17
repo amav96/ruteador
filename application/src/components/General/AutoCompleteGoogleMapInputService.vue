@@ -8,8 +8,8 @@
         rounded 
         outlined 
         class="q-pa-md"
-        ref="pacInput" 
-        id="test"
+        ref="pacInput"
+        color="deep-purple-13"
       >
         <template v-slot:prepend>
           <q-icon @click="$emit('goBack', true)"  name="arrow_back" />
@@ -35,8 +35,8 @@ const { google }: any = window;
 
 import { ref, onMounted, toRefs, defineProps, defineEmits, computed } from 'vue';
 import { formatAddress } from 'src/utils/Google'
-import ListAutoCompleteGoogle from './ListAutoCompleteGoogle.vue'
-import { onUnmounted } from 'vue';
+import ListAutoCompleteGoogle from 'src/components/Recorrido/ListAutoCompleteGoogle.vue'
+import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
 
 const props = defineProps({
   addressValue: {
@@ -54,7 +54,14 @@ const props = defineProps({
 });
 
 const { addressValue, id } = toRefs(props);
-const emit = defineEmits(['goBack', 'selectedAddress', 'selectOrigin', 'selectDestination']);
+
+const emit = defineEmits<{
+  (e: 'goBack', data: boolean ): void
+  (e: 'selectedAddress', data: GooglePlacesAutocompleteResponseModel): void
+  (e: 'selectOrigin', value: GooglePlacesAutocompleteResponseModel | AutoGpsModel): void
+  (e: 'selectDestination', value: GooglePlacesAutocompleteResponseModel): void
+}>()
+
 const address = ref<string>('');
 const pacInput = ref<HTMLInputElement | null | any>(null);
 

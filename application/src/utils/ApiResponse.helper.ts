@@ -14,6 +14,7 @@ export interface ApiRequest<T = any> {
     extraHeaders?: { [key: string]: string };
     params?: URLSearchParams;
     responseType?: ResponseType;
+    auth?: boolean
 }
 
 export interface ApiResponse<T = any> {
@@ -57,11 +58,12 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
                 ...call.extraHeaders
             }
         };
+        if(call.auth){
+            let tokenAutenticado = await Preferences.get({ key: "_token" });
 
-        let tokenAutenticado = await Preferences.get({ key: "_token" });
-
-        if (tokenAutenticado.value && axiosCall.headers) {
-            axiosCall.headers['Authorization'] = `Bearer ${tokenAutenticado.value}`;
+            if (tokenAutenticado.value && axiosCall.headers) {
+                axiosCall.headers['Authorization'] = `Bearer ${tokenAutenticado.value}`;
+            }
         }
 
         instance(axiosCall).then(onSuccess).catch(onError);

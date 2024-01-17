@@ -7,32 +7,31 @@
             borderless
             class="text-body1"
             color="deep-purple-13"
-            v-model="origin.formatted_address"
-            @click="selectOrigin"
+            v-model="origen.formatted_address"
+            @click="goToSelectOrigen"
           >
             <template v-slot:prepend>
               <q-icon
-                :class="`q-ml-sm ${autoOrigin ? 'text-blue' : ''}`"
-                :name="autoOrigin ? 'gps_fixed' : 'explore'"
+                :class="`q-ml-sm ${autoOrigen ? 'text-blue' : ''}`"
+                :name="autoOrigen ? 'gps_fixed' : 'explore'"
               />
             </template>
-            <template v-slot:append>
+            <template v-if="origen.formatted_address" v-slot:append>
               <q-icon
                 name="highlight_off"
                 color="deep-purple-13"
-                :class="`q-mr-sm ${autoOrigin ? 'pointeer' : ''}`"
-                @click="removeOrigin"
-                
+                :class="`q-mr-sm ${autoOrigen ? 'pointeer' : ''}`"
+                @click="removerOrigin"
               />
             </template>
           </q-input>
     
           <q-input
-            :label="!destination ? 'Elige donde quieres terminar' : 'Destino'"
+            :label="!destino ? 'Elige donde quieres terminar' : 'Destino'"
             borderless
             class="text-body1"
             color="deep-purple-13"
-            v-model="destination.formatted_address"
+            v-model="destino.formatted_address"
             @click="selectDestination"
           >
             <template v-slot:prepend>
@@ -41,21 +40,23 @@
                 name="place"
               />
             </template>
-            <template v-slot:append>
+            <template v-if="destino.formatted_address" v-slot:append>
               <q-icon
                 name="highlight_off"
                 color="deep-purple-13"
-                :class="`q-mr-sm ${destination ? 'pointeer' : ''}`"
-                @click="removeDestination"
+                :class="`q-mr-sm ${destino ? 'pointeer' : ''}`"
+                @click="removerDestino"
               />
             </template>
           </q-input>
         </div>
   
-        <div class="flex row items-center q-py-xs q-my-xs">
-          <q-btn @click="addStop" round color="deep-purple-13" icon="add" />
-          <div @click="addStop" class="q-ml-sm pointer ">
-            <strong>Agregar parada</strong>
+        <div class="flex row items-center justify-center q-my-md">
+          <div class="flex column items-center">
+            <q-btn @click="addStop" round color="deep-purple-13" icon="add" />
+            <div @click="addStop" class="pointer q-my-sm">
+              <strong>Parada</strong>
+            </div>
           </div>
         </div>
   
@@ -84,7 +85,7 @@
   
         <router-view
           @selected-address="handleAddress"
-          @select-origin="setOrigin({data: $event})"
+          @select-origin="origenSeleccionado"
           @select-destination="setDestination"
         ></router-view>
       </div>
@@ -110,7 +111,7 @@
 </template>
   
   <script setup lang="ts">
-  import { useRouter } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import RecorridoRepository from 'src/repositories/RecorridoRepository';
   import { computed, watch, onMounted, ref } from 'vue';
   import { v4 as uuidv4 } from 'uuid';
@@ -118,7 +119,10 @@
   import { onBeforeUnmount } from 'vue';
   import { useQuasar } from 'quasar';
   import { VueDraggable } from 'vue-draggable-plus';
-  import { RecorridoModel } from 'src/models/recorrido';
+  import { RecorridoModel } from 'src/models/Recorrido.model';
+  import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
+  import { CoordenadasModel, UpdateOrigenRequest } from 'src/models/Recorrido.model';
+import { geoposicionar, formatearGeposiciones } from 'src/utils/Google';
   
   const $q = useQuasar();
   
@@ -128,20 +132,23 @@
   
   interface Way {
     formatted_address?: string ;
-    data: any;
+    data: CoordenadasModel;
   }
   
-  const origin = ref<Way>({
+  const origen = ref<Way>({
     formatted_address: '',
     data: {},
   });
-  const autoOrigin = ref<boolean>(false);
-  const destination = ref<Way>({
+  const autoOrigen = ref<boolean>(false);
+  const destino = ref<Way>({
     formatted_address: '',
     data: {},
   });
   
   const router = useRouter();
+  const route = useRoute();
+  
+  const recorridoId = computed(() => route.params.recorrido_id)
   
   const addStop = (event: any) => {
     router.push({ name: 'buscar-direccion' });
@@ -153,12 +160,18 @@
     intermediates,
     async (newVal) => {
       try {
-        const storage_recorrido = await recorridoRepository.getRecorrido();
+
+        const {
+        recorrido_id
+        } = route.params
+        // console.log("watch")
+        // console.log(intermediates.value)
+        // const storage_recorrido = await recorridoRepository.getRecorrido(Number(recorrido_id));
   
-        recorridoRepository.setRecorrido({
-          ...storage_recorrido,
-          intermediates: newVal,
-        });
+        // recorridoRepository.setRecorrido({
+        //   ...storage_recorrido,
+        //   intermediates: newVal,
+        // });
       } catch (error) {
         console.log(error);
       }
@@ -215,22 +228,43 @@
     intermediates.value.splice(index, 1);
   };
   
-  onMounted(() => getRecorridoPersistido());
+  onMounted(() => getRecorrido());
   
-  const getRecorridoPersistido = async () => {
-    const storage_recorridoActual = await recorridoRepository.getRecorrido();
-  
-    if (storage_recorridoActual) {
-      if (storage_recorridoActual.intermediates) {
-        intermediates.value = storage_recorridoActual.intermediates;
+  const getRecorrido = async () => {
+    const {
+      recorrido_id
+    } = route.params
+    const relaciones = ['paradas'];
+    try {
+
+      const response = await recorridoRepository.get(Number(recorrido_id), relaciones);
+      
+      if (response && response.length > 0) {
+        const [recorrido] = response;
+        if(recorrido.origen_lat){
+          origen.value.data.lat = recorrido.origen_lat
+        }
+        if(recorrido.origen_lng){
+          origen.value.data.lng = recorrido.origen_lng
+        }
+        if(recorrido.origen_formateado){
+          origen.value.formatted_address = recorrido.origen_formateado
+        }
+        console.log(recorrido)
+        // if (response.intermediates) {
+        //   intermediates.value = response.intermediates;
+        // }
+        // if (response.origin) {
+        //   origenSeleccionado(response.origin);
+        // }
+    
+        // if (response.destination) {
+        //   setDestination(response.destination);
+        // }
       }
-      if (storage_recorridoActual.origin) {
-        setOrigin(storage_recorridoActual.origin);
-      }
-  
-      if (storage_recorridoActual.destination) {
-        setDestination(storage_recorridoActual.destination);
-      }
+      
+    } catch (error) {
+      
     }
   };
   
@@ -242,7 +276,7 @@
     if (cargandoRecorrido.value) return;
     cargandoRecorrido.value = true;
   
-    if (!origin.value.formatted_address || !destination.value.formatted_address) {
+    if (!origen.value.formatted_address || !destino.value.formatted_address) {
       $q.notify({
         type: 'warning',
         message: 'Debes ingresar punto de partida y donde quieres terminar',
@@ -250,7 +284,7 @@
       return;
     }
 
-    const latLngOrigin = origin.value.data.location.latLng;
+    const latLngOrigin = origen.value.data.location.latLng;
     if (!latLngOrigin.latitude || !latLngOrigin.longitude) {
       $q.notify({
         type: 'warning',
@@ -259,7 +293,7 @@
       return;
     }
   
-    const latLngDestination = destination.value.data.location.latLng;
+    const latLngDestination = destino.value.data.location.latLng;
     if (!latLngDestination.latitude || !latLngDestination.longitude) {
       $q.notify({
         type: 'warning',
@@ -273,7 +307,7 @@
         location: origin.value.data.location,
       },
       destination: {
-        location: destination.value.data.location,
+        location: destino.value.data.location,
       },
       intermediates: intermediates.value,
     };
@@ -293,9 +327,9 @@
   };
   
   const reordenarRecorrido = (recorrido: RecorridoModel) => {
-    let orden = recorrido.routes[0].optimizedIntermediateWaypointIndex;
-    const reordenar = orden.map((posicion) => intermediates.value[posicion]);
-    intermediates.value = reordenar;
+    // let orden = recorrido.routes[0].optimizedIntermediateWaypointIndex;
+    // const reordenar = orden.map((posicion) => intermediates.value[posicion]);
+    // intermediates.value = reordenar;
   };
   
   const verRecorridoGoogleMaps = () => {
@@ -303,8 +337,8 @@
       (waypoint) => `${waypoint.location.lat},${waypoint.location.lng}`
     );
  
-    const originPath = `${origin.value.data.location.latLng.latitude},${origin.value.data.location.latLng.longitude}`;
-    const destinationPath = `${destination.value.data.location.latLng.latitude},${destination.value.data.location.latLng.longitude}`;
+    const originPath = `${origen.value.data.lat},${origen.value.data.lng}`;
+    const destinationPath = `${destino.value.data.lat},${destino.value.data.lng}`;
 
     const url = `https://www.google.com/maps/dir/?api=1&origin=${originPath}&destination=${destinationPath}&travelmode=driving&waypoints=${waypoints.join(
       '|'
@@ -313,47 +347,58 @@
     window.open(url);
   };
   
-  const selectOrigin = () => {
+  const goToSelectOrigen = () => {
     router.push({ name: 'buscar-direccion', query: { origin: 1 } });
   };
   
-  const setOrigin = async (value: { data: any , formatted_address?: string}) => {
+  const origenSeleccionado = async (value : GooglePlacesAutocompleteResponseModel | AutoGpsModel) => {
     
-    const { data: { auto , formatted_address} } = value;
-    
-    origin.value = {
-        ...origin.value,
-        ...value
-    };
-
-    if (formatted_address) {
-      if (formatted_address.length > 35) {
-        origin.value.formatted_address = formatted_address.substr(0, 35) + '...';
-      } else {
-        origin.value.formatted_address = formatted_address;
+    if ('formatted_address' in value) {
+      const {formatted_address, geometry } = value;
+      origen.value.formatted_address = formatted_address;
+      origen.value.data = {
+        lat: geometry.location.lat(),
+        lng: geometry.location.lng(),
       }
-  
-      const latLngOrigin = await getOriginLocation();
-      origin.value.data.location = {
-        latLng: {
-          latitude: latLngOrigin.latitude,
-          longitude: latLngOrigin.longitude,
-        },
-      };
-    } 
-    
-    if (auto) {
-      autoOrigin.value = true;
-      const latLngOrigin = await getOriginLocation();
-     
+
+    } else if('auto' in value){
+      origen.value.formatted_address = 'Tu ubicación'
+      if(position.value.coords){
+        const { latitude , longitude } = position.value.coords
+        const geo = await geoposicionar(latitude, longitude)
+        geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
+        const geoFormateado = formatearGeposiciones(geo);
+        origen.value.data = {
+          lat: geoFormateado.lat,
+          lng: geoFormateado.lng,
+        }
+      }
+
     }
   
-    recorridoRepository.setOrigin(origin.value);
+    try {
+
+      await recorridoRepository.updateOrigen(
+      {
+        origen_lat: origen.value.data.lat ?? 0,
+        origen_lng: origen.value.data.lng ?? 0,
+        origen_formateado: origen.value.formatted_address ?? ''
+      }, 
+      Number(recorridoId.value));
+      
+    } catch (error) {
+
+      $q.notify({
+          type: 'warning',
+          message: 'No se actualizo correctamente el destino',
+      });
+    }
+
   };
   
   const position = ref<any>({});
   const getOriginLocation = async (): Promise<{ latitude: number; longitude: number }> => {
-    const { data } = origin.value;
+    const { data } = origen.value;
    
     if (data.auto) {
       if (
@@ -422,19 +467,24 @@
     Geolocation.clearWatch(geoId);
   });
   
-  watch(autoOrigin, (val) => {
-    if (autoOrigin.value) {
-      origin.value.formatted_address = 'Tu ubicación';
+  watch(autoOrigen, (val) => {
+    if (autoOrigen.value) {
+      origen.value.formatted_address = 'Tu ubicación';
     } else {
-      origin.value.formatted_address = '';
+      origen.value.formatted_address = '';
     }
   });
   
-  const removeOrigin = () => {
-    autoOrigin.value = false;
-    origin.value.formatted_address = '';
-    origin.value.data = {};
-    recorridoRepository.removeOrigin();
+  const removerOrigin = async() => {
+    origen.value.formatted_address = '';
+    origen.value.data = {};
+    await recorridoRepository.removerOrigen(Number(recorridoId.value));
+  };
+
+  const removerDestino = () => {
+    destino.value.formatted_address = '';
+    destino.value.data = {};
+    recorridoRepository.removerDestino(Number(recorridoId.value));
   };
   
   const selectDestination = () => {
@@ -444,17 +494,17 @@
   const setDestination = (value: { data: any , formatted_address?: string}) => {
     const { formatted_address } = value;
   
-    destination.value.data = value;
+    destino.value.data = value;
     if (formatted_address) {
       if (formatted_address.length > 35) {
-        destination.value.formatted_address =
+        destino.value.formatted_address =
           formatted_address.substr(0, 35) + '...';
       } else {
-        destination.value.formatted_address = formatted_address;
+        destino.value.formatted_address = formatted_address;
       }
   
       const latLngDestination = getDestinationLocation();
-      destination.value.data.location = {
+      destino.value.data.location = {
         latLng: {
           latitude: latLngDestination.latitude,
           longitude: latLngDestination.longitude,
@@ -469,7 +519,7 @@
 
     const {
       geometry: { location: { lat, lng } },
-    } = destination.value.data;
+    } = deestino.value.data;
   
     if (lat && lng) {
       return {
@@ -484,11 +534,7 @@
     };
   };
   
-  const removeDestination = () => {
-    destination.value.formatted_address = '';
-    destination.value.data = {};
-    recorridoRepository.removeDestination();
-  };
+
   
   </script>
   
