@@ -40,6 +40,7 @@ export default route(function (/* { store, ssrContext } */) {
       usuarioAutenticado,
       getUsuario
     } = usuarioStore
+    
     if(to.meta.requiresAuth ){
 
       if(await usuarioAutenticado()){

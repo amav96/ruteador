@@ -6,6 +6,7 @@ export interface GooglePlacesAutocompleteResponseModel {
     plus_code: PlusCodeModel;
     types: string[];
     customName: string; // Personalizado según tus necesidades
+    id?: number
 }
 
 export interface AddressComponentModel {
@@ -39,4 +40,13 @@ export interface PlusCodeModel {
 
 export interface AutoGpsModel {
     auto?: boolean 
+}
+
+export interface FormateadorGoogleAddressModel {
+    formatted_address: string;
+    localidad: string;
+    provincia: string;
+    codigo_postal: string;
+    numero: string;
+    calle: string;
 }

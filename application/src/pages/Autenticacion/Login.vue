@@ -66,9 +66,9 @@ import logo from 'src/assets/logo.jpg'
 import { ref, computed, reactive } from "vue"
 import { useQuasar } from 'quasar'
 import { isValidEmail } from 'src/utils/Validations'
-import AutenticacionRepository from 'src/repositories/AutenticacionRepository';
+import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
 import { LoginModel } from 'src/models/Autenticacion.model';
-import DialogLoading from 'src/components/general/DialogLoading.vue'
+import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { useRouter } from 'vue-router';
 

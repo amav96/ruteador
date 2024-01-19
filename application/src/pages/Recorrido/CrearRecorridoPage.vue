@@ -49,9 +49,9 @@
 <script setup lang="ts">
 
 import navigator from 'src/assets/navigator.svg'
-import RecorridoRepository from 'src/repositories/RecorridoRepository';
+import RecorridoRepository from 'src/repositories/Recorrido.repository';
 import { useUsuarioStore } from 'src/stores/Usuario'
-import DialogLoading from 'src/components/general/DialogLoading.vue'
+import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 

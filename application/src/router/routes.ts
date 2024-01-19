@@ -1,10 +1,10 @@
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
- 
+
   {
     path: '/recorridos',
-    redirect: '/crear-recorrido',
+    redirect: '/recorridos/crear-recorrido',
     meta: { requiresAuth: true},
     component: () => import('layouts/MainLayout.vue'),
     children: [

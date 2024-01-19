@@ -58,6 +58,7 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
                 ...call.extraHeaders
             }
         };
+        console.log(axiosCall)
         if(call.auth){
             let tokenAutenticado = await Preferences.get({ key: "_token" });
 

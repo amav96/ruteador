@@ -22,7 +22,7 @@
   import { ref, onMounted, toValue } from 'vue';
    // @ts-ignore
 import { toRefs, computed } from 'vue';
-  import { formatAddress } from 'src/utils/Google'
+  import { formatearGoogleAddress } from 'src/utils/Google'
   const props = defineProps({
     defaultAddress: {
       type: String,
@@ -54,7 +54,7 @@ import { toRefs, computed } from 'vue';
   // Función principal llamada al seleccionar un lugar en el autocompletado
   const callbackFunction = (autocomplete: any) => {
     const place = autocomplete.getPlace();
-    const formattedAddress = formatAddress(place.address_components);
+    const formattedAddress = formatearGoogleAddress(place.address_components);
     // address.value = formattedAddress;
     place.customName = formattedAddress
     if(isEditMode.value){

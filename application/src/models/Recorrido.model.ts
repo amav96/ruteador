@@ -42,6 +42,12 @@ export interface UpdateOrigenRequest {
     origen_formateado: string
 }
 
+export interface UpdateDestinoRequest {
+    destino_lat : number,
+    destino_lng: number,
+    destino_formateado: string
+}
+
 export interface CoordenadasModel{
     lat?: number,
     lng?: number,

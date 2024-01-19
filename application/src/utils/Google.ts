@@ -1,48 +1,65 @@
-import request from './ApiResponse.helper'
+import { get } from 'http';
+import request from './ApiResponseCapacitor.util'
+import { FormateadorGoogleAddressModel } from 'src/models/Google.model';
 
-export const formatAddress = (addressComponents: any[]) => {
+export const formatearGoogleAddress = (addressComponents: any[]) :FormateadorGoogleAddressModel => {
+
     const ShouldBeComponent : any = {
-      home: ["street_number"],
-      postal_code: ["postal_code"],
-      street: ["street_address", "route"],
+      street_number: ['street_number'],
+      postal_code: ['postal_code'],
+      street: ['street_address', 'route'],
       region: [
-        "administrative_area_level_1",
-        "administrative_area_level_2",
-        "administrative_area_level_3",
-        "administrative_area_level_4",
-        "administrative_area_level_5"
+        'administrative_area_level_1',
+        'administrative_area_level_2',
+        'administrative_area_level_3',
+        'administrative_area_level_4',
+        'administrative_area_level_5'
       ],
       city: [
-        "locality",
-        "sublocality",
-        "sublocality_level_1",
-        "sublocality_level_2",
-        "sublocality_level_3",
-        "sublocality_level_4"
+        'political',
+        'neighborhood',
+        'locality',
+        'sublocality',
+        'sublocality_level_1',
+        'sublocality_level_2',
+        'sublocality_level_3',
+        'sublocality_level_4'
       ],
-      country: ["country"]
+      country: ['country']
     };
   
     const formattedAddress : any = {
-      home: "",
-      postal_code: "",
-      street: "",
-      region: "",
-      city: "",
-      country: ""
+      street_number: '',
+      postal_code: '',
+      street: '',
+      region: '',
+      city: '',
+      country: ''
     };
   
-    addressComponents.forEach(component => {
-      for (const shouldBe in ShouldBeComponent) {
-        if (ShouldBeComponent[shouldBe].indexOf(component.types[0]) !== -1) {
-          formattedAddress[shouldBe] = shouldBe === "country"
-            ? component.short_name
-            : component.long_name;
+    for (const shouldBe in ShouldBeComponent) {
+      let consiguioValor = false;
+      for(const option of ShouldBeComponent[shouldBe]){
+        if(consiguioValor) break
+        for(const component of addressComponents){
+            if(consiguioValor) break
+            if(option.indexOf(component.types[0]) !== -1){
+              formattedAddress[shouldBe] = component.short_name && shouldBe !== 'country' ? component.short_name : component.long_name
+              consiguioValor = true;
+              break;
+            }
         }
       }
-    });
-  
-    return `${formattedAddress.street} ${formattedAddress.home}, ${formattedAddress.postal_code ?? ''} ${formattedAddress.city ?? formattedAddress.region}`;
+    }
+ 
+    return {
+      formatted_address: `${formattedAddress.street} ${formattedAddress.street_number}, ${formattedAddress.postal_code ?? ''} ${formattedAddress.city ?? formattedAddress.region}`,
+      localidad : formattedAddress.city as string,
+      provincia : formattedAddress.region as string,
+      codigo_postal: formattedAddress.postal_code as string,
+      numero: formattedAddress.street_number as string,
+      calle: formattedAddress.street as string,
+    }
 };
 
 export const GPS = () => {
@@ -58,14 +75,15 @@ export const GPS = () => {
 
 export const geoposicionar = async (lat: string, lng: string) => {
   try {
-    const queryString = `latlng=${lat},${lng}&key=AIzaSyAD2gY2H88XBrGUz8sJVWYpAWkkz6n38Ds`; // Reemplaza con tu clave API de Google Maps
-
-    const searchParams = new URLSearchParams(queryString);
 
     const response = await request({
       url: 'https://maps.googleapis.com/maps/api/geocode/json',
       method: 'GET',
-      params: searchParams
+      // @ts-ignore
+      params: {
+        latlng: `${lat},${lng}`,
+        key: 'AIzaSyAD2gY2H88XBrGUz8sJVWYpAWkkz6n38Ds'
+      }
     })
 
     return response.data

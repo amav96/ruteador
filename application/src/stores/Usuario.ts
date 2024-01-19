@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Preferences } from '@capacitor/preferences';
-import AutenticacionRepository from 'src/repositories/AutenticacionRepository';
+import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
 
 interface UsuarioModel {
     id: number;
