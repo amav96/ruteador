@@ -35,6 +35,23 @@ export default class ParadaRepository {
           console.log(error)
           throw error
         }
-  }
+    }
+
+    async getParada(params: any,paradaId : string) : Promise<ParadaModel[]> {
+      try {
+        const response = await request({
+          url: API_BASE_URL + '/api/paradas/' + paradaId,
+          method: 'GET',
+          auth: true,
+          params
+        });
+  
+        return response.data;
+  
+      } catch (error) {
+        console.log(error)
+        throw error
+      }
+    }
 
 }

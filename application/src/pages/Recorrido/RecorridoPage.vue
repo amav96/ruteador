@@ -261,10 +261,16 @@
   };
   
   const goToActualizarParada = (data: any, id: number) => {
+    // router.push({
+    //   name: 'buscar-direccion',
+    //   query: { addressValue: data.direccion_formateada, id },
+    // });
+      console.log(id)
     router.push({
-      name: 'buscar-direccion',
-      query: { addressValue: data.direccion_formateada, id },
+      name: 'parada',
+      params: { parada_id: id },
     });
+
   };
   
   const removeAddres = async (index: number) => {
@@ -277,10 +283,12 @@
     const {
       recorrido_id
     } = route.params
-    const relaciones = ['paradas'];
+    const params = {
+      incluye : ['paradas']
+    }
     try {
 
-      const response = await recorridoRepository.get(Number(recorrido_id), relaciones);
+      const response = await recorridoRepository.get(Number(recorrido_id), params);
       if (response && response.length > 0) {
         const [recorrido] = response;
         const {

@@ -1,3 +1,5 @@
+import { ItemModel } from "./Item.model";
+
 export interface ParadaRequestModel {
     recorrido_id?: number;
     lat: number;
@@ -29,4 +31,5 @@ export interface ParadaModel {
     recorrido_id: number;
     rider_id: number;
     updated_at: string;
+    items: ItemModel[] 
 }

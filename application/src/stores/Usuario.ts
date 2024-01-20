@@ -1,17 +1,12 @@
 import { defineStore } from 'pinia'
 import { Preferences } from '@capacitor/preferences';
 import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
+import { EmpresaModel } from 'src/models/Empresa.model';
+import { UsuarioModel } from 'src/models/Usuario.model';
 
-interface UsuarioModel {
-    id: number;
-    nombre: string;
-    email :string;
-    created_at: string;
-    updated_at: string;
-}
 
 interface UsuarioStoreModel{
-    usuario : UsuarioModel | null,
+    usuario : UsuarioModel,
     token : string
 }
 
@@ -22,12 +17,12 @@ const autenticacionRepository = new AutenticacionRepository();
 export const useUsuarioStore = defineStore('usuario', {
     state: () =>
     ({
-      usuario: null,
+      usuario: null as unknown as UsuarioModel,
       token: ""
     } as UsuarioStoreModel),
 
   actions: {
-    setUsuario(usuario : UsuarioModel | null){
+    setUsuario(usuario : UsuarioModel){
       this.usuario = usuario
     },
     async usuarioAutenticado(): Promise<boolean> {

@@ -17,9 +17,20 @@ const routes: RouteRecordRaw[] = [
             path: 'buscar-direccion/:addressValue?/:id?/:origin?/:destination?',
             name: 'buscar-direccion',
             component: () => import('pages/Recorrido/BuscarDireccion.vue'), 
-            
+          },
+          {
+            path: 'parada/:parada_id',
+            name: 'parada',
+            component: () => import('pages/Recorrido/Parada/ModalParada.vue'), 
+            children: [
+              {
+                path: 'agregar-item',
+                name: 'agregar-item',
+                component: () => import('pages/Recorrido/Parada/ModalGuardarItem.vue'), 
+              }
+            ]
           }
-        ]
+        ],
       },
       { 
         path: 'crear-recorrido', 

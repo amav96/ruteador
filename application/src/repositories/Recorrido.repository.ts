@@ -35,13 +35,13 @@ export default class RecorridoRepository {
     
   }
 
-
-  async get(recorridoId : number | string, relaciones?: string[]): Promise<RecorridoModel[]> {
+  async get(recorridoId : number | string, incluye: any): Promise<RecorridoModel[]> {
     try {
       const response = await request({
-        url: API_BASE_URL + `/api/recorridos/${recorridoId}${relaciones ? '?relaciones=' + relaciones : ''}`,
+        url: API_BASE_URL + `/api/recorridos/${recorridoId}`,
         method: 'GET',
-        auth: true
+        auth: true,
+        params: incluye 
       });
  
       return response.data;
