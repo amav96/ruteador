@@ -1,4 +1,4 @@
-export interface ProveedorItem {
+export interface ProveedorItemModel {
     id: number;
     nombre: string;
     escanear: number;

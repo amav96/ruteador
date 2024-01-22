@@ -13,8 +13,6 @@ const { configure } = require('quasar/wrappers');
 const path = require('path');
 require('dotenv').config()
 
-console.log(process.env.VUE_ROUTER_MODE)
-
 module.exports = configure(function (/* ctx */) {
   return {
 

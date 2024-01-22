@@ -48,10 +48,10 @@ export default class DataProviderRepository {
       }
     }
 
-    async getTiposItems() {
+    async getItemsTipos() {
       try {
         const response = await request({
-          url: API_BASE_URL + `/api/tipos-items`,
+          url: API_BASE_URL + `/api/items-tipos`,
           method: 'GET',
           auth: true
         });
@@ -66,7 +66,22 @@ export default class DataProviderRepository {
     async getProveedoresItems() {
       try {
         const response = await request({
-          url: API_BASE_URL + `/api/proveedores-items`,
+          url: API_BASE_URL + `/api/items-proveedores`,
+          method: 'GET',
+          auth: true
+        });
+   
+        return response.data;
+  
+      } catch (error) {
+        throw error
+      }
+    }
+
+    async getItemsEstados() {
+      try {
+        const response = await request({
+          url: API_BASE_URL + `/api/items-estados`,
           method: 'GET',
           auth: true
         });

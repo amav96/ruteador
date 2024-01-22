@@ -7,8 +7,10 @@ const dataProviderRepository = new DataProviderRepository();
 const tiposDocumentos = ref<any>([])
 const codigosArea = ref<any>([])
 const empresas = ref<any>([])
-const tiposItems = ref<any>([])
+const itemsTipos = ref<any>([])
 const proveedoresItems = ref<any>([])
+const itemsEstados = ref<any>([])
+
 
 export function useDataProvider() {
 
@@ -16,7 +18,6 @@ export function useDataProvider() {
     if(tiposDocumentos.value.length === 0){
         const response = await dataProviderRepository.getTiposDocumentos();
         tiposDocumentos.value = response;
-        console.log(tiposDocumentos.value)
         return tiposDocumentos.value
     } else {
         return tiposDocumentos.value
@@ -43,13 +44,13 @@ export function useDataProvider() {
     }
    } 
 
-   const getTiposItems = async () => {
-    if(tiposItems.value.length === 0){
-        const response = await dataProviderRepository.getTiposItems();
-        tiposItems.value = response;
-        return tiposItems.value
+   const getItemsTipos = async () => {
+    if(itemsTipos.value.length === 0){
+        const response = await dataProviderRepository.getItemsTipos();
+        itemsTipos.value = response;
+        return itemsTipos.value
     } else {
-        return tiposItems.value
+        return itemsTipos.value
     }
    }
 
@@ -63,6 +64,19 @@ export function useDataProvider() {
     }
    }
 
+   const getItemsEstados = async () => {
+    if(itemsEstados.value.length === 0){
+        const response = await dataProviderRepository.getItemsEstados();
+        itemsEstados.value = response;
+        return itemsEstados.value
+    } else {
+        return itemsEstados.value
+    }
+   }
+
+   
+
+
   return { 
     getTipoDocumentos,
     tiposDocumentos,
@@ -70,9 +84,11 @@ export function useDataProvider() {
     codigosArea,
     getEmpresas,
     empresas,
-    getTiposItems,
-    tiposItems,
+    getItemsTipos,
+    itemsTipos,
     getProveedoresItems,
-    proveedoresItems
+    proveedoresItems,
+    itemsEstados,
+    getItemsEstados
    }
 }

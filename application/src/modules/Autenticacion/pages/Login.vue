@@ -100,10 +100,11 @@ const onSubmit = async () => {
         if(usuario && token){
             usuarioStore.setUsuario(usuario);
             usuarioStore.setToken(token);
-            router.push({name: 'recorridos'})
+            router.push({name: 'crear-recorrido'})
         }
 
     } catch (error : any) {
+        
         const { data } = error;
         let mensaje = data && data.message ?  data.message : 'No se puede iniciar correctamente';
         $q.notify({

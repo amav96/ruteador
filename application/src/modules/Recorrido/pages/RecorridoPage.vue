@@ -114,7 +114,6 @@
   import RecorridoRepository from 'src/repositories/Recorrido.repository';
   import ParadaRepository from 'src/repositories/Parada.repository';
   import { computed, watch, onMounted, ref } from 'vue';
-  import { v4 as uuidv4 } from 'uuid';
   import { Geolocation } from '@capacitor/geolocation';
   import { onBeforeUnmount } from 'vue';
   import { useQuasar } from 'quasar';

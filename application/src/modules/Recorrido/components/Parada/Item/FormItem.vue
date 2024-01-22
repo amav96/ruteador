@@ -31,7 +31,7 @@
             <q-select 
             label="Proovedor"
             color="deep-purple-6"
-            v-model="itemForm.proveedor_item_id" 
+            v-model="itemForm.item_proveedor_id" 
             :options="proveedoresItems" 
             clearable 
             option-label="nombre"
@@ -48,8 +48,25 @@
             <q-select 
             label="Tipo paquete"
             color="deep-purple-6"
-            v-model="itemForm.tipo_item_id" 
-            :options="tiposItems" 
+            v-model="itemForm.item_tipo_id" 
+            :options="itemsTipos" 
+            clearable 
+            option-label="nombre"
+            option-value="id"
+            emit-value
+            map-options
+            :rules="[
+                val => !!val || '* Tipo de paquete obligatorio',
+            ]"
+            />
+        </div>
+
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-select 
+            label="Estado"
+            color="deep-purple-6"
+            v-model="itemForm.item_estado_id" 
+            :options="itemsEstados" 
             clearable 
             option-label="nombre"
             option-value="id"
@@ -71,6 +88,18 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { onBeforeMount } from 'vue';
 import { ItemRequestModel } from 'src/models/Item.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
+import { toRefs } from 'vue';
+import ItemRepository from 'src/repositories/Item.repository'
+
+const itemRepository = new ItemRepository()
+
+const props = withDefaults(defineProps<{item_id?: number | string | null}>(), {
+  item_id: null,
+});
+
+const {
+    item_id
+} = toRefs(props);
 
 const usuarioStore = useUsuarioStore()
 
@@ -80,8 +109,9 @@ const breakpoint = computed(() => $q.screen)
 const itemForm = ref<ItemRequestModel>({
     track_id: null,
     empresa_id : 1,
-    tipo_item_id: 1,
-    proveedor_item_id: 1
+    item_tipo_id: 1,
+    item_proveedor_id: 1,
+    item_estado_id: 1
 })
 
 const startScan = async () => {
@@ -111,24 +141,43 @@ onBeforeMount(() => {
     stopScan()
 })
 
-
 const {
 
-    getTiposItems,
-    tiposItems,
+    getItemsTipos,
+    itemsTipos,
     getProveedoresItems,
-    proveedoresItems
+    proveedoresItems,
+    itemsEstados,
+    getItemsEstados
 } = useDataProvider()
 
 onMounted(async() => {
-    await getTiposItems()
+    await getItemsTipos()
     await getProveedoresItems()
+    await getItemsEstados()
+    // Solo para editar
+    await getItem();
 })
+
+const getItem = async () => {
+    if(item_id.value){
+        const response = await itemRepository.get(item_id.value);
+        if(response.length > 0){
+            const [ item ] = response;
+            itemForm.value.track_id = item.track_id
+            itemForm.value.empresa_id = item.empresa_id
+            itemForm.value.item_tipo_id = item.item_tipo_id
+            itemForm.value.item_proveedor_id = item.item_proveedor_id
+            itemForm.value.destinatario = item.destinatario
+            itemForm.value.item_estado_id = item.item_estado_id
+        }
+        
+    }
+}
 
 defineExpose({
     itemForm
 })
-
 
 
 </script>
