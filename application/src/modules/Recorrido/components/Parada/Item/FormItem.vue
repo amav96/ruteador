@@ -33,7 +33,6 @@
             color="deep-purple-6"
             v-model="itemForm.item_proveedor_id" 
             :options="proveedoresItems" 
-            clearable 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -50,7 +49,6 @@
             color="deep-purple-6"
             v-model="itemForm.item_tipo_id" 
             :options="itemsTipos" 
-            clearable 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -67,7 +65,6 @@
             color="deep-purple-6"
             v-model="itemForm.item_estado_id" 
             :options="itemsEstados" 
-            clearable 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -81,7 +78,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useDataProvider } from 'src/composables/DataProvider'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';

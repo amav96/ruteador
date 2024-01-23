@@ -41,6 +41,10 @@ const request = async (call: ApiRequest): Promise<ApiResponse> => {
     }
     
     const response: HttpResponse = await makeCapacitorHttpCall(options);
+    if(response.status > 300){
+      throw response
+    }
+    
 
     return {
       data: response.data,
@@ -48,30 +52,36 @@ const request = async (call: ApiRequest): Promise<ApiResponse> => {
       headers: response.headers,
     };
 } catch (error: any) {
-  console.log(error)
+
     throw {
-      data: error.response?.data,
-      status: error.response?.status,
-      headers: error.response?.headers,
+      data: error.data,
+      status: error.status,
+      headers: error.headers,
     };
   }
 };
 
 const makeCapacitorHttpCall = async (options: any): Promise<HttpResponse> => {
-  switch (options.method) {
-    case 'GET':
-      return await CapacitorHttp.get(options);
-    case 'POST':
-      return await CapacitorHttp.post(options);
-    case 'PUT':
-      return  await CapacitorHttp.put(options);
-    case 'PATCH':
-      return await CapacitorHttp.patch(options);
-    case 'DELETE':
-      return await CapacitorHttp.delete(options);
-    default:
-      throw new Error(`Unsupported HTTP method: ${options.method}`);
+  try {
+    switch (options.method) {
+      case 'GET':
+        return await CapacitorHttp.get(options);
+      case 'POST':
+        return await CapacitorHttp.post(options);
+      case 'PUT':
+        return  await CapacitorHttp.put(options);
+      case 'PATCH':
+        return await CapacitorHttp.patch(options);
+      case 'DELETE':
+        return await CapacitorHttp.delete(options);
+      default:
+        throw new Error(`Unsupported HTTP method: ${options.method}`);
+    }
+  } catch (capacitorError) {
+    console.log(capacitorError)
+    throw capacitorError
   }
+ 
 };
 
 export default request;

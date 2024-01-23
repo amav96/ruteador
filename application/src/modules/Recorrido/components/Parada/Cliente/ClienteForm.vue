@@ -6,7 +6,6 @@
             color="deep-purple-6"
             v-model="clienteForm.tipo_documento_id" 
             :options="tiposDocumentos" 
-            clearable 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -49,7 +48,6 @@
                 color="deep-purple-6"
                 v-model="item.codigo_area_id" 
                 :options="codigosArea" 
-                clearable 
                 option-label="codigo"
                 option-value="id"
                 emit-value
@@ -135,7 +133,7 @@ onMounted(async() => {
 const getCliente = async () => {
     if(cliente_id.value){
        try {
-        const response = await clienteRepository.get(cliente_id.value, { incluir : ['clientesNumeros']})
+        const response = await clienteRepository.get(cliente_id.value, { incluye : ['clientesNumeros']})
         const [cliente] = response;
         if(cliente){
             clienteForm.value.tipo_documento_id = cliente.tipo_documento_id

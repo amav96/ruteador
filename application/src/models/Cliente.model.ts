@@ -2,7 +2,7 @@ export interface ClienteModel {
     id?: number;
     nombre: string | null;
     tipo_documento_id: number;
-    tipo_documento: {
+    tipo_documento?: {
         id: number;
         nombre: string
     }

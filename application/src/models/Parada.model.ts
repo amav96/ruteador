@@ -11,21 +11,21 @@ export interface ParadaRequestModel {
     rider_id: number
 }
 
-export interface EstadoParadaModel {
+export interface ParadaEstadoModel {
     codigo: string;
     id: number;
     nombre: string;
-    estado_parada_id: number;
+    parada_estado_id: number;
 }
 
 export interface ParadaModel {
     codigo_postal: string;
     created_at: string;
     direccion_formateada: string;
-    estado_parada: EstadoParadaModel;
+    parada_estado: ParadaEstadoModel;
     id: number;
-    lat: number;
-    lng: number;
+    lat: string;
+    lng: string;
     localidad: string;
     provincia: string;
     recorrido_id: number;
@@ -33,3 +33,9 @@ export interface ParadaModel {
     updated_at: string;
     items: ItemModel[] 
 }
+
+export interface ParadaEstadoRequestModel {
+    item_estado_id: number
+    parada_id? : number
+}
+

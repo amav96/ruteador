@@ -6,9 +6,17 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-      <q-card class="text-black q-pa-md flex justify column no-wrap items-center" style="height:100vh;">
+      <q-card class="text-black q-pa-sm flex justify column no-wrap items-center" style="height:100vh;">
+        <div class="q-mb-md full-width">
+            <q-icon 
+            @click="router.push({name: 'parada'})" 
+            name="arrow_back" 
+            color="deep-purple-13"
+            size="sm"
+            />
+        </div>
 
-        <div class="q-mb-lg full-width">
+        <!-- <div class="q-mb-lg full-width">
             <q-btn 
             @click="router.push({name: 'parada'})" 
             round 
@@ -16,7 +24,7 @@
             color="deep-purple-13" 
             icon="arrow_back" 
             />
-        </div>
+        </div> -->
 
         <div    
         :class="['flex row justify-between text-weight-bold text-h6 q-mb-xs cursor-pointer', breakpoint.xs ? 'full-width' : '']">
@@ -234,6 +242,7 @@ const crearItem = async (cliente_id?: number | null) => {
                 router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
             }
         } catch (error) {
+            console.log(error)
             guardandoItem.value = false;
         }
     } 
@@ -252,10 +261,15 @@ const actualizarItem = async (cliente_id?: number | null) => {
             }
         } catch (error) {
             guardandoItem.value = false;
+            $q.notify({
+                type: 'negative',
+                message: 'No se guardo correctamente, revisa todos los campos antes de guardar',
+                position: 'top',
+                timeout: 3000
+            })
         }
     } 
 
 }
-
 
 </script>

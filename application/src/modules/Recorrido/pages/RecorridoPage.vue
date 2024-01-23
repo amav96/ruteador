@@ -1,6 +1,7 @@
 <template>
     <q-page class="bg-grey-2 q-px-md">
         <div class="rounded-borders bg-white ">
+          <!-- origen -->
           <q-input
             label="Ubicación de partida"
             borderless
@@ -17,14 +18,15 @@
             </template>
             <template v-if="origen.formatted_address" v-slot:append>
               <q-icon
-                name="highlight_off"
+                name="close"
+                size="xs"
                 color="deep-purple-13"
                 :class="`q-mr-sm ${autoOrigen ? 'pointeer' : ''}`"
                 @click="removerOrigin"
               />
             </template>
           </q-input>
-    
+          <!-- destino -->
           <q-input
             :label="!destino ? 'Elige donde quieres terminar' : 'Destino'"
             borderless
@@ -41,7 +43,8 @@
             </template>
             <template v-if="destino.formatted_address" v-slot:append>
               <q-icon
-                name="highlight_off"
+                name="close"
+                size="xs"
                 color="deep-purple-13"
                 :class="`q-mr-sm ${destino ? 'pointeer' : ''}`"
                 @click="removerDestino"
@@ -49,7 +52,8 @@
             </template>
           </q-input>
         </div>
-  
+        
+        <!-- agregar parada -->
         <div class="flex row items-center justify-center q-my-md">
           <div class="flex column items-center">
             <q-btn @click="goToSeleccionarParada" round color="deep-purple-13" icon="add" />
@@ -58,16 +62,26 @@
             </div>
           </div>
         </div>
-  
+        
+        
+        <!-- lista de paradas -->
         <template v-if="tieneParadas">
           <q-scroll-area style="height: 55vh" >
-            <div v-for="(parada, index) in paradas" :key="index">
-              <q-item clickable v-ripple class="list-group-item bg-white rounded-borders q-my-sm">
-                <q-item-section @click="goToActualizarParada(parada, parada.id)">
-                  <div class="flex row items-center">
-                    <div class="q-mr-sm text-weight-bold number-container">
+            <div 
+            v-for="(parada, index) in paradas" 
+            :key="index"
+            @click="goToActualizarParada(parada, parada.id)"
+            >
+              <q-item clickable v-ripple :class="[
+                'list-group-item rounded-borders q-my-sm', 
+                `bg-white`
+                ]">
+                <q-item-section >
+                  <div class="flex row no-wrap items-center ">
+                    <div class="q-mr-xs text-weight-bold number-container">
                       {{ index + 1 }} -
-                    </div>
+                    </div>                 
+
                     <div class="flex column text-body1" style="max-width: 85%;">
                       <span>{{ parada.direccion_formateada }}</span>
                       <span v-if="parada.localidad" class="text-weight-bold" > {{ parada.localidad }} </span>
@@ -75,7 +89,11 @@
                   </div>
                 </q-item-section>
                 <q-item-section avatar>
-                  <q-icon size="xs" @click="removeAddres(index)" name="close" color="deep-purple-13" />
+                  <q-icon 
+                  size="sm" 
+                  @click.stop="!visitado(parada) ? removeAddres(index): ''" 
+                  :name="visitado(parada) ? 'check_circle_outline' : 'highlight_off'" 
+                  :color="visitado(parada) ? 'green-14' : 'deep-purple-13'" />
                 </q-item-section>
               </q-item>
               
@@ -87,25 +105,9 @@
           @selected-address="paradaSeleccionada"
           @select-origin="origenSeleccionado"
           @select-destination="destinoSeleccionado"
+          @actualizar-estado-parada="actualizarEstadoParada"
         ></router-view>
-  
-      <!-- <q-footer reveal bordered class="bg-grey-8 text-white">
-        <q-tabs v-model="tab" class="bg-deep-purple-13 text-white shadow-2">
-          <q-tab
-            @click="obtenerRecorrido"
-            v-if="tieneParadas"
-            name="crearrecorrido"
-            label="Crear recorrido"
-            icon="near_me"
-          />
-          <q-tab
-            @click="verRecorridoGoogleMaps"
-            name="verrecorrido"
-            label="Ver recorrido"
-            icon="map"
-          />
-        </q-tabs>
-      </q-footer> -->
+
     </q-page>
 </template>
   
@@ -131,8 +133,6 @@
   const recorridoRepository = new RecorridoRepository();
   const paradaRepository = new ParadaRepository();
   
-  const tab = ref('crearrecorrido');
-  
   interface Way {
     formatted_address?: string ;
     data: CoordenadasModel;
@@ -154,7 +154,6 @@
   const router = useRouter();
   const route = useRoute();
 
-  
   const usuarioStore = useUsuarioStore()
   const {
       usuario
@@ -271,9 +270,17 @@
     });
 
   };
+
+  const actualizarEstadoParada = (parada: ParadaModel) => {
+    let indexParada = paradas.value.findIndex((p:ParadaModel) => p.id === parada.id)
+    if(indexParada > -1){
+      paradas.value[indexParada] = parada
+    }
+  }
   
   const removeAddres = async (index: number) => {
-    intermediates.value.splice(index, 1);
+    console.log('removiendo')
+    // intermediates.value.splice(index, 1);
   };
   
   onMounted(() => getRecorrido());
@@ -283,7 +290,7 @@
       recorrido_id
     } = route.params
     const params = {
-      incluye : ['paradas']
+      incluye : ['paradas.paradaEstado']
     }
     try {
 
@@ -512,6 +519,10 @@
     destino.value.data = {};
     recorridoRepository.removerDestino(Number(recorridoId.value));
   };
+
+  const visitado = (parada : ParadaModel) : boolean => {
+    return parada.parada_estado.codigo === 'visitado'
+  }
 
   </script>
   

@@ -15,17 +15,16 @@
                 color="deep-purple-13"
                 size="sm"
                 />
-        
             </div>
             
-            <div class="flex justify-center items-center">
-                    <span class="text-subtitle1 text-weight-medium">
+            <div class="flex column justify-center  items-center">
+                    <div class="text-subtitle1 text-weight-medium text-center q-mx-sm">
                     {{ parada?.direccion_formateada }}
-                    </span>
-                    <span v-if="parada?.localidad" class="q-mx-sm" >-</span>
-                    <span v-if="parada?.localidad" class="text-subtitle1 text-weight-medium">
+                    </div>
+                    
+                    <div v-if="parada?.localidad" class="text-subtitle1 text-weight-medium">
                     {{ parada?.localidad }}
-                    </span>
+                    </div>
             </div>
             
 
@@ -36,8 +35,9 @@
             
             />
 
-            <div class="flex justify-end">
+            <div v-if="parada" class="flex justify-end">
                 <q-btn 
+                @click="navegar(parada.lat, parada.lng)"
                 class="q-my-sm q-py-sm" 
                 label="Navegar" 
                 color="black" 
@@ -61,11 +61,6 @@
             </div>
 
             <template v-if="tieneItems">
-                <!-- <div class="q-mb-lg q"> 
-                    <span class="text-weight-bold text-h6">
-                        {{ items.length > 1 ? 'Paquetes' : '' }}
-                    </span>
-                </div> -->
                 <div class="flex column items-center full-width">
                     <div
                     v-for="(item, index) in items"
@@ -79,45 +74,33 @@
                                     {{ item.cliente?.nombre ?? item.destinatario }}
                                 </span>
                             </div>
-                            <div>
-                                Numero envio: {{ item.track_id }}
+                            <div class="q-mb-xs">
+                                Numero envio: <span class="text-weight-medium" >{{ item.track_id }}</span>
                             </div>
-                            <div>
-                                {{ item.item_estado.nombre }}
+                            <div class="q-mb-xs">
+                                <span class="text-weight-medium" >{{ item.item_proveedor.nombre }}</span>
                             </div>
-                            <div>
-                                Proveedor: {{ item.item_proveedor.nombre }}
+                            <div class="q-mb-xs">
+                                Agencia: <span class="text-weight-medium" >{{ item.empresa.nombre }}</span>
                             </div>
-                            <div>
-                                Agencia: {{ item.empresa.nombre }}
+                            <div class="q-mb-xs">
+                                Tipo: <span class="text-weight-medium" >{{ item.item_tipo.nombre }}</span>
                             </div>
-                            <div>
-                                Tipo: {{ item.item_tipo.nombre }}
+                            <div class="q-mb-xs" v-if="item.cliente && item.cliente.numero_documento">
+                                <span class="text-weight-medium" >{{ item.cliente.tipo_documento?.nombre }} {{ item.cliente.numero_documento }}</span>
                             </div>
-                            <div v-if="item.cliente">
-                                {{ item.cliente.tipo_documento.nombre }} {{ item.cliente.numero_documento }}
+                            <div class="flex text-white q-mb-xs" >
+                                <q-chip :style="`background:${item.item_estado.color};`" text-color="white" >
+                                    {{ item.item_estado.nombre }} 
+                                </q-chip>
                             </div>
       
                         </div>
-                        <div class="flex justify-end" style="width:10%;">
+                        <div v-if="paqueteEntregable" class="flex justify-end" style="width:10%;">
                             <q-icon @click="goToEditarItemCliente" name="edit" size="sm" />
                         </div>
                         <!-- TODO: mostrar numero tlf, documento -->
-                        <!-- <div class="flex column">
-                            <q-btn 
-                            class="q-my-sm q-py-sm" 
-                            label="Entregar" 
-                            color="deep-purple-13" 
-                            unelevated 
-                            />
-                            <q-btn 
-                            class="q-my-xs text-deep-purple-13 q-py-sm" 
-                            label="No pude hacer la entrega" 
-                            unelevated 
-                            />
-                        </div> -->
-                        
-                        
+                       
                     </div>
                     <q-separator v-if="items.length > 1" spaced  />
                     
@@ -125,12 +108,15 @@
                 </div>
             </template>
         </div>
-        <div class="flex column">
+
+        <!-- acciones  -->
+        <div v-if="paqueteEntregable" class="flex column">
             <q-btn 
             class="q-my-sm q-py-sm" 
             label="Entregar" 
             color="deep-purple-13" 
             unelevated 
+            @click="abrirConfirmar = !abrirConfirmar"
             />
             <q-btn 
             class="q-my-xs text-deep-purple-13 q-py-sm" 
@@ -138,11 +124,88 @@
             unelevated 
             />
         </div> 
+        <div v-else class="flex column" >
+            <q-btn 
+            class="q-my-sm q-py-sm" 
+            label="Atras" 
+            color="deep-purple-13" 
+            unelevated 
+            @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido_id}})"
+            />
+        </div> 
+
+        <!-- confirmar entrega -->
+        <q-dialog v-model="abrirConfirmar" persistent>
+            <q-card>
+                <q-card-section class="column items-center">
+                <q-avatar icon="all_inbox" class="q-mb-md" color="deep-purple-13" text-color="white" />
+                    <div class="q-ml-sm text-weight-bold text-subtitle1">Necesitamos su confirmación</div>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                <q-btn flat label="Volver" color="black"  v-close-popup />
+                <q-btn 
+                flat 
+                label="Confirmar"  
+                color="deep-purple-13" 
+                v-close-popup
+                @click="confirmarPaquete"
+                 />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+
+        <dialog-loading :open="cargandoActualizarEstado" text="Cargando paquete" />
+
+        <!-- realizado correctamente -->
+        <q-dialog
+        v-model="mostrarRespuestaInformacion"
+        persistent
+        :maximized="maximizedToggle"
+        transition-show="slide-up"
+        transition-hide="slide-down"
+        >
+            <q-card class="text-black flex column justify-between items-center q-pa-sm bg-green-14" style="height:100vh;">
+                <div class="flex column justify-center items-center q-my-lg">
+                    <div>
+                    <q-icon 
+                    name="check_circle_outline" 
+                    color="white"
+                    size="lg"
+                    class="q-mb-lg"
+                    />
+                    </div>
+                    <div class="text-center q-mb-lg" >
+                        <span class="text-white text-h4">Realizado correctamente</span>
+                    </div>
+                    <div>
+                        <q-icon 
+                        name="inventory" 
+                        color="white"
+                        size="xl"
+                        class="q-mb-lg"
+                        />
+                    </div>
+                </div>
+                <div :class="[breakpoint.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
+                    <q-btn
+                    unelevated 
+                    rounded 
+                    color="white"
+                    label="Seguir recorrido" 
+                    type="buttom"
+                    class="full-width text-black"
+                    @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido_id}})"
+                    />
+                </div>
+                
+            </q-card>
+        </q-dialog>
+
       </q-card>
       <router-view
       @actualizar-parada="getParada"
       >
-
       </router-view>
     </q-dialog>
 </template>
@@ -152,18 +215,30 @@ import { onMounted } from 'vue';
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
+import ItemRepository from 'src/repositories/Item.repository'
 import { ParadaModel } from 'src/models/Parada.model';
-import { ItemModel } from 'src/models/Item.model';
+import { ItemModel, ItemRequestModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
+import DialogLoading from 'src/components/General/DialogLoading.vue'
+import { ITEMS_ESTADOS, ITEMS_TIPOS } from 'src/utils/DataProviders'
+import { useQuasar } from 'quasar';
+
+const emit = defineEmits<{
+  (e: 'actualizarEstadoParada', value: ParadaModel): void
+}>()
 
 const paradaRepository = new ParadaRepository();
+const itemRepository = new ItemRepository();
 
 const route = useRoute();
-// query params
 
 const {
-  parada_id
+  parada_id,
+  recorrido_id
 } = route.params
+
+const $q = useQuasar();
+const breakpoint = computed(() => $q.screen)
 
 const dialog =  ref(true)
 const maximizedToggle =  ref(true)
@@ -224,5 +299,71 @@ onMounted(() => {
     getParada()
 })
 
+const navegar = async (lat: string, lng: string) => {
+
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    window.open(url);
+
+    const [item] = items.value
+    const { id } = item;
+    const request = {
+        item_estado_id: ITEMS_ESTADOS.EN_CAMINO,
+        parada_id: parada.value?.id as number
+    }
+    const response = await itemRepository.updateEstado(request, id);
+}
+
+const abrirConfirmar = ref<boolean>(false)
+const cargandoActualizarEstado = ref<boolean>(false)
+const mostrarRespuestaInformacion = ref<boolean>(false)
+
+const confirmarPaquete = async () => {
+    abrirConfirmar.value = false
+    if(items.value.length === 0){
+        await paradaVisitada()
+    } else {
+        const [item] = items.value
+        const { id } = item;
+        const item_estado_id = item.item_tipo_id === ITEMS_TIPOS.ENTREGA ? ITEMS_ESTADOS.ENTREGADO : ITEMS_ESTADOS.RETIRADO
+        const request = {
+            item_estado_id,
+            parada_id: parada.value?.id as number,
+        }
+
+        try {
+            cargandoActualizarEstado.value = true;
+            const response = await itemRepository.updateEstado(request, id);
+            mostrarRespuestaInformacion.value = true
+            actualizarEstadoParada(response)
+            
+        } catch (error) {
+            
+        } finally {
+            cargandoActualizarEstado.value = false;
+        }
+    }
+}
+
+const paradaVisitada = async () => {
+    alert('actualizar unicamente estado de parada')
+}
+
+// const paqueteEntregable = computed(() => true)
+
+const paqueteEntregable = computed(() => (items.value.length === 0) ||  
+    items.value.some((i) => i.item_estado.codigo !== 'entregado' && i.item_estado.codigo !== 'retirado')
+)
+
+const actualizarEstadoParada = (item: ItemModel) => {
+    if(item.parada){
+        emit('actualizarEstadoParada', item.parada)
+    }
+}
 
 </script>
+
+<style scoped>
+.q-chip {
+    margin: 0px;
+}
+</style>

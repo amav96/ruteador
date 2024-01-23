@@ -1,6 +1,7 @@
 import { ClienteModel } from "./Cliente.model";
 import { EmpresaModel } from "./Empresa.model";
 import { EstadoItemModel } from "./EstadoItem.model";
+import { ParadaModel } from "./Parada.model";
 import { ProveedorItemModel } from "./ProveedorItem.model";
 import { TipoItemModel } from "./TipoItem.model";
 
@@ -33,7 +34,7 @@ export interface ItemModel {
     empresa: EmpresaModel;
     creado_por: number;
     item_estado: EstadoItemModel;
-    
     item_proveedor: ProveedorItemModel;
     item_tipo: TipoItemModel;
+    parada?: ParadaModel
 }
