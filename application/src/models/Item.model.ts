@@ -1,6 +1,5 @@
 import { ClienteModel } from "./Cliente.model";
 import { EmpresaModel } from "./Empresa.model";
-import { EstadoItemModel } from "./EstadoItem.model";
 import { ParadaModel } from "./Parada.model";
 import { ProveedorItemModel } from "./ProveedorItem.model";
 import { TipoItemModel } from "./TipoItem.model";
@@ -33,7 +32,7 @@ export interface ItemModel {
     empresa_id: number;
     empresa: EmpresaModel;
     creado_por: number;
-    item_estado: EstadoItemModel;
+    item_estado: ItemEstadoModel;
     item_proveedor: ProveedorItemModel;
     item_tipo: TipoItemModel;
     parada?: ParadaModel
@@ -43,4 +42,11 @@ export interface ItemModel {
 export interface ItemEstadoRequestModel {
     item_estado_id: number
     parada_id? : number
+}
+
+export interface ItemEstadoModel {
+    id: number;
+    nombre: string;
+    codigo: string;
+    color: string;
 }

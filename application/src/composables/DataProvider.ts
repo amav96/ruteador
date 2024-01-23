@@ -1,16 +1,17 @@
 
 import { ref, onMounted, onUnmounted } from 'vue'
 import DataProviderRepository from 'src/repositories/DataProvider.repository'
+import { EmpresaModel } from 'src/models/Empresa.model';
 
 const dataProviderRepository = new DataProviderRepository();
 
 const tiposDocumentos = ref<any>([])
 const codigosArea = ref<any>([])
-const empresas = ref<any>([])
+const empresas = ref<EmpresaModel[]>([])
 const itemsTipos = ref<any>([])
 const proveedoresItems = ref<any>([])
 const itemsEstados = ref<any>([])
-
+const paradasEstados = ref<any>([])
 
 export function useDataProvider() {
 
@@ -64,9 +65,9 @@ export function useDataProvider() {
     }
    }
 
-   const getItemsEstados = async () => {
+   const getItemsEstados = async (params: any = {}) => {
     if(itemsEstados.value.length === 0){
-        const response = await dataProviderRepository.getItemsEstados();
+        const response = await dataProviderRepository.getItemsEstados(params);
         itemsEstados.value = response;
         return itemsEstados.value
     } else {
@@ -74,8 +75,15 @@ export function useDataProvider() {
     }
    }
 
-   
-
+   const getParadasEstados = async (params: any = {}) => {
+    if(paradasEstados.value.length === 0){
+        const response = await dataProviderRepository.getParadasEstados(params);
+        paradasEstados.value = response;
+        return paradasEstados.value
+    } else {
+        return paradasEstados.value
+    }
+   }
 
   return { 
     getTipoDocumentos,
@@ -89,6 +97,8 @@ export function useDataProvider() {
     getProveedoresItems,
     proveedoresItems,
     itemsEstados,
-    getItemsEstados
+    getItemsEstados,
+    paradasEstados,
+    getParadasEstados
    }
 }

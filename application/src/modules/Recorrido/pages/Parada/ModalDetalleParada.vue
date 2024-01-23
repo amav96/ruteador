@@ -6,9 +6,9 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-      <q-card class="text-black flex column justify-between q-pa-sm " style="height:100vh;">
-        <div>
-            <div class="q-mb-md full-width">
+      <q-card class="text-black flex column justify-between " style="height:100vh;">
+        <div class>
+            <div class="full-width q-pa-sm">
                 <q-icon 
                 @click="router.push({name: 'recorrido', params: { recorrido_id: route.params.recorrido_id}})" 
                 name="arrow_back" 
@@ -18,24 +18,23 @@
             </div>
             
             <div class="flex column justify-center  items-center">
-                    <div class="text-subtitle1 text-weight-medium text-center q-mx-sm">
-                    {{ parada?.direccion_formateada }}
-                    </div>
-                    
-                    <div v-if="parada?.localidad" class="text-subtitle1 text-weight-medium">
-                    {{ parada?.localidad }}
-                    </div>
+                <div class="text-subtitle1 text-weight-medium text-center q-mx-sm">
+                {{ parada?.direccion_formateada }}
+                </div>
+                
+                <div v-if="parada?.localidad" class="text-subtitle1 text-weight-medium">
+                {{ parada?.localidad }}
+                </div>
             </div>
             
-
             <google-iframe-map
             v-if="parada"
             :lat="parada.lat"
             :lng="parada.lng"
-            
             />
 
-            <div v-if="parada" class="flex justify-end">
+            <!-- navegar -->
+            <div v-if="parada" class="flex justify-end q-mx-sm q-mb-xs">
                 <q-btn 
                 @click="navegar(parada.lat, parada.lng)"
                 class="q-my-sm q-py-sm" 
@@ -47,9 +46,12 @@
                 />
             </div>
 
-            <q-separator spaced />
+            <q-separator spaced style="margin:0px" />
+            <div v-if="estadoParadaMostrable" class="text-white q-pa-sm" :style="`background:${parada?.parada_estado.color}`">
+                <span class="text-weight-medium" > {{ parada?.parada_estado.nombre }} </span>
+            </div>
 
-            <div v-if="!trayendoParada && !tieneItems" class="flex column">
+            <div v-if="!trayendoParada && !tieneItems && paqueteEntregable" class="flex column q-pa-sm">
                 <div class="flex row items-center q-gutter-x-sm">
                     <div>
                         <span class="text-weight-bold text-h6">Paquete</span>
@@ -61,7 +63,7 @@
             </div>
 
             <template v-if="tieneItems">
-                <div class="flex column items-center full-width">
+                <div class="flex column items-center full-width q-pa-sm">
                     <div
                     v-for="(item, index) in items"
                     :key="index"
@@ -110,7 +112,7 @@
         </div>
 
         <!-- acciones  -->
-        <div v-if="paqueteEntregable" class="flex column">
+        <div v-if="paqueteEntregable" class="flex column q-pa-sm">
             <q-btn 
             class="q-my-sm q-py-sm" 
             label="Entregar" 
@@ -122,9 +124,10 @@
             class="q-my-xs text-deep-purple-13 q-py-sm" 
             label="No pude hacer la entrega" 
             unelevated 
+            @click="abrirSeleccionarMotivoNegativo = !abrirSeleccionarMotivoNegativo"
             />
         </div> 
-        <div v-else class="flex column" >
+        <div v-else class="flex column q-pa-sm" >
             <q-btn 
             class="q-my-sm q-py-sm" 
             label="Atras" 
@@ -149,9 +152,42 @@
                 label="Confirmar"  
                 color="deep-purple-13" 
                 v-close-popup
-                @click="confirmarEntregaPaquete"
+                @click="notificarItemPositivo"
                  />
                 </q-card-actions>
+            </q-card>
+        </q-dialog>
+
+        <!-- motivos de negativo -->
+        <q-dialog 
+        v-model="abrirSeleccionarMotivoNegativo" 
+        persistent
+        :maximized="true"
+        >
+            <q-card>
+                <div class="full-width q-pa-sm">
+                    <q-icon 
+                    @click="abrirSeleccionarMotivoNegativo = !abrirSeleccionarMotivoNegativo" 
+                    name="arrow_back" 
+                    color="deep-purple-13"
+                    size="sm"
+                    />
+                </div>
+                <q-card-section>
+                    <div class="text-h6">Seleccione el motivo</div>
+                </q-card-section>
+                
+                <q-list  bordered separator >
+                    <q-item  
+                    v-for="(estado, index) in items.length === 0 ? paradasEstados : itemsEstados"
+                    :key="index"
+                    clickable 
+                    v-ripple
+                    @click="items.length === 0 ? notificarParadaNegativa(estado) : notificarItemNegativo(estado)"
+                    >
+                        <q-item-section>{{ estado.nombre }}</q-item-section>
+                    </q-item>
+                </q-list>
             </q-card>
         </q-dialog>
 
@@ -216,13 +252,14 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
-import { ParadaModel } from 'src/models/Parada.model';
-import { ItemModel } from 'src/models/Item.model';
+import { ParadaModel, ParadaEstadoModel } from 'src/models/Parada.model';
+import { ItemModel, ItemEstadoModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProviders'
 import { useQuasar } from 'quasar';
 import { useUsuarioStore } from 'src/stores/Usuario'
+import {useDataProvider} from 'src/composables/DataProvider'
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -239,6 +276,13 @@ const {
   parada_id,
   recorrido_id
 } = route.params
+
+const { 
+    itemsEstados,
+    getItemsEstados,
+    paradasEstados,
+    getParadasEstados
+} = useDataProvider()
 
 const $q = useQuasar();
 const breakpoint = computed(() => $q.screen)
@@ -301,6 +345,8 @@ const getParada = async () => {
 
 onMounted(() => {
     getParada()
+    getItemsEstados({tipo: 'negativo'})
+    getParadasEstados({tipo: 'negativo'})
 })
 
 const navegar = async (lat: string, lng: string) => {
@@ -323,11 +369,12 @@ const navegar = async (lat: string, lng: string) => {
 const abrirConfirmar = ref<boolean>(false)
 const cargandoActualizarEstado = ref<boolean>(false)
 const mostrarRespuestaInformacion = ref<boolean>(false)
+const abrirSeleccionarMotivoNegativo = ref<boolean>(false)
 
-const confirmarEntregaPaquete = async () => {
+const notificarItemPositivo = async () => {
     abrirConfirmar.value = false
     if(items.value.length === 0){
-        await visitarParada()
+        await notificarParadaPositiva()
     } else {
         const [item] = items.value
         const { id } = item;
@@ -351,7 +398,7 @@ const confirmarEntregaPaquete = async () => {
     }
 }
 
-const visitarParada = async () => {
+const notificarParadaPositiva = async () => {
     if(parada.value){
       try {
         const { usuario: { id } } = usuarioStore
@@ -384,6 +431,15 @@ const actualizarEstadoParada = (item: ItemModel) => {
     if(item.parada){
         emit('actualizarEstadoParada', item.parada)
     }
+}
+
+const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado')
+
+const notificarParadaNegativa = (paradaEstado: ParadaEstadoModel) => {
+    console.log(paradaEstado)
+}
+const notificarItemNegativo = (itemEstado: ItemEstadoModel) => {
+    console.log(itemEstado)
 }
 
 </script>

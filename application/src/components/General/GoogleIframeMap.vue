@@ -30,7 +30,7 @@
 
 <script setup>
 import {
-  defineProps, toRefs, computed, ref, watch, defineEmits,
+  toRefs, computed, ref, watch, defineEmits,
 } from 'vue';
 
 const props = defineProps({

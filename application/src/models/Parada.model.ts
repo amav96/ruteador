@@ -18,6 +18,7 @@ export interface ParadaEstadoRequestModel {
 
 export interface ParadaEstadoModel {
     codigo: string;
+    color: string;
     id: number;
     nombre: string;
     parada_estado_id: number;
@@ -38,6 +39,5 @@ export interface ParadaModel {
     updated_at: string;
     items: ItemModel[] 
 }
-
 
 

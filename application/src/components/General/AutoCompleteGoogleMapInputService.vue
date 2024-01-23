@@ -33,7 +33,7 @@
 
 const { google }: any = window;
 
-import { ref, onMounted, toRefs, defineProps, defineEmits, computed } from 'vue';
+import { ref, onMounted, toRefs, defineEmits, computed } from 'vue';
 import { formatearGoogleAddress } from 'src/utils/Google'
 import ListAutoCompleteGoogle from 'src/modules/Recorrido/components/ListAutoCompleteGoogle.vue'
 import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';

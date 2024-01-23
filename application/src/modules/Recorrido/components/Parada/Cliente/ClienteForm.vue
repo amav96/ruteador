@@ -82,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, defineExpose, toRefs } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useDataProvider } from 'src/composables/DataProvider'
 import { ClienteModel } from 'src/models/Cliente.model';

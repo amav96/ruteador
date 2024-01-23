@@ -78,12 +78,29 @@ export default class DataProviderRepository {
       }
     }
 
-    async getItemsEstados() {
+    async getItemsEstados(params: any) {
       try {
         const response = await request({
           url: API_BASE_URL + `/api/items-estados`,
           method: 'GET',
-          auth: true
+          auth: true,
+          params
+        });
+   
+        return response.data;
+  
+      } catch (error) {
+        throw error
+      }
+    }
+
+    async getParadasEstados(params: any){
+      try {
+        const response = await request({
+          url: API_BASE_URL + `/api/paradas-estados`,
+          method: 'GET',
+          auth: true,
+          params
         });
    
         return response.data;
