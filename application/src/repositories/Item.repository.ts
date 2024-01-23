@@ -1,5 +1,4 @@
-import { ItemModel, ItemRequestModel } from 'src/models/Item.model';
-import { ParadaEstadoRequestModel } from 'src/models/Parada.model';
+import { ItemEstadoRequestModel, ItemModel, ItemRequestModel } from 'src/models/Item.model';
 import request from 'src/utils/ApiResponseCapacitor.util';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
@@ -53,7 +52,7 @@ export default class ItemRepository {
     }
   }
 
-  async updateEstado(data: ParadaEstadoRequestModel, item_id: string | number): Promise<ItemModel>{
+  async updateEstado(data: ItemEstadoRequestModel, item_id: string | number): Promise<ItemModel>{
     try {
       const response = await request({
         url: API_BASE_URL + '/api/items/estado/' + item_id,

@@ -38,3 +38,9 @@ export interface ItemModel {
     item_tipo: TipoItemModel;
     parada?: ParadaModel
 }
+
+
+export interface ItemEstadoRequestModel {
+    item_estado_id: number
+    parada_id? : number
+}

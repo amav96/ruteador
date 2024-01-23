@@ -259,11 +259,6 @@
   };
   
   const goToActualizarParada = (data: any, id: number) => {
-    // router.push({
-    //   name: 'buscar-direccion',
-    //   query: { addressValue: data.direccion_formateada, id },
-    // });
-      console.log(id)
     router.push({
       name: 'parada',
       params: { parada_id: id },
@@ -290,7 +285,7 @@
       recorrido_id
     } = route.params
     const params = {
-      incluye : ['paradas.paradaEstado']
+      incluir : ['paradas.paradaEstado']
     }
     try {
 

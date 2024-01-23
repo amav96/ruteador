@@ -11,6 +11,11 @@ export interface ParadaRequestModel {
     rider_id: number
 }
 
+export interface ParadaEstadoRequestModel {
+    parada_estado_id: number
+    rider_id: number
+}
+
 export interface ParadaEstadoModel {
     codigo: string;
     id: number;
@@ -34,8 +39,5 @@ export interface ParadaModel {
     items: ItemModel[] 
 }
 
-export interface ParadaEstadoRequestModel {
-    item_estado_id: number
-    parada_id? : number
-}
+
 

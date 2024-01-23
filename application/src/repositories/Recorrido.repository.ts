@@ -35,13 +35,13 @@ export default class RecorridoRepository {
     
   }
 
-  async get(recorridoId : number | string, incluye: any): Promise<RecorridoModel[]> {
+  async get(recorridoId : number | string, incluir: any): Promise<RecorridoModel[]> {
     try {
       const response = await request({
         url: API_BASE_URL + `/api/recorridos/${recorridoId}`,
         method: 'GET',
         auth: true,
-        params: incluye 
+        params: incluir 
       });
  
       return response.data;

@@ -36,10 +36,6 @@ const {
 
 const openDialog = ref<Boolean>(false)
 
-setTimeout(() => {
-    console.log(openDialog.value)
-}, 2000);
-
 watch(open, (newVal: Boolean) => {
     openDialog.value = newVal
 })

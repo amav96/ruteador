@@ -149,7 +149,7 @@
                 label="Confirmar"  
                 color="deep-purple-13" 
                 v-close-popup
-                @click="confirmarPaquete"
+                @click="confirmarEntregaPaquete"
                  />
                 </q-card-actions>
             </q-card>
@@ -187,7 +187,7 @@
                         />
                     </div>
                 </div>
-                <div :class="[breakpoint.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
+                <div :class="[breakpoint?.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
                     <q-btn
                     unelevated 
                     rounded 
@@ -217,11 +217,12 @@ import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
 import { ParadaModel } from 'src/models/Parada.model';
-import { ItemModel, ItemRequestModel } from 'src/models/Item.model';
+import { ItemModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
-import { ITEMS_ESTADOS, ITEMS_TIPOS } from 'src/utils/DataProviders'
+import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProviders'
 import { useQuasar } from 'quasar';
+import { useUsuarioStore } from 'src/stores/Usuario'
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -229,6 +230,8 @@ const emit = defineEmits<{
 
 const paradaRepository = new ParadaRepository();
 const itemRepository = new ItemRepository();
+
+const usuarioStore = useUsuarioStore()
 
 const route = useRoute();
 
@@ -266,13 +269,14 @@ const getParada = async () => {
 
     try {
         let params = {
-            incluye: [
+            incluir: [
                 'items.itemEstado', 
                 'items.cliente',
                 'items.cliente.tipoDocumento', 
                 'items.itemProveedor', 
                 'items.itemTipo', 
-                'items.empresa'
+                'items.empresa',
+                'paradaEstado'
             ].join(',')
         }
         
@@ -300,9 +304,12 @@ onMounted(() => {
 })
 
 const navegar = async (lat: string, lng: string) => {
-
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     window.open(url);
+
+    if(parada.value?.parada_estado.codigo === 'visitado'){
+        return 
+    }
 
     const [item] = items.value
     const { id } = item;
@@ -310,17 +317,17 @@ const navegar = async (lat: string, lng: string) => {
         item_estado_id: ITEMS_ESTADOS.EN_CAMINO,
         parada_id: parada.value?.id as number
     }
-    const response = await itemRepository.updateEstado(request, id);
+    await itemRepository.updateEstado(request, id);
 }
 
 const abrirConfirmar = ref<boolean>(false)
 const cargandoActualizarEstado = ref<boolean>(false)
 const mostrarRespuestaInformacion = ref<boolean>(false)
 
-const confirmarPaquete = async () => {
+const confirmarEntregaPaquete = async () => {
     abrirConfirmar.value = false
     if(items.value.length === 0){
-        await paradaVisitada()
+        await visitarParada()
     } else {
         const [item] = items.value
         const { id } = item;
@@ -344,13 +351,32 @@ const confirmarPaquete = async () => {
     }
 }
 
-const paradaVisitada = async () => {
-    alert('actualizar unicamente estado de parada')
+const visitarParada = async () => {
+    if(parada.value){
+      try {
+        const { usuario: { id } } = usuarioStore
+        cargandoActualizarEstado.value = true;
+        const request = {
+            parada_estado_id: PARADA_ESTADOS.VISITADO,
+            rider_id: id
+        }
+        const response = await paradaRepository.updateEstado(request, parada.value.id);
+        if(response.parada){
+            emit('actualizarEstadoParada', response.parada)
+            mostrarRespuestaInformacion.value = true
+        }
+        
+      } catch (error) {
+        
+      } finally {
+            cargandoActualizarEstado.value = false;
+        }
+    }
 }
 
 // const paqueteEntregable = computed(() => true)
 
-const paqueteEntregable = computed(() => (items.value.length === 0) ||  
+const paqueteEntregable = computed(() => (items.value.length === 0 && parada.value?.parada_estado.codigo !== 'visitado') ||  
     items.value.some((i) => i.item_estado.codigo !== 'entregado' && i.item_estado.codigo !== 'retirado')
 )
 

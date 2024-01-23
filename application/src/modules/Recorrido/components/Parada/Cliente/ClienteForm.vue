@@ -133,7 +133,7 @@ onMounted(async() => {
 const getCliente = async () => {
     if(cliente_id.value){
        try {
-        const response = await clienteRepository.get(cliente_id.value, { incluye : ['clientesNumeros']})
+        const response = await clienteRepository.get(cliente_id.value, { incluir : ['clientesNumeros']})
         const [cliente] = response;
         if(cliente){
             clienteForm.value.tipo_documento_id = cliente.tipo_documento_id
