@@ -62,8 +62,7 @@
             </div>
           </div>
         </div>
-        
-        
+             
         <!-- lista de paradas -->
         <template v-if="tieneParadas">
           <q-scroll-area style="height: 55vh" >
@@ -91,16 +90,16 @@
                 <q-item-section avatar>
                   <q-icon 
                   size="sm" 
-                  @click.stop="!visitado(parada) ? removeAddres(index): ''" 
-                  :name="visitado(parada) ? 'check_circle_outline' : 'highlight_off'" 
-                  :color="visitado(parada) ? 'green-14' : 'deep-purple-13'" />
+                  @click.stop="eliminable(parada) ? eliminarParada(parada): null" 
+                  :name="nameIcon(parada)" 
+                  :color="colorParada(parada)" />
                 </q-item-section>
               </q-item>
               
             </div>
           </q-scroll-area>
         </template>
-  
+
         <router-view
           @selected-address="paradaSeleccionada"
           @select-origin="origenSeleccionado"
@@ -121,12 +120,13 @@
   import { useQuasar } from 'quasar';
   import { RecorridoModel } from 'src/models/Recorrido.model';
   import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
-  import { CoordenadasModel, UpdateOrigenRequest } from 'src/models/Recorrido.model';
+  import { CoordenadasModel } from 'src/models/Recorrido.model';
   import { ParadaModel } from 'src/models/Parada.model';
   
   import { geoposicionar, formatearGeposiciones, formatearGoogleAddress } from 'src/utils/Google';
   import { useUsuarioStore } from 'src/stores/Usuario'
   import { FormateadorGoogleAddressModel } from 'src/models/Google.model';
+import { PARADA_ESTADOS } from 'src/utils/DataProviders';
   
   const $q = useQuasar();
   
@@ -272,12 +272,7 @@
       paradas.value[indexParada] = parada
     }
   }
-  
-  const removeAddres = async (index: number) => {
-    console.log('removiendo')
-    // intermediates.value.splice(index, 1);
-  };
-  
+    
   onMounted(() => getRecorrido());
   
   const getRecorrido = async () => {
@@ -515,9 +510,64 @@
     recorridoRepository.removerDestino(Number(recorridoId.value));
   };
 
-  const visitado = (parada : ParadaModel) : boolean => {
-    return parada.parada_estado.codigo === 'visitado'
+  const eliminable = (parada : ParadaModel) : boolean => {
+    return parada.parada_estado.codigo !== 'visitado' && parada.parada_estado.tipo !== 'negativo'
   }
+
+  const nameIcon = (parada : ParadaModel) : string => {
+    if(parada.parada_estado_id === PARADA_ESTADOS.PREPARADO || parada.parada_estado_id === PARADA_ESTADOS.EN_CAMINO){
+      return 'highlight_off'
+    } else if(parada.parada_estado.tipo === 'positivo'){
+      return 'check_circle_outline'
+    } else {
+      return 'cancel'
+    }
+  }
+
+  const colorParada = (parada: ParadaModel) : string => {
+
+    if(parada.parada_estado_id === PARADA_ESTADOS.PREPARADO || parada.parada_estado_id === PARADA_ESTADOS.EN_CAMINO){
+      return 'deep-purple-13'
+    } else if(parada.parada_estado.tipo === 'positivo'){
+      return 'green-14'
+    } else {
+      return 'red-13'
+    }
+
+    
+  }
+
+  const eliminandoParada = ref<boolean>(false)
+  const eliminarParada = async (parada : ParadaModel) => {
+    if(eliminandoParada.value) return 
+    
+    $q.dialog({
+        title: '¿Estas seguro?',
+        message: 'Necesitamos su confirmación',
+        cancel: {
+          push: true,
+          color: 'red-13'
+        },
+        ok: {
+          push: true,
+          color: 'deep-purple-13',
+        },
+        persistent: true
+      }).onOk(async () => {
+        try {
+          eliminandoParada.value = true
+          const response = await paradaRepository.delete(parada.id)
+          console.log(response)
+          console.log(paradas.value)
+          paradas.value = paradas.value.filter((p) => p.id !== response.id)
+        } catch (error) {
+          
+        } finally{
+          eliminandoParada.value = false
+        }
+      })
+    // intermediates.value.splice(index, 1);
+  };
 
   </script>
   

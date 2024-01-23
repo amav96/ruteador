@@ -6,7 +6,7 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-      <q-card class="text-black flex column justify-between " style="height:100vh;">
+      <q-card class="text-black flex column no-wrap justify-between " style="height:100vh;">
         <div class>
             <div class="full-width q-pa-sm">
                 <q-icon 
@@ -152,7 +152,7 @@
                 label="Confirmar"  
                 color="deep-purple-13" 
                 v-close-popup
-                @click="notificarItemPositivo"
+                @click="items.length === 0 ? notificarParadaPositiva()  : notificarItemPositivo()"
                  />
                 </q-card-actions>
             </q-card>
@@ -179,7 +179,7 @@
                 
                 <q-list  bordered separator >
                     <q-item  
-                    v-for="(estado, index) in items.length === 0 ? paradasEstados : itemsEstados"
+                    v-for="(estado, index) in items.length === 0 ? paradasEstados : itemEstadosFiltrados"
                     :key="index"
                     clickable 
                     v-ripple
@@ -194,49 +194,17 @@
         <dialog-loading :open="cargandoActualizarEstado" text="Cargando paquete" />
 
         <!-- realizado correctamente -->
-        <q-dialog
-        v-model="mostrarRespuestaInformacion"
-        persistent
-        :maximized="maximizedToggle"
-        transition-show="slide-up"
-        transition-hide="slide-down"
-        >
-            <q-card class="text-black flex column justify-between items-center q-pa-sm bg-green-14" style="height:100vh;">
-                <div class="flex column justify-center items-center q-my-lg">
-                    <div>
-                    <q-icon 
-                    name="check_circle_outline" 
-                    color="white"
-                    size="lg"
-                    class="q-mb-lg"
-                    />
-                    </div>
-                    <div class="text-center q-mb-lg" >
-                        <span class="text-white text-h4">Realizado correctamente</span>
-                    </div>
-                    <div>
-                        <q-icon 
-                        name="inventory" 
-                        color="white"
-                        size="xl"
-                        class="q-mb-lg"
-                        />
-                    </div>
-                </div>
-                <div :class="[breakpoint?.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
-                    <q-btn
-                    unelevated 
-                    rounded 
-                    color="white"
-                    label="Seguir recorrido" 
-                    type="buttom"
-                    class="full-width text-black"
-                    @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido_id}})"
-                    />
-                </div>
-                
-            </q-card>
-        </q-dialog>
+        <modal-respuesta-accion
+        :open="mostrarMensajePositivo"
+        :recorrido_id="Number(recorrido_id)"
+        />
+
+        <modal-respuesta-accion
+        :open="mostrarMensajeNegativo"
+        bg-color="bg-red-13"
+        :recorrido_id="Number(recorrido_id)"
+        />
+
 
       </q-card>
       <router-view
@@ -260,6 +228,7 @@ import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProvid
 import { useQuasar } from 'quasar';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import {useDataProvider} from 'src/composables/DataProvider'
+import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.vue';
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -271,6 +240,7 @@ const itemRepository = new ItemRepository();
 const usuarioStore = useUsuarioStore()
 
 const route = useRoute();
+const router = useRouter();
 
 const {
   parada_id,
@@ -284,13 +254,13 @@ const {
     getParadasEstados
 } = useDataProvider()
 
+const itemEstadosFiltrados = computed(() => itemsEstados.value.filter((i: ItemEstadoModel) => i.tipo === 'negativo'))
+
 const $q = useQuasar();
 const breakpoint = computed(() => $q.screen)
 
 const dialog =  ref(true)
 const maximizedToggle =  ref(true)
-
-const router = useRouter();
 
 const goToAgregarPaquete = () => {
     router.push({name: 'agregar-item',})
@@ -345,7 +315,7 @@ const getParada = async () => {
 
 onMounted(() => {
     getParada()
-    getItemsEstados({tipo: 'negativo'})
+    getItemsEstados()
     getParadasEstados({tipo: 'negativo'})
 })
 
@@ -353,48 +323,83 @@ const navegar = async (lat: string, lng: string) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     window.open(url);
 
-    if(parada.value?.parada_estado.codigo === 'visitado'){
-        return 
-    }
+    // if(parada.value?.parada_estado.codigo === 'visitado'){
+    //     return 
+    // }
 
-    const [item] = items.value
-    const { id } = item;
-    const request = {
-        item_estado_id: ITEMS_ESTADOS.EN_CAMINO,
-        parada_id: parada.value?.id as number
-    }
-    await itemRepository.updateEstado(request, id);
+    // if(items.value.length > 0){
+    //     const [item] = items.value
+    //     const { id } = item;
+    //     const request : any = {
+    //         parada_id: parada.value?.id as number,
+    //         item_estado_id: ITEMS_ESTADOS.EN_CAMINO 
+    //     }
+    //     await itemRepository.updateEstado(request, id);
+    // } else {
+    //     const { usuario: { id } } = usuarioStore
+    //     const request = {
+    //         parada_estado_id: PARADA_ESTADOS.EN_CAMINO,
+    //         rider_id: id
+    //     } 
+    //     await paradaRepository.updateEstado(request, Number(parada.value?.id));
+    // }
+    
 }
 
 const abrirConfirmar = ref<boolean>(false)
 const cargandoActualizarEstado = ref<boolean>(false)
-const mostrarRespuestaInformacion = ref<boolean>(false)
+const mostrarMensajePositivo = ref<boolean>(false)
+const mostrarMensajeNegativo = ref<boolean>(false)
+    
 const abrirSeleccionarMotivoNegativo = ref<boolean>(false)
 
 const notificarItemPositivo = async () => {
     abrirConfirmar.value = false
-    if(items.value.length === 0){
-        await notificarParadaPositiva()
-    } else {
-        const [item] = items.value
-        const { id } = item;
-        const item_estado_id = item.item_tipo_id === ITEMS_TIPOS.ENTREGA ? ITEMS_ESTADOS.ENTREGADO : ITEMS_ESTADOS.RETIRADO
-        const request = {
-            item_estado_id,
-            parada_id: parada.value?.id as number,
-        }
+    const [item] = items.value
+    const { id } = item;
+    const item_estado_id = item.item_tipo_id === ITEMS_TIPOS.ENTREGA ? ITEMS_ESTADOS.ENTREGADO : ITEMS_ESTADOS.RETIRADO
+    const request = {
+        item_estado_id,
+        parada_id: parada.value?.id as number,
+    }
 
-        try {
-            cargandoActualizarEstado.value = true;
-            const response = await itemRepository.updateEstado(request, id);
-            mostrarRespuestaInformacion.value = true
-            actualizarEstadoParada(response)
-            
-        } catch (error) {
-            
-        } finally {
-            cargandoActualizarEstado.value = false;
+    try {
+        cargandoActualizarEstado.value = true;
+        const response = await itemRepository.updateEstado(request, id);
+        mostrarMensajePositivo.value = true
+        if(response.parada){
+            emit('actualizarEstadoParada', response.parada)
         }
+        
+    } catch (error) {
+        
+    } finally {
+        cargandoActualizarEstado.value = false;
+    }
+
+}
+
+const notificarItemNegativo = async (itemEstado: ItemEstadoModel) => {
+    abrirConfirmar.value = false
+    const [item] = items.value
+    const { id } = item;
+    const request = {
+        item_estado_id: itemEstado.id,
+        parada_id: parada.value?.id as number,
+    }
+
+    try {
+        cargandoActualizarEstado.value = true;
+        const response = await itemRepository.updateEstado(request, id);
+        mostrarMensajeNegativo.value = true
+        if(response.parada){
+            emit('actualizarEstadoParada', response.parada)
+        }
+        
+    } catch (error) {
+        
+    } finally {
+        cargandoActualizarEstado.value = false;
     }
 }
 
@@ -410,7 +415,30 @@ const notificarParadaPositiva = async () => {
         const response = await paradaRepository.updateEstado(request, parada.value.id);
         if(response.parada){
             emit('actualizarEstadoParada', response.parada)
-            mostrarRespuestaInformacion.value = true
+         mostrarMensajePositivo.value = true
+        }
+        
+      } catch (error) {
+        
+      } finally {
+            cargandoActualizarEstado.value = false;
+        }
+    }
+}
+
+const notificarParadaNegativa = async (paradaEstado: ParadaEstadoModel) => {
+    if(parada.value){
+      try {
+        const { usuario: { id } } = usuarioStore
+        cargandoActualizarEstado.value = true;
+        const request = {
+            parada_estado_id: paradaEstado.id,
+            rider_id: id
+        }
+        const response = await paradaRepository.updateEstado(request, parada.value.id);
+        mostrarMensajeNegativo.value = true
+        if(response.parada){
+            emit('actualizarEstadoParada', response.parada)
         }
         
       } catch (error) {
@@ -427,20 +455,7 @@ const paqueteEntregable = computed(() => (items.value.length === 0 && parada.val
     items.value.some((i) => i.item_estado.codigo !== 'entregado' && i.item_estado.codigo !== 'retirado')
 )
 
-const actualizarEstadoParada = (item: ItemModel) => {
-    if(item.parada){
-        emit('actualizarEstadoParada', item.parada)
-    }
-}
-
-const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado')
-
-const notificarParadaNegativa = (paradaEstado: ParadaEstadoModel) => {
-    console.log(paradaEstado)
-}
-const notificarItemNegativo = (itemEstado: ItemEstadoModel) => {
-    console.log(itemEstado)
-}
+const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado' || parada.value?.parada_estado.tipo === 'negativo')
 
 </script>
 

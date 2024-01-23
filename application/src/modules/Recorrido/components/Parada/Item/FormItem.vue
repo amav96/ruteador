@@ -64,7 +64,7 @@
             label="Estado"
             color="deep-purple-6"
             v-model="itemForm.item_estado_id" 
-            :options="itemsEstados" 
+            :options="itemEstadosFiltrados" 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -82,7 +82,7 @@ import { useQuasar } from 'quasar'
 import { useDataProvider } from 'src/composables/DataProvider'
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { onBeforeMount } from 'vue';
-import { ItemRequestModel } from 'src/models/Item.model';
+import { ItemEstadoModel, ItemRequestModel } from 'src/models/Item.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { toRefs } from 'vue';
 import ItemRepository from 'src/repositories/Item.repository'
@@ -154,6 +154,8 @@ onMounted(async() => {
     // Solo para editar
     await getItem();
 })
+
+const itemEstadosFiltrados = computed(() => itemsEstados.value.filter((i: ItemEstadoModel) => i.tipo === 'positivo'))
 
 const getItem = async () => {
     if(item_id.value){

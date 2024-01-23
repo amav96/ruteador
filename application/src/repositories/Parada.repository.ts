@@ -69,4 +69,19 @@ export default class ParadaRepository {
       }
     }
 
+    async delete(paradaId: number | string): Promise<{id: number}> {
+      try {
+          const response = await request({
+            url: API_BASE_URL + '/api/paradas/' + paradaId,
+            method: 'DELETE',
+            auth: true
+          });
+    
+          return response.data;
+    
+        } catch (error) {
+          throw error
+        }
+    }
+
 }

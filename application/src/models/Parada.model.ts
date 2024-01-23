@@ -21,13 +21,14 @@ export interface ParadaEstadoModel {
     color: string;
     id: number;
     nombre: string;
-    parada_estado_id: number;
+    tipo: string;
 }
 
 export interface ParadaModel {
     codigo_postal: string;
     created_at: string;
     direccion_formateada: string;
+    parada_estado_id: number;
     parada_estado: ParadaEstadoModel;
     id: number;
     lat: string;

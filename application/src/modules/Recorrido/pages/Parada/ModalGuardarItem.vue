@@ -230,17 +230,16 @@ const actualizarCliente = async () => {
 }
 
 const crearItem = async (cliente_id?: number | null) => {
-    
     if(itemForm.value){
         try {
             guardandoItem.value = true;
             if(cliente_id){
                 itemForm.value.cliente_id = cliente_id
-                
-                const response = await itemRepository.create(itemForm.value);
-                emit('actualizarParada', true)
-                router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
             }
+            const response = await itemRepository.create(itemForm.value);
+            emit('actualizarParada', true)
+            router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
+            
         } catch (error) {
             console.log(error)
             guardandoItem.value = false;
@@ -255,10 +254,11 @@ const actualizarItem = async (cliente_id?: number | null) => {
             guardandoItem.value = true;
             if(cliente_id){
                 itemForm.value.cliente_id = cliente_id
-                const response = await itemRepository.update(itemForm.value, route.params.item_id as string);
-                emit('actualizarParada', true)
-                router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
             }
+            const response = await itemRepository.update(itemForm.value, route.params.item_id as string);
+            emit('actualizarParada', true)
+            router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
+           
         } catch (error) {
             guardandoItem.value = false;
             $q.notify({

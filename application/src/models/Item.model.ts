@@ -49,4 +49,5 @@ export interface ItemEstadoModel {
     nombre: string;
     codigo: string;
     color: string;
+    tipo: string;
 }
