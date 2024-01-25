@@ -1,4 +1,4 @@
-import request from 'src/utils/ApiResponseCapacitor.util';
+import request from 'src/utils/ApiResponse.helper';
 import { LoginModel } from 'src/models/Autenticacion.model'
 import { UsuarioModel } from 'src/models/Usuario.model';
 import { API_BASE_URL } from 'src/utils/BaseUrl'

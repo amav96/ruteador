@@ -1,79 +1,79 @@
 <template>
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-            <q-input 
-            v-model="itemForm.track_id" 
-            color="deep-purple-6" 
-            label="Numero envio"
-            autocomplete="off"
-            >
-                <template v-slot:append>
-                    <q-icon @click="startScan" name="qr_code_scanner" />
-                </template>
-            </q-input>
-        </div>
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-            <q-select 
-            label="Agencia paqueteria"
-            color="deep-purple-6"
-            v-model="itemForm.empresa_id" 
-            :options="usuarioStore.usuario.empresas" 
-            option-label="nombre"
-            option-value="id"
-            emit-value
-            map-options
-            :rules="[
-                val => !!val || '* Empresa obligatoria',
-            ]"
-            />
-        </div>
+    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+        <q-input 
+        v-model="itemForm.track_id" 
+        color="deep-purple-6" 
+        label="Numero envio"
+        autocomplete="off"
+        >
+            <template v-slot:append>
+                <q-icon @click="startScan" name="qr_code_scanner" />
+            </template>
+        </q-input>
+    </div>
+    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+        <q-select 
+        label="Agencia paqueteria"
+        color="deep-purple-6"
+        v-model="itemForm.empresa_id" 
+        :options="usuarioStore.usuario.empresas" 
+        option-label="nombre"
+        option-value="id"
+        emit-value
+        map-options
+        :rules="[
+            val => !!val || '* Empresa obligatoria',
+        ]"
+        />
+    </div>
 
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-            <q-select 
-            label="Proovedor"
-            color="deep-purple-6"
-            v-model="itemForm.item_proveedor_id" 
-            :options="proveedoresItems" 
-            option-label="nombre"
-            option-value="id"
-            emit-value
-            map-options
-            :rules="[
-                val => !!val || '* Proveedor obligatorio',
-            ]"
-            />
-        </div>
+    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+        <q-select 
+        label="Proovedor"
+        color="deep-purple-6"
+        v-model="itemForm.item_proveedor_id" 
+        :options="proveedoresItems" 
+        option-label="nombre"
+        option-value="id"
+        emit-value
+        map-options
+        :rules="[
+            val => !!val || '* Proveedor obligatorio',
+        ]"
+        />
+    </div>
 
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-            <q-select 
-            label="Tipo paquete"
-            color="deep-purple-6"
-            v-model="itemForm.item_tipo_id" 
-            :options="itemsTipos" 
-            option-label="nombre"
-            option-value="id"
-            emit-value
-            map-options
-            :rules="[
-                val => !!val || '* Tipo de paquete obligatorio',
-            ]"
-            />
-        </div>
+    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+        <q-select 
+        label="Tipo paquete"
+        color="deep-purple-6"
+        v-model="itemForm.item_tipo_id" 
+        :options="itemsTipos" 
+        option-label="nombre"
+        option-value="id"
+        emit-value
+        map-options
+        :rules="[
+            val => !!val || '* Tipo de paquete obligatorio',
+        ]"
+        />
+    </div>
 
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-            <q-select 
-            label="Estado"
-            color="deep-purple-6"
-            v-model="itemForm.item_estado_id" 
-            :options="itemEstadosFiltrados" 
-            option-label="nombre"
-            option-value="id"
-            emit-value
-            map-options
-            :rules="[
-                val => !!val || '* Tipo de paquete obligatorio',
-            ]"
-            />
-        </div>
+    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+        <q-select 
+        label="Estado"
+        color="deep-purple-6"
+        v-model="itemForm.item_estado_id" 
+        :options="itemEstadosFiltrados" 
+        option-label="nombre"
+        option-value="id"
+        emit-value
+        map-options
+        :rules="[
+            val => !!val || '* Tipo de paquete obligatorio',
+        ]"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -111,6 +111,7 @@ const itemForm = ref<ItemRequestModel>({
 })
 
 const startScan = async () => {
+
   // Check camera permission
   // This is just a simple example, check out the better checks below
   await BarcodeScanner.checkPermission({ force: true });
@@ -119,13 +120,35 @@ const startScan = async () => {
   // note: if you are using ionic this might not be enough, check below
   BarcodeScanner.hideBackground();
 
-  const result = await BarcodeScanner.startScan(); // start scanning and wait for a result
+   // Configura el intervalo para verificar la presencia del elemento 'video'
+   let intervalId = setInterval(() => {
+    const videoElement = document.getElementById('video');
+    if (videoElement) {
+      const videoParent : any = videoElement.parentNode;
+      if (videoParent && videoParent.style.zIndex !== '9999') {
+        // Aplica estilos al padre del video si aún no se ha aplicado
+        videoParent.style.zIndex = '9999';
+        // Otros estilos que desees aplicar al div padre
+
+        // Detén el intervalo después de aplicar los estilos
+        clearInterval(intervalId);
+      }
+    }
+  }, 800); 
+
+  const result : any = await BarcodeScanner.startScan(); // start scanning and wait for a result
+
+ 
 
   // if the result has content
   if (result.hasContent) {
-    alert(JSON.stringify(result.content)); // log the raw scanned content
-
+    const { id } = JSON.parse(result.content)
+    if(id){
+        itemForm.value.track_id = id
+    }
   }
+
+  stopScan()
 };
 
 const stopScan = () => {
@@ -189,5 +212,6 @@ body.barcode-scanner-active {
 .barcode-scanner-modal {
   visibility: visible;
 }
+
 
 </style>

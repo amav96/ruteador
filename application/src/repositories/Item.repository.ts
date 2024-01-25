@@ -1,4 +1,4 @@
-import { ItemEstadoRequestModel, ItemModel, ItemRequestModel } from 'src/models/Item.model';
+import { ItemEstadoRequestModel, ItemModel, ItemRequestModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import request from 'src/utils/ApiResponseCapacitor.util';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
@@ -65,6 +65,38 @@ export default class ItemRepository {
     } catch (error) {
       throw error
     }
+  }
+
+  async eliminarItemComprobante(item_comprobante_id: number){
+    try {
+      const response = await request({
+        url: API_BASE_URL + '/api/items-comprobantes/delete/' + item_comprobante_id,
+        method: 'DELETE',
+        auth: true
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async generarUrlTemporariaComprobante(data: UrlTemporariaItemComprobanteRequestModel)
+  :Promise< UrlTemporariaItemComprobanteResponseModel> {
+
+    try {
+      const response = await request({
+        url: API_BASE_URL + '/api/items-comprobantes/url-temporaria',
+        method: 'POST',
+        data,
+        auth: true
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+
   }
 
 }

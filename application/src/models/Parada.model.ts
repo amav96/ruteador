@@ -1,3 +1,4 @@
+import { StorageAwsModel } from "./Aws.model";
 import { ItemModel } from "./Item.model";
 
 export interface ParadaRequestModel {
@@ -24,6 +25,15 @@ export interface ParadaEstadoModel {
     tipo: string;
 }
 
+export interface ParadaComprobanteModel {
+    id: number;
+    parada_id: number;
+    path: string;
+    usuario_id: number;
+    created_at: string;
+    updated_at: string
+}
+
 export interface ParadaModel {
     codigo_postal: string;
     created_at: string;
@@ -38,7 +48,28 @@ export interface ParadaModel {
     recorrido_id: number;
     rider_id: number;
     updated_at: string;
-    items: ItemModel[] 
+    items: ItemModel[],
+    comprobantes: ParadaComprobanteModel[]
+}
+
+
+export interface UrlTemporariaParadaComprobanteRequestModel {
+    nombre_archivo: string
+    parada_id: number
+}
+
+export interface ParadaComprobanteModel {
+    id: number;
+    parada_id: number;
+    path: string;
+    usuario_id: number;
+    created_at: string;
+    updated_at: string
+}
+
+export interface UrlTemporariaParadaComprobanteResponseModel {
+    comprobante: ParadaComprobanteModel
+    storage: StorageAwsModel
 }
 
 

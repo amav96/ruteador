@@ -1,4 +1,4 @@
-import { ParadaEstadoRequestModel, ParadaModel, ParadaRequestModel } from 'src/models/Parada.model';
+import { ParadaEstadoRequestModel, ParadaModel, ParadaRequestModel, UrlTemporariaParadaComprobanteRequestModel, UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
 import request from 'src/utils/ApiResponseCapacitor.util';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
@@ -82,6 +82,38 @@ export default class ParadaRepository {
         } catch (error) {
           throw error
         }
+    }
+
+    async eliminarParadaComprobante(parada_comprobante_id: number){
+      try {
+        const response = await request({
+          url: API_BASE_URL + '/api/paradas-comprobantes/delete/' + parada_comprobante_id,
+          method: 'DELETE',
+          auth: true
+        });
+        return response.data;
+  
+      } catch (error) {
+        throw error
+      }
+    }
+  
+    async generarUrlTemporariaComprobante(data: UrlTemporariaParadaComprobanteRequestModel)
+    :Promise< UrlTemporariaParadaComprobanteResponseModel> {
+  
+      try {
+        const response = await request({
+          url: API_BASE_URL + '/api/paradas-comprobantes/url-temporaria',
+          method: 'POST',
+          data,
+          auth: true
+        });
+        return response.data;
+  
+      } catch (error) {
+        throw error
+      }
+  
     }
 
 }

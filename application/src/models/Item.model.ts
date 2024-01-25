@@ -1,3 +1,4 @@
+import { StorageAwsModel } from "./Aws.model";
 import { ClienteModel } from "./Cliente.model";
 import { EmpresaModel } from "./Empresa.model";
 import { ParadaModel } from "./Parada.model";
@@ -15,6 +16,7 @@ export interface ItemRequestModel {
     item_estado_id: number
     cliente_id?: number
 }
+
 
 export interface ItemModel {
     id: number;
@@ -36,6 +38,7 @@ export interface ItemModel {
     item_proveedor: ProveedorItemModel;
     item_tipo: TipoItemModel;
     parada?: ParadaModel
+    comprobantes: ItemComprobanteModel[]
 }
 
 
@@ -50,4 +53,23 @@ export interface ItemEstadoModel {
     codigo: string;
     color: string;
     tipo: string;
+}
+
+export interface UrlTemporariaItemComprobanteRequestModel {
+    nombre_archivo: string
+    item_id: number
+}
+
+export interface ItemComprobanteModel {
+    id: number;
+    item_id: number;
+    path: string;
+    usuario_id: number;
+    created_at: string;
+    updated_at: string
+}
+
+export interface UrlTemporariaItemComprobanteResponseModel {
+    comprobante: ItemComprobanteModel
+    storage: StorageAwsModel
 }

@@ -33,6 +33,7 @@ module.exports = configure(function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'main',
       'i18n',
       'axios',
     ],
@@ -64,6 +65,7 @@ module.exports = configure(function (/* ctx */) {
       },
       env: require('dotenv').config().parsed,
       vueRouterMode: process.env.VUE_ROUTER_MODE,
+      S3BUCKETLAGUAGUA: process.env.S3BUCKETLAGUAGUA,
      
       // vueRouterBase,
       // vueDevtools,
@@ -103,7 +105,6 @@ module.exports = configure(function (/* ctx */) {
       // https: true
       open: true, // opens browser window automatically
       port: 3000,
-      
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework

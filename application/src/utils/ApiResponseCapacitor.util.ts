@@ -41,6 +41,7 @@ const request = async (call: ApiRequest): Promise<ApiResponse> => {
     }
     
     const response: HttpResponse = await makeCapacitorHttpCall(options);
+    
     if(response.status > 300){
       throw response
     }

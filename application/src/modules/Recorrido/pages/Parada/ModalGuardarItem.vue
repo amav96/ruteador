@@ -240,8 +240,15 @@ const crearItem = async (cliente_id?: number | null) => {
             emit('actualizarParada', true)
             router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
             
-        } catch (error) {
-            console.log(error)
+        } catch (error  : any) {
+            const { data } = error;
+            let mensaje = data && data.message ?  data.message : 'No se creo correctamente';
+            $q.notify({
+                type: 'negative',
+                message: mensaje,
+                position: 'top',
+                timeout: 15000
+            })
             guardandoItem.value = false;
         }
     } 

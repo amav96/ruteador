@@ -47,10 +47,13 @@
             </div>
 
             <q-separator spaced style="margin:0px" />
+            
+            <!-- estado actual -->
             <div v-if="estadoParadaMostrable" class="text-white q-pa-sm" :style="`background:${parada?.parada_estado.color}`">
                 <span class="text-weight-medium" > {{ parada?.parada_estado.nombre }} </span>
             </div>
 
+            <!-- agregar paquete -->
             <div v-if="!trayendoParada && !tieneItems && paqueteEntregable" class="flex column q-pa-sm">
                 <div class="flex row items-center q-gutter-x-sm">
                     <div>
@@ -62,54 +65,92 @@
                 </div>
             </div>
 
+            <imagenes-comprobantes 
+            v-if="parada"
+            modelo="ParadaComprobante"
+            :comprobantes="parada.comprobantes"
+            :pathBucket="S3BUCKETLAGUAGUA"
+            @actualizar-comprobantes="parada.comprobantes = $event"
+            />
+
+            <!-- agregar comprobante a parada -->
+            <div v-if="!trayendoParada && !tieneItems && paqueteEntregable" 
+            class="flex row items-center q-gutter-x-sm q-px-sm q-my-sm">
+                <div>
+                    <q-icon size="sm" name="photo_camera" />
+                </div> 
+                <div @click="takePicture()" >
+                    <q-btn round size="xs" color="deep-purple-13" icon="add" />
+                </div>
+            </div>
+
+            <!-- listado de paquetes -->
             <template v-if="tieneItems">
-                <div class="flex column items-center full-width q-pa-sm">
+                <div class="flex column items-center full-width ">
                     <div
                     v-for="(item, index) in items"
                     :key="index"
                     class="full-width"
                     >
-                    <div class="flex row no-wrap full-width">
-                        <div class="flex column justify-between" style="width:90%;">
+                        <div class="flex row no-wrap q-pa-sm">
+                            <div class="flex column justify-between" style="width:90%;">
+                                <div>
+                                    <span class="text-weight-regular text-h6">
+                                        {{ item.cliente?.nombre ?? item.destinatario }}
+                                    </span>
+                                </div>
+                                <div class="q-mb-xs">
+                                    Numero envio: <span class="text-weight-medium" >{{ item.track_id }}</span>
+                                </div>
+                                <div class="q-mb-xs">
+                                    <span class="text-weight-medium" >{{ item.item_proveedor.nombre }}</span>
+                                </div>
+                                <div class="q-mb-xs">
+                                    Agencia: <span class="text-weight-medium" >{{ item.empresa.nombre }}</span>
+                                </div>
+                                <div class="q-mb-xs">
+                                    Tipo: <span class="text-weight-medium" >{{ item.item_tipo.nombre }}</span>
+                                </div>
+                                <div class="q-mb-xs" v-if="item.cliente && item.cliente.numero_documento">
+                                    <span class="text-weight-medium" >{{ item.cliente.tipo_documento?.nombre }} {{ item.cliente.numero_documento }}</span>
+                                </div>
+                                <div class="flex text-white q-mb-xs" >
+                                    <q-chip square  :style="`background:${item.item_estado.color};`" text-color="white" >
+                                        {{ item.item_estado.nombre }} 
+                                    </q-chip>
+                                </div>
+        
+                            </div>
+                            <div v-if="paqueteEntregable" class="flex justify-end" style="width:10%;">
+                                <q-icon @click="goToEditarItemCliente" name="edit" size="sm" />
+                            </div>
+                            <!-- TODO: mostrar numero tlf, documento -->
+                        
+                        </div>
+
+                        <imagenes-comprobantes 
+                        modelo="ItemComprobante"
+                        :comprobantes="item.comprobantes"
+                        :pathBucket="S3BUCKETLAGUAGUA"
+                        @actualizar-comprobantes="item.comprobantes = $event"
+                        />
+                           
+                        <div class="flex row items-center q-gutter-x-sm q-px-sm q-my-sm">
                             <div>
-                                <span class="text-weight-regular text-h6">
-                                    {{ item.cliente?.nombre ?? item.destinatario }}
-                                </span>
+                                <q-icon size="sm" name="photo_camera" />
+                            </div> 
+                            <div @click="takePicture(item)" >
+                                <q-btn round size="xs" color="deep-purple-13" icon="add" />
                             </div>
-                            <div class="q-mb-xs">
-                                Numero envio: <span class="text-weight-medium" >{{ item.track_id }}</span>
-                            </div>
-                            <div class="q-mb-xs">
-                                <span class="text-weight-medium" >{{ item.item_proveedor.nombre }}</span>
-                            </div>
-                            <div class="q-mb-xs">
-                                Agencia: <span class="text-weight-medium" >{{ item.empresa.nombre }}</span>
-                            </div>
-                            <div class="q-mb-xs">
-                                Tipo: <span class="text-weight-medium" >{{ item.item_tipo.nombre }}</span>
-                            </div>
-                            <div class="q-mb-xs" v-if="item.cliente && item.cliente.numero_documento">
-                                <span class="text-weight-medium" >{{ item.cliente.tipo_documento?.nombre }} {{ item.cliente.numero_documento }}</span>
-                            </div>
-                            <div class="flex text-white q-mb-xs" >
-                                <q-chip :style="`background:${item.item_estado.color};`" text-color="white" >
-                                    {{ item.item_estado.nombre }} 
-                                </q-chip>
-                            </div>
-      
                         </div>
-                        <div v-if="paqueteEntregable" class="flex justify-end" style="width:10%;">
-                            <q-icon @click="goToEditarItemCliente" name="edit" size="sm" />
-                        </div>
-                        <!-- TODO: mostrar numero tlf, documento -->
-                       
-                    </div>
-                    <q-separator v-if="items.length > 1" spaced  />
-                    
+                        <!-- <q-separator spaced  style="margin:0px" /> -->
                     </div>
                 </div>
             </template>
         </div>
+
+        <!-- agregando comprobante -->
+        <dialog-loading :open="cargandoComprobante" text="Cargando comprobante" />
 
         <!-- acciones  -->
         <div v-if="paqueteEntregable" class="flex column q-pa-sm">
@@ -205,7 +246,6 @@
         :recorrido_id="Number(recorrido_id)"
         />
 
-
       </q-card>
       <router-view
       @actualizar-parada="getParada"
@@ -220,8 +260,8 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
-import { ParadaModel, ParadaEstadoModel } from 'src/models/Parada.model';
-import { ItemModel, ItemEstadoModel } from 'src/models/Item.model';
+import { ParadaModel, ParadaEstadoModel, ParadaComprobanteModel, UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
+import { ItemModel, ItemEstadoModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProviders'
@@ -229,10 +269,15 @@ import { useQuasar } from 'quasar';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import {useDataProvider} from 'src/composables/DataProvider'
 import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.vue';
+import ImagenesComprobantes from '../../components/Parada/ImagenesComprobantes.vue';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { uploadFileToS3 } from 'src/utils/AWS'
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
 }>()
+
+const S3BUCKETLAGUAGUA : string = process.env.S3BUCKETLAGUAGUA as string
 
 const paradaRepository = new ParadaRepository();
 const itemRepository = new ItemRepository();
@@ -290,7 +335,9 @@ const getParada = async () => {
                 'items.itemProveedor', 
                 'items.itemTipo', 
                 'items.empresa',
-                'paradaEstado'
+                'items.comprobantes',
+                'paradaEstado',
+                'comprobantes'
             ].join(',')
         }
         
@@ -457,9 +504,106 @@ const paqueteEntregable = computed(() => (items.value.length === 0 && parada.val
 
 const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado' || parada.value?.parada_estado.tipo === 'negativo')
 
+const takePicture = async (item?: ItemModel) => {
+  const image = await Camera.getPhoto({
+    quality: 90,
+    allowEditing: true,
+    resultType: CameraResultType.Uri
+  });
+  if(image.webPath){
+    let nombre_archivo = image.webPath?.split('/')[3] ?? "name"
+   
+    // Obtén el contenido binario de la imagen usando fetch
+    const responseImage = await fetch(image.webPath);
+    const blob = await responseImage.blob();
+
+    // Crea un objeto File a partir del Blob y asigna el nombre del archivo
+    const file = new File([blob], nombre_archivo);
+  
+    if(item){
+        generarUrlItemComprobante(nombre_archivo, file, item)
+    } else {
+        generarUrlParadaComprobante(nombre_archivo, file)
+    }
+  }
+
+};
+
+const cargandoComprobante = ref<boolean>(false)
+const generarUrlItemComprobante = async (nombre_archivo: string, file: File, item: ItemModel) => {
+
+    cargandoComprobante.value = true
+    let response : UrlTemporariaItemComprobanteResponseModel | null = null
+    try {
+        response = await itemRepository.generarUrlTemporariaComprobante({
+            nombre_archivo,
+            item_id: item.id 
+        })
+    } catch (error) {
+        cargandoComprobante.value = false
+    }
+
+    if(response){
+        const { storage, comprobante }  = response;
+        if(storage){
+            try {
+                await uploadFileToS3(storage.url, file);
+                const { item_id } = comprobante
+                const itemIndex = items.value.findIndex((i: ItemModel) => i.id === item_id)
+                if(itemIndex > -1){
+                    items.value[itemIndex].comprobantes.push(comprobante)
+                }
+                
+            } catch (error) {
+                const { id } = comprobante;
+                await itemRepository.eliminarItemComprobante(id)
+            } finally {
+                cargandoComprobante.value = false
+            }
+        } else {
+            cargandoComprobante.value = false
+        }
+    }
+}
+
+const generarUrlParadaComprobante = async (nombre_archivo: string, file: File) => {
+    if(parada.value){
+
+        cargandoComprobante.value = true
+        let response : UrlTemporariaParadaComprobanteResponseModel | null = null
+        try {
+            response = await paradaRepository.generarUrlTemporariaComprobante({
+                nombre_archivo,
+                parada_id: parada.value.id 
+            })
+        } catch (error) {
+            cargandoComprobante.value = false
+        }
+
+        if(response){
+            const { storage, comprobante }  = response;
+            if(storage){
+                try {
+                    await uploadFileToS3(storage.url, file);
+                    parada.value.comprobantes.push(comprobante)
+                    
+                } catch (error) {
+                    const { id } = comprobante;
+                    await itemRepository.eliminarItemComprobante(id)
+                } finally {
+                    cargandoComprobante.value = false
+                }
+            } else {
+                cargandoComprobante.value = false
+            }
+        }
+    }
+}
+
 </script>
 
 <style scoped>
+
 .q-chip {
     margin: 0px;
 }

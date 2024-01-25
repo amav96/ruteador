@@ -111,7 +111,7 @@
 </template>
   
   <script setup lang="ts">
-  import { useRoute, useRouter } from 'vue-router';
+  import { routerKey, useRoute, useRouter } from 'vue-router';
   import RecorridoRepository from 'src/repositories/Recorrido.repository';
   import ParadaRepository from 'src/repositories/Parada.repository';
   import { computed, watch, onMounted, ref } from 'vue';
@@ -320,6 +320,8 @@ import { PARADA_ESTADOS } from 'src/utils/DataProviders';
           paradas.value = paradasServer
         }
         
+      } else {
+        router.push({name: 'crear-recorrido'})
       }
       
     } catch (error) {
