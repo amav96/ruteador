@@ -90,7 +90,13 @@
               <q-skeleton class="full-width q-mt-xs" type="text" />
             </template>
             <template v-else-if="tieneParadas">
-              <q-btn @click="abrirModalMapa = !abrirModalMapa" :disabled="optimizandoRecorrido" round color="deep-purple-13" icon="map" />
+              <q-btn 
+              @click="router.push({name: 'mapa-paradas'})" 
+              :disabled="optimizandoRecorrido" 
+              round 
+              color="deep-purple-13" 
+              icon="map"
+              />
               <div class="pointer q-mt-sm">
                 <strong>
                   Ver mapa
@@ -114,7 +120,7 @@
           <div class="text-weight-medium" > {{ recorrido.duracion }}</div>
         </div>
         <!-- lista de paradas -->
-        <q-scroll-area v-if="!cargandoRecorrido && tieneParadas"   style="height: 55vh" >
+        <q-scroll-area v-if="!cargandoRecorrido && tieneParadas"   :style="`height:${heightScrollPararadas()};`" >
           <div 
           v-for="(parada, index) in paradas" 
           :key="index"
@@ -146,18 +152,52 @@
             </q-item>
           </div>
         </q-scroll-area>
+
+        <!-- finalizar recorrido -->
+        <div v-if="!recorridoFinalizado" class="flex column q-pa-sm">
+            <q-btn 
+            class="q-my-sm q-py-sm" 
+            label="Finalizar recorrido" 
+            color="deep-purple-13" 
+            unelevated 
+            @click="abrirConfirmarEstadoRecorrido = !abrirConfirmarEstadoRecorrido"
+            />
+        </div>
+        <div  v-else-if="recorridoFinalizado"
+        class="flex justify-center"
+         >
+          <q-chip  
+          class="q-mt-md " 
+          color="deep-purple-13" 
+          text-color="white" 
+          icon-right="check">
+          Finalizado
+          </q-chip>
+        </div>
+
+        <!-- confirmar finalizacion -->
+        <q-dialog v-model="abrirConfirmarEstadoRecorrido" persistent>
+            <q-card>
+                <q-card-section class="column items-center">
+                <q-avatar icon="all_inbox" class="q-mb-md" color="deep-purple-13" text-color="white" />
+                    <div class="q-ml-sm text-weight-bold text-subtitle1">Necesitamos su confirmación</div>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                <q-btn flat label="Volver" color="black"  v-close-popup />
+                <q-btn 
+                flat 
+                label="Confirmar"  
+                color="deep-purple-13" 
+                v-close-popup
+                @click="finalizarRecorrido"
+                 />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
        
         <dialog-loading :open="optimizandoRecorrido" text="Optimizando recorrido" />
-
-        <modal-recorrido-mapa 
-        v-if="recorrido"
-        :open="abrirModalMapa"
-        :lat="(recorrido.origen_actual_lat as number)"
-        :lng="(recorrido.origen_actual_lng as number)"
-        :paradas="recorrido.paradas"
-        :polyline="recorrido.polyline"
-        @close="abrirModalMapa = false"
-        />
+        <dialog-loading :open="actualizandoRecorridoEstado" text="Actualizando recorrido" />
 
         <router-view
           @selected-address="paradaSeleccionada"
@@ -173,29 +213,26 @@
   import { useRoute, useRouter } from 'vue-router';
   import RecorridoRepository from 'src/repositories/Recorrido.repository';
   import ParadaRepository from 'src/repositories/Parada.repository';
-  import { computed, watch, onMounted, ref } from 'vue';
+  import { computed, onMounted, ref, onBeforeUnmount } from 'vue';
   import { Geolocation } from '@capacitor/geolocation';
-  import { onBeforeUnmount } from 'vue';
   import { useQuasar } from 'quasar';
-  import { RecorridoModel } from 'src/models/Recorrido.model';
   import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
   import { CoordenadasModel } from 'src/models/Recorrido.model';
   import { ParadaModel } from 'src/models/Parada.model';
   import DialogLoading from 'src/components/General/DialogLoading.vue'
   import SkeletonParadas from 'src/modules/Recorrido/components/Parada/SkeletonParadas.vue'
-  import ModalRecorridoMapa from 'src/modules/Recorrido/components/ModalRecorridoMapa.vue'
   import { geoposicionar, formatearGeposiciones, formatearGoogleAddress } from 'src/utils/Google';
   import { useUsuarioStore } from 'src/stores/Usuario'
+  import { useRecorridoStore } from 'src/stores/Recorrido'
   import { FormateadorGoogleAddressModel } from 'src/models/Google.model';
-  import { PARADA_ESTADOS } from 'src/utils/DataProviders';
-  import { reactive } from 'vue';
+  import { PARADA_ESTADOS, RECORRIDO_ESTADOS } from 'src/utils/DataProviders';
+  import { storeToRefs } from 'pinia';
   
   const router = useRouter();
   const route = useRoute();
 
   const $q = useQuasar();
   const breakpoint = computed(() => $q.screen)
-
   const usuarioStore = useUsuarioStore()
   const {
       usuario
@@ -208,8 +245,9 @@
     formatted_address?: string ;
     data: CoordenadasModel;
   }
-  
-  const recorrido = ref<RecorridoModel>()
+  const recorridoStore = useRecorridoStore()
+  const { recorrido, paradas } = storeToRefs(recorridoStore)
+
   const origen = ref<Way>({
     formatted_address: '',
     data: {},
@@ -220,21 +258,11 @@
     data: {},
   });
 
-  const origenActual = reactive({
-    lat: 0,
-    lng: 0
-  })
-
-  const polyline = ref<any>(null)
-
-  const paradas = ref<ParadaModel[]>([])
-  
   const recorridoId = computed(() => route.params.recorrido_id)
 
   onMounted(() => getRecorrido());
   
   const cargandoRecorrido = ref<boolean>(false)
-
   const getRecorrido = async () => {
     const {
       recorrido_id
@@ -245,7 +273,8 @@
     try {
       cargandoRecorrido.value = true;
       const response = await recorridoRepository.get(Number(recorrido_id), params);
-      if (response && response.length > 0) {
+
+      if (response && Array.isArray(response) && response.length > 0) {
         const [recoridoServer] = response;
         recorrido.value = recoridoServer
 
@@ -287,14 +316,12 @@
         }
 
         if(origen_actual_lat && origen_actual_lng){
-          origenActual.lat = origen_actual_lat
-          origenActual.lng = origen_actual_lng
+          recorrido.value.origen_actual_lat = origen_actual_lat
+          recorrido.value.origen_actual_lng = origen_actual_lng
         }
 
-        console.log(polylineServer)
         if(polylineServer){
-          polyline.value = polylineServer
-          console.log(polyline.value)
+          recorrido.value.polyline = polylineServer
         }
         
       } else {
@@ -311,8 +338,6 @@
   const goToSeleccionarParada = (event: any) => {
     router.push({ name: 'buscar-direccion' });
   };
-  
-  const intermediates = ref<any[]>([]);
   
   const direccionLegible = ( data: FormateadorGoogleAddressModel, direccionAuxiliar : string) : string => {
 
@@ -426,21 +451,6 @@
   const tieneParadas = computed(
     () => paradas.value && paradas.value?.length > 0
   );
-
-  const verRecorridoGoogleMaps = () => {
-    const waypoints = intermediates.value.map(
-      (waypoint) => `${waypoint.location.lat},${waypoint.location.lng}`
-    );
- 
-    const originPath = `${origen.value.data.lat},${origen.value.data.lng}`;
-    const destinationPath = `${destino.value.data.lat},${destino.value.data.lng}`;
-
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${originPath}&destination=${destinationPath}&travelmode=driving&waypoints=${waypoints.join(
-      '|'
-    )}`;
-  
-    window.open(url);
-  };
   
   const goToSeleccionarOrigen = () => {
     router.push({ name: 'buscar-direccion', query: { origin: 1 } });
@@ -613,8 +623,6 @@
         try {
           eliminandoParada.value = true
           const response = await paradaRepository.delete(parada.id)
-          console.log(response)
-          console.log(paradas.value)
           paradas.value = paradas.value.filter((p) => p.id !== response.id)
         } catch (error) {
           
@@ -654,7 +662,9 @@
       try {
 
         const { latitude , longitude } = position.value.coords
-        if(latitude !== origenActual.lat && longitude !== origenActual.lng){
+        const { origen_actual_lat , origen_actual_lng } = recorrido.value
+
+        if(latitude !== origen_actual_lat && longitude !== origen_actual_lng){
 
           const geo = await geoposicionar(latitude, longitude)
           geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
@@ -666,6 +676,10 @@
             origen_actual_formateado: geoFormateado.formatted_address
           }, 
           Number(recorridoId.value));
+
+          recorrido.value.origen_actual_lat = latitude
+          recorrido.value.origen_actual_lng = longitude
+          recorrido.value.origen_actual_formateado = geoFormateado.formatted_address
         }
 
       } catch (error) {
@@ -684,16 +698,17 @@
         recorrido_id: Number(recorridoId.value),
         rider_id: usuario.id
       })
-      const { recorrido: recorridoServer, duracion, distancia } = response;
+      const { recorrido: recorridoServer, duracion, distancia, polyline } = response;
       if(recorridoServer){
         paradas.value = [...recorridoServer]
         if(recorrido.value){
           recorrido.value.optimizado = 1;
           if(duracion) recorrido.value.duracion = duracion;
           if(distancia) recorrido.value.distancia = distancia;
+          if(polyline) recorrido.value.polyline = polyline;
+          
         }
-        
-
+      
         $q.notify({
           type: 'positive',
           message: 'Recorrido optimizado',
@@ -709,8 +724,35 @@
 
   }
 
-  const abrirModalMapa = ref<boolean>(false)
+  const heightScrollPararadas = () => {
+    if(breakpoint.value.height < 800){
+      return '50vh'
+    } else {
+      return '55vh'
+    }
+  }
 
+  const recorridoFinalizado = computed(() => recorrido.value?.recorrido_estado_id === RECORRIDO_ESTADOS.FINALIZADO)
+  const actualizandoRecorridoEstado = ref<boolean>(false)
+  const abrirConfirmarEstadoRecorrido = ref<boolean>(false)
+    
+  const finalizarRecorrido = async () => {
+   try {
+    actualizandoRecorridoEstado.value = true;
+    const response = await recorridoRepository.updateEstado(
+      { recorrido_estado_id: RECORRIDO_ESTADOS.FINALIZADO },
+      recorrido.value.id
+    )
+    if(response && response.recorrido_estado_id){
+      recorrido.value.recorrido_estado_id = response.recorrido_estado_id
+    }
+   } catch (error) {
+    
+   } finally {
+    actualizandoRecorridoEstado.value = false;
+   }
+   
+  }
   </script>
   
   <style>

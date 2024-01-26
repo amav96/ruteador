@@ -9,6 +9,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { 
+        path: 'listado', 
+        name: 'recorrido-listado',
+        meta: { requiresAuth: true},
+        component: () => import('src/modules/Recorrido/pages/RecorridosPage.vue'), 
+      },
+      { 
         path: ':recorrido_id', 
         name: 'recorrido',
         component: () => import('src/modules/Recorrido/pages/RecorridoPage.vue'), 
@@ -34,7 +40,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('src/modules/Recorrido/pages/Parada/ModalGuardarItem.vue'), 
               },
             ]
-          }
+          },
+          {
+            path: 'mapa-paradas',
+            name: 'mapa-paradas',
+            component: () => import('src/modules/Recorrido/pages/ModalMapaRecorrido.vue'), 
+            
+          },
         ],
       },
       { 
@@ -52,6 +64,7 @@ const routes: RouteRecordRaw[] = [
     children:[ 
       {
         path: 'login',
+        name: 'login',
         component: () => import('src/modules/Autenticacion/pages/Login.vue'), 
       }
     ]

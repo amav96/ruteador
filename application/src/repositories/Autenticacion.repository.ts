@@ -33,5 +33,20 @@ export default class AutenticacionRepository {
             throw error
         }
     }
+    
+    async logout(): Promise<any> {
+        try {
+            const response =  await request({
+                url: API_BASE_URL +'/api/auth/logout',
+                method: 'POST',
+                auth: true
+              });
+              
+            return response.data;
+
+        } catch (error: any) {
+            throw error
+        }
+    }
 
 }

@@ -1,31 +1,17 @@
 import { ParadaModel } from 'src/models/Parada.model';
-import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel} from 'src/models/Recorrido.model';
+import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel, UpdateEstadoRequest, RecorridoPaginacionModel} from 'src/models/Recorrido.model';
 import request from 'src/utils/ApiResponseCapacitor.util';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class RecorridoRepository {
 
-  
-  async obtenerRecorrido(data: any): Promise<RecorridoModel | any> {
-    try {
-        return await request({
-            url: API_BASE_URL + '/api/armar-recorrido',
-            method: 'POST',
-            data,
-            auth: true
-          });
-    } catch (error) {
-        throw error
-    }
-  }
-
   async optimizar(data: OptimizarRecorridoRequestModel) 
   : Promise<{ 
     recorrido: ParadaModel[],
     duracion: string,
-    distancia: string
-  }> 
-  {
+    distancia: string,
+    polyline: string
+  }> {
     try {
       const response = await request({
           url: API_BASE_URL + '/api/recorridos/optimizar',
@@ -34,9 +20,9 @@ export default class RecorridoRepository {
           auth: true
         });
       return response.data;
-  } catch (error) {
-      throw error
-  }
+    } catch (error) {
+        throw error
+    }
   }
 
   async create(data : RecorridoFormModel): Promise<RecorridoResponseModel>{
@@ -56,13 +42,13 @@ export default class RecorridoRepository {
     
   }
 
-  async get(recorridoId : number | string, incluir: any): Promise<RecorridoModel[]> {
+  async get(recorridoId? : number | null , params?: any): Promise<RecorridoModel[] | RecorridoPaginacionModel> {
     try {
       const response = await request({
-        url: API_BASE_URL + `/api/recorridos/${recorridoId}`,
+        url: API_BASE_URL + `/api/recorridos${recorridoId ? `/${recorridoId}`:''}`,
         method: 'GET',
         auth: true,
-        params: incluir 
+        params: params 
       });
  
       return response.data;
@@ -71,6 +57,7 @@ export default class RecorridoRepository {
       throw error
     }
   }
+
 
   async updateOrigen(data : UpdateOrigenRequest, recorridoId : number){
     try {
@@ -149,5 +136,22 @@ export default class RecorridoRepository {
       throw error
     }
   }
+
+  async updateEstado(data : UpdateEstadoRequest ,recorridoId : number) {
+    try {
+      const response = await request({
+        url:  API_BASE_URL + `/api/recorridos/${recorridoId}/estado`,
+        method: 'PATCH',
+        data,
+        auth: true
+      });
+      
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+  }
+
 
 }

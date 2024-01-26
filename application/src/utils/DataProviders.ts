@@ -17,3 +17,10 @@ export const ITEMS_TIPOS = {
     ENTREGA: 1,
     RETIRO: 2
 }
+
+export const RECORRIDO_ESTADOS = {
+    PREPARADO: 1,
+    INICIADO: 2,
+    FINALIZADO: 3,
+    CANCELADO: 4
+}

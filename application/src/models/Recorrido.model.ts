@@ -4,7 +4,8 @@ export interface RecorridoModel {
     id: number;
     rider_id: number;
     creador_por: number;
-    estado_recorrido_id: number;
+    recorrido_estado_id: number;
+    recorrido_estado: RecorridoEstadoModel
     origen_lat: number | null;
     origen_lng: number | null;
     destino_lat: number | null;
@@ -25,6 +26,23 @@ export interface RecorridoModel {
     created_at: string;
     updated_at: string;
     paradas: any[]; // Ajusta el tipo según la estructura real de las paradas
+}
+
+export interface RecorridoEstadoModel {
+    id: number;
+    nombre: string;
+    codigo: string;
+    color: string;
+}
+
+export interface RecorridoPaginacionModel {
+    current_page: number;
+    data: RecorridoModel[];
+    per_page: number;
+    total: number;
+    last_page: number,
+    next_page_url: string
+    prev_page_url: string
 }
 
 export interface OptimizarRecorridoRequestModel {
@@ -71,4 +89,8 @@ export interface CoordenadasModel{
     lat?: number,
     lng?: number,
     auto?: boolean
+}
+
+export interface UpdateEstadoRequest {
+    recorrido_estado_id: number
 }

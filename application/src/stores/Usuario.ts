@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { Preferences } from '@capacitor/preferences';
 import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
-import { EmpresaModel } from 'src/models/Empresa.model';
 import { UsuarioModel } from 'src/models/Usuario.model';
 
 
@@ -65,6 +64,12 @@ export const useUsuarioStore = defineStore('usuario', {
           console.error("Empty token");
         }
       }
+    },
+    async logout(){
+      this.token = ''
+      // @ts-ignore
+      this.usuario = null
+      await Preferences.remove({ key: _TOKEN });
     }
   },
 })

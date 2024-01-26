@@ -29,24 +29,53 @@
     </q-header>
 
     <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Modulos
-        </q-item-label>
+        v-model="leftDrawerOpen"
+        show-if-above
+        :width="200"
+        :breakpoint="500"
+      >
+        <q-scroll-area class="fit">
+          <q-list padding class="menu-list">
+            
+            <q-item @click="router.push({name: 'recorrido-listado'})" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="route" />
+              </q-item-section>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+              <q-item-section>
+                Recorridos
+              </q-item-section>
+            </q-item>
+            <q-separator />
+
+            <q-item @click="router.push({name: 'crear-recorrido'})" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="map" />
+              </q-item-section>
+
+              <q-item-section>
+                Crear recorrido
+              </q-item-section>
+            </q-item>
+            <q-separator />
+
+            <q-item @click="cerrarSesion" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="logout" />
+              </q-item-section>
+
+              <q-item-section>
+                Salir
+              </q-item-section>
+            </q-item>
+            <q-separator />
+
+
+          </q-list>
+        </q-scroll-area>
     </q-drawer>
+
+    <dialog-loading :open="cerrandoSesion" text="Saliendo de  la aplicacion" />
 
     <q-page-container>
       <router-view />
@@ -56,59 +85,44 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
 import logo from 'src/assets/logo.jpg'
+import { useRoute, useRouter } from 'vue-router';
+import { useUsuarioStore } from 'src/stores/Usuario'
+import DialogLoading from 'src/components/General/DialogLoading.vue'
+import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
 
-const essentialLinks: EssentialLinkProps[] = [
-  // {
-  //   title: 'Docs',
-  //   caption: 'quasar.dev',
-  //   icon: 'school',
-  //   link: 'https://quasar.dev'
-  // },
-  // {
-  //   title: 'Github',
-  //   caption: 'github.com/quasarframework',
-  //   icon: 'code',
-  //   link: 'https://github.com/quasarframework'
-  // },
-  // {
-  //   title: 'Discord Chat Channel',
-  //   caption: 'chat.quasar.dev',
-  //   icon: 'chat',
-  //   link: 'https://chat.quasar.dev'
-  // },
-  // {
-  //   title: 'Forum',
-  //   caption: 'forum.quasar.dev',
-  //   icon: 'record_voice_over',
-  //   link: 'https://forum.quasar.dev'
-  // },
-  // {
-  //   title: 'Twitter',
-  //   caption: '@quasarframework',
-  //   icon: 'rss_feed',
-  //   link: 'https://twitter.quasar.dev'
-  // },
-  {
-    title: 'Recorridos',
-    // caption: '@QuasarFramework',
-    icon: 'public',
-    link: '/recorridos'
-  },
-  // {
-  //   title: 'Quasar Awesome',
-  //   caption: 'Community Quasar projects',
-  //   icon: 'favorite',
-  //   link: 'https://awesome.quasar.dev'
-  // }
-];
+const autenticacionRepository = new AutenticacionRepository();
+
+const router = useRouter();
+const route = useRoute();
 
 const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
+
+const usuarioStore = useUsuarioStore()
+
+const cerrandoSesion = ref<boolean>(false)
+const cerrarSesion = async () => {
+
+  if(cerrandoSesion.value) return
+
+  const { logout } = usuarioStore
+  try {
+    cerrandoSesion.value = true;
+    await autenticacionRepository.logout()
+    logout()
+    
+  } catch (error) {
+    
+  } finally{
+    cerrandoSesion.value = false;
+    router.push({name: 'login'})
+  }
+}
+
 </script>
 
 <style>

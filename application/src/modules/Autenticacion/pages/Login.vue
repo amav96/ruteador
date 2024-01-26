@@ -57,14 +57,6 @@
 
             <DialogLoading :open="formLoading" text="Autenticando..." />
         </div>
-        <div class="flex row items-center q-gutter-x-sm q-px-sm q-mb-sm">
-                            <div>
-                                <q-icon size="sm" name="photo_camera" />
-                            </div> 
-                            <div @click="takePicture" >
-                                <q-btn round size="sm" color="deep-purple-13" icon="add" />
-                            </div>
-                        </div>
     </q-page>
 </template>
 
@@ -79,24 +71,6 @@ import { LoginModel } from 'src/models/Autenticacion.model';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { useRouter } from 'vue-router';
-import { Camera, CameraResultType } from '@capacitor/camera';
-
-const takePicture = async () => {
-  const image = await Camera.getPhoto({
-    quality: 90,
-    allowEditing: true,
-    resultType: CameraResultType.Uri
-  });
-  alert(JSON.stringify(image))
-  // image.webPath will contain a path that can be set as an image src.
-  // You can access the original file using image.path, which can be
-  // passed to the Filesystem API to read the raw data of the image,
-  // if desired (or pass resultType: CameraResultType.Base64 to getPhoto)
-  var imageUrl = image.webPath;
-
-  // Can be set to the src of an image now
-//   imageElement.src = imageUrl;
-};
 
 const autenticacionRepository = new AutenticacionRepository();
 const usuarioStore = useUsuarioStore()

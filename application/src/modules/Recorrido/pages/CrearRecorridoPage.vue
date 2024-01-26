@@ -54,6 +54,8 @@ import { useUsuarioStore } from 'src/stores/Usuario'
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useRecorridoStore } from 'src/stores/Recorrido';
+import { storeToRefs } from 'pinia';
 
 const recorridoRepository = new RecorridoRepository();
 
@@ -63,6 +65,9 @@ const usuarioStore = useUsuarioStore()
 const {
     usuario
 } = usuarioStore
+
+const recorridoStore = useRecorridoStore()
+const { recorrido, paradas } = storeToRefs(recorridoStore)
 
 const inicio = ref<any>({
     dia: '',
@@ -81,10 +86,12 @@ const crearRecorrido = async () => {
                 rider_id : usuario.id,
                 inicio : inicio.value.dia + inicio.value.hora + ':00'
             });
-            const { recorrido } = response;
-            if(recorrido){
-                router.push({name: 'recorrido', params: { recorrido_id : recorrido.id}})
-            }
+          
+            // @ts-ignore
+            recorrido.value = null
+            paradas.value = []
+            router.push({name: 'recorrido', params: { recorrido_id : response.recorrido.id}})
+              
         } catch (error) {
             
         } finally {
