@@ -49,6 +49,7 @@ export interface ParadaModel {
     rider_id: number;
     updated_at: string;
     items: ItemModel[],
+    optimizado: number;
     comprobantes: ParadaComprobanteModel[]
 }
 

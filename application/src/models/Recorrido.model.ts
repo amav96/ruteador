@@ -11,14 +11,26 @@ export interface RecorridoModel {
     destino_lng: number | null;
     origen_formateado: string | null;
     destino_formateado: string | null;
+    origen_actual_lat: number | null;
+    origen_actual_lng: number | null;
+    origen_actual_formateado: string | null;
+    origen_auto: number;
     optimizado: number;
+    distancia: string | null;
+    duracion: string | null;
+    polyline: string | null;
     empresa_id: string | null;
     inicio: string;
     finalizado: string | null;
     created_at: string;
     updated_at: string;
     paradas: any[]; // Ajusta el tipo según la estructura real de las paradas
-  }
+}
+
+export interface OptimizarRecorridoRequestModel {
+    recorrido_id: number;
+    rider_id: number
+}
 
 export interface RecorridoFormModel {
     rider_id: number;
@@ -39,7 +51,14 @@ export interface RecorridoResponseModel {
 export interface UpdateOrigenRequest {
     origen_lat : number,
     origen_lng: number,
-    origen_formateado: string
+    origen_formateado: string,
+    origen_auto: number
+}
+
+export interface UpdateOrigenActualRequest {
+    origen_actual_lat : number,
+    origen_actual_lng: number,
+    origen_actual_formateado: string,
 }
 
 export interface UpdateDestinoRequest {

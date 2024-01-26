@@ -49,7 +49,7 @@
             <q-separator spaced style="margin:0px" />
             
             <!-- estado actual -->
-            <div v-if="estadoParadaMostrable" class="text-white q-pa-sm" :style="`background:${parada?.parada_estado.color}`">
+            <div v-if="estadoParadaMostrable" class="text-white q-pa-sm q-mb-sm" :style="`background:${parada?.parada_estado.color}`">
                 <span class="text-weight-medium" > {{ parada?.parada_estado.nombre }} </span>
             </div>
 
@@ -65,13 +65,22 @@
                 </div>
             </div>
 
+            <div v-if="tieneItems && parada && parada?.comprobantes.length > 0"
+            class="q-mx-sm text-subtitle1 text-weight-medium"
+            >
+                Comprobantes de parada
+            </div>
+
             <imagenes-comprobantes 
             v-if="parada"
             modelo="ParadaComprobante"
             :comprobantes="parada.comprobantes"
             :pathBucket="S3BUCKETLAGUAGUA"
+            :imagen-eliminable="!estadoParadaMostrable"
             @actualizar-comprobantes="parada.comprobantes = $event"
             />
+
+            <q-separator v-if="tieneItems && parada && parada?.comprobantes.length > 0" spaced />
 
             <!-- agregar comprobante a parada -->
             <div v-if="!trayendoParada && !tieneItems && paqueteEntregable" 
@@ -114,28 +123,35 @@
                                 <div class="q-mb-xs" v-if="item.cliente && item.cliente.numero_documento">
                                     <span class="text-weight-medium" >{{ item.cliente.tipo_documento?.nombre }} {{ item.cliente.numero_documento }}</span>
                                 </div>
-                                <div class="flex text-white q-mb-xs" >
+                                <div class="flex text-white " >
                                     <q-chip square  :style="`background:${item.item_estado.color};`" text-color="white" >
                                         {{ item.item_estado.nombre }} 
                                     </q-chip>
                                 </div>
         
                             </div>
-                            <div v-if="paqueteEntregable" class="flex justify-end" style="width:10%;">
+                            <div v-if="paqueteEntregable && !paqueteGestionado" class="flex justify-end" style="width:10%;">
                                 <q-icon @click="goToEditarItemCliente" name="edit" size="sm" />
                             </div>
                             <!-- TODO: mostrar numero tlf, documento -->
                         
                         </div>
 
+                        <div v-if="item.comprobantes.length > 0"
+                        class="q-mx-sm q-mb-sm text-subtitle1 text-weight-medium"
+                        >
+                            Comprobantes de paquete
+                        </div>
+
                         <imagenes-comprobantes 
                         modelo="ItemComprobante"
                         :comprobantes="item.comprobantes"
-                        :pathBucket="S3BUCKETLAGUAGUA"
+                        :path-bucket="S3BUCKETLAGUAGUA"
+                        :imagen-eliminable="!paqueteGestionado"
                         @actualizar-comprobantes="item.comprobantes = $event"
                         />
                            
-                        <div class="flex row items-center q-gutter-x-sm q-px-sm q-my-sm">
+                        <div v-if="!paqueteGestionado" class="flex row items-center q-gutter-x-sm q-px-sm q-my-sm">
                             <div>
                                 <q-icon size="sm" name="photo_camera" />
                             </div> 
@@ -260,8 +276,8 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
-import { ParadaModel, ParadaEstadoModel, ParadaComprobanteModel, UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
-import { ItemModel, ItemEstadoModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
+import { ParadaModel, ParadaEstadoModel,  UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
+import { ItemModel, ItemEstadoModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProviders'
@@ -500,6 +516,10 @@ const notificarParadaNegativa = async (paradaEstado: ParadaEstadoModel) => {
 
 const paqueteEntregable = computed(() => (items.value.length === 0 && parada.value?.parada_estado.codigo !== 'visitado') ||  
     items.value.some((i) => i.item_estado.codigo !== 'entregado' && i.item_estado.codigo !== 'retirado')
+)
+
+const paqueteGestionado = computed(() => items.value.length > 0  && 
+    items.value.some((i) => i.item_estado.codigo == 'entregado' || i.item_estado.codigo == 'retirado' || i.item_estado.tipo == 'negativo')
 )
 
 const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado' || parada.value?.parada_estado.tipo === 'negativo')

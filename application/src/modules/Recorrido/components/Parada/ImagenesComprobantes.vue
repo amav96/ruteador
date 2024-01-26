@@ -10,6 +10,7 @@
         @click="visibleRef = !visibleRef"
         >
           <q-icon  
+          v-if="imagenEliminable"
           class="absolute all-pointer-events" 
           size="25px" 
           name="cancel" 
@@ -47,14 +48,16 @@ const emit = defineEmits<{
 interface Props {
   comprobantes: ItemComprobanteModel[] | ParadaComprobanteModel[],
   pathBucket: string,
-  modelo: string
+  modelo: string,
+  imagenEliminable: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   comprobantes: () => [],
+  imagenEliminable: false
 });
 
-const { comprobantes, pathBucket, modelo } = toRefs(props)
+const { comprobantes, pathBucket, modelo, imagenEliminable } = toRefs(props)
 
 const itemRepository = new ItemRepository();
 const paradaRepository = new ParadaRepository();
