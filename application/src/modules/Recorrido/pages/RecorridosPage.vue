@@ -28,7 +28,7 @@
             >
               <q-item-section >
                 <div class="flex row no-wrap justify-between">
-                  <div  @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido.id}})"   class="flex column justify-center">
+                  <div  @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido.id}})"   class="flex column justify-center full-width">
                     <div class="flex column text-body1" style="max-width: 85%;">
                       <div  class="text-weight-bold" > Origen </div> 
                       <div  class="" > {{ recorrido.origen_formateado }} </div> 
