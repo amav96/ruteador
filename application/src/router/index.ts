@@ -50,7 +50,13 @@ export default route(function (/* { store, ssrContext } */) {
         next('/autenticacion/login')
       }
     } else {
-      next();
+      if(to.path === "/"){
+        next('recorridos/recorrido-listado');
+      } else {
+        next();
+      }
+      
+      
     }
    
   })

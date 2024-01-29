@@ -1,3 +1,4 @@
+import { ParadaModel } from "./Parada.model";
 
 
 export interface RecorridoModel {
@@ -25,7 +26,7 @@ export interface RecorridoModel {
     finalizado: string | null;
     created_at: string;
     updated_at: string;
-    paradas: any[]; // Ajusta el tipo según la estructura real de las paradas
+    paradas: ParadaModel[]; // Ajusta el tipo según la estructura real de las paradas
 }
 
 export interface RecorridoEstadoModel {

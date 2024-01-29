@@ -271,8 +271,12 @@
       incluir : ['paradas.paradaEstado']
     }
     try {
+      const recorridoId = Number(recorrido_id)
+      if(Number.isNaN(recorridoId)){
+        router.push({name: 'recorrido-listado'})
+      }
       cargandoRecorrido.value = true;
-      const response = await recorridoRepository.get(Number(recorrido_id), params);
+      const response = await recorridoRepository.get(recorridoId, params);
 
       if (response && Array.isArray(response) && response.length > 0) {
         const [recoridoServer] = response;
@@ -325,7 +329,7 @@
         }
         
       } else {
-        router.push({name: 'crear-recorrido'})
+        router.push({name: 'recorrido-listado'})
       }
       
     } catch (error) {

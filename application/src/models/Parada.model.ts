@@ -63,6 +63,7 @@ export interface ParadaComprobanteModel {
     id: number;
     parada_id: number;
     path: string;
+    base64Image?: string
     usuario_id: number;
     created_at: string;
     updated_at: string
