@@ -36,6 +36,7 @@ module.exports = configure(function (/* ctx */) {
       'main',
       'i18n',
       'axios',
+      'capacitor'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
