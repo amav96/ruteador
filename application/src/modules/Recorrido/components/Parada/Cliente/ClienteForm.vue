@@ -90,6 +90,10 @@ import { ClienteModel } from 'src/models/Cliente.model';
 import ClienteRepository from 'src/repositories/Cliente.repository'
 import SkeletonCliente from 'src/modules/Recorrido/components/Parada/Cliente/SkeletonCliente.vue'
 
+const emit = defineEmits<{
+  (e: 'formularioCargado', data: boolean ): void
+}>()
+
 const props = withDefaults(defineProps<{cliente_id?: number | string | null}>(), {
   cliente_id: null,
 });
@@ -125,6 +129,7 @@ const {
 } = useDataProvider()
 
 onMounted(async() => {
+    emit("formularioCargado", true)
     await getTipoDocumentos()
     await getCodigosArea()
     if(cliente_id.value){
@@ -137,6 +142,7 @@ const getCliente = async () => {
     if(cliente_id.value){
        try {
         trayendoCliente.value = true
+        emit("formularioCargado", true)
         const response = await clienteRepository.get(cliente_id.value, { incluir : ['clientesNumeros']})
         const [cliente] = response;
         if(cliente){
@@ -159,9 +165,11 @@ const getCliente = async () => {
         
        } finally {
         trayendoCliente.value = false
+        emit("formularioCargado", false)
        }
     } else {
         trayendoCliente.value = false
+        emit("formularioCargado", false)
     }
 }
 

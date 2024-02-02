@@ -1,6 +1,6 @@
 <template>
-        <skeleton-item :mostrar="trayendoItem" />
-        <template v-if="!trayendoItem">
+    <skeleton-item :mostrar="trayendoItem" />
+    <template v-if="!trayendoItem">
 
         <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
             <q-input 
@@ -92,6 +92,10 @@ import { toRefs } from 'vue';
 import ItemRepository from 'src/repositories/Item.repository'
 import SkeletonItem from 'src/modules/Recorrido/components/Parada/Item/SkeletonItem.vue'
 
+const emit = defineEmits<{
+  (e: 'formularioCargado', data: boolean ): void
+}>()
+
 const itemRepository = new ItemRepository()
 
 const props = withDefaults(defineProps<{item_id?: number | string | null}>(), {
@@ -176,6 +180,7 @@ const {
 } = useDataProvider()
 
 onMounted(async() => {
+    emit("formularioCargado", true)
     await getItemsTipos()
     await getProveedoresItems()
     await getItemsEstados()
@@ -190,6 +195,7 @@ const getItem = async () => {
     if(item_id.value){
         try {
             trayendoItem.value = true;
+            emit("formularioCargado", true)
             const response = await itemRepository.get(item_id.value);
             if(response.length > 0){
                 const [ item ] = response;
@@ -204,9 +210,11 @@ const getItem = async () => {
             
         } finally {
             trayendoItem.value = false;
+            emit("formularioCargado", false)
         }
     } else {
         trayendoItem.value = false;
+        emit("formularioCargado", false)
     }
 }
 

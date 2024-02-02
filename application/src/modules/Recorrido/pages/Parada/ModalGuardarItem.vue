@@ -44,6 +44,7 @@
         <div class="full-width justify-center items-center flex column" v-show="mostrarInformacionPaquete">
             <form-item 
             :item_id="route.params.item_id as string ?? null"
+            @formulario-cargado="cargandoFomularios = $event"
             ref="formItemRef"
             /> 
         </div>
@@ -66,6 +67,7 @@
         <div class="full-width justify-center items-center flex column" v-show="mostrarInformacionContacto">
             <cliente-form 
             :cliente_id="route.params.cliente_id as string ?? null"
+            @formulario-cargado="cargandoFomularios = $event"
             ref="formContactoRef"
             /> 
         </div>
@@ -79,7 +81,7 @@
             type="buttom"
             class="full-width"
             @click="manejarData"
-            :disabled="guardandoCliente || guardandoItem"
+            :disabled="guardandoCliente || guardandoItem || cargandoFomularios"
             />
         </div>
             
@@ -134,6 +136,7 @@ const clientesNumerosForm = ref<any>(null)
 const guardandoCliente = ref<boolean>(false)
 const guardandoItem = ref<boolean>(false)
 
+const cargandoFomularios = ref<boolean>(false)
 const manejarData = async () => {
 
     const {
