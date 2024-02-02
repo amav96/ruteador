@@ -1,7 +1,7 @@
 <template>
-    <q-page class="bg-grey-2 q-px-md">
+    <q-page class="flex column no-wrap q-px-md full-height">
 
-        <div class="rounded-borders bg-white q-mt-md">
+        <div class="rounded-borders bg-white">
           <q-skeleton v-if="cargandoRecorrido" height="90px" square animation="fade">
           </q-skeleton>
           <template v-else>
@@ -120,7 +120,7 @@
           <div class="text-weight-medium" > {{ recorrido.duracion }}</div>
         </div>
         <!-- lista de paradas -->
-        <q-scroll-area v-if="!cargandoRecorrido && tieneParadas"   :style="`height:${heightScrollPararadas()};`" >
+        <q-scroll-area v-if="!cargandoRecorrido && tieneParadas" style="flex: 1;"  >
           <div 
           v-for="(parada, index) in paradas" 
           :key="index"
@@ -465,7 +465,8 @@
   };
   
   const origenSeleccionado = async (value : GooglePlacesAutocompleteResponseModel | AutoGpsModel) => {
-    let origen_formateado : string = '' 
+    let origen_formateado : string = ''
+   
     if ('formatted_address' in value) {
       const {formatted_address, geometry } = value;
       origen.value.formatted_address = formatted_address;
@@ -482,6 +483,7 @@
         const geo = await geoposicionar(latitude, longitude)
         geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
         const geoFormateado = formatearGeposiciones(geo);
+        
         origen.value.formatted_address = 'Tu ubicación'
         origen_formateado = geoFormateado.formatted_address
         origen.value.data = {
@@ -507,6 +509,8 @@
       });
       return
     }
+
+    
   
     try {
       
@@ -519,14 +523,21 @@
       }, 
       Number(recorridoId.value));
 
+      recorrido.value.origen_lat = origen.value.data.lat
+      recorrido.value.origen_lng = origen.value.data.lng
+      recorrido.value.origen_formateado = origen_formateado
+      recorrido.value.origen_actual_lat = origen.value.data.lat
+      recorrido.value.origen_actual_lng = origen.value.data.lng
+      recorrido.value.origen_actual_formateado = origen_formateado
 
       
     } catch (error) {
 
-      $q.notify({
-          type: 'warning',
-          message: 'No se actualizo correctamente el origen',
-      });
+      // $q.notify({
+      //     type: 'warning',
+      //     message: JSON.stringify(error),
+      //     timeout: 8000
+      // });
     }
 
   };
@@ -549,6 +560,10 @@
         }, 
         Number(recorridoId.value));
 
+        recorrido.value.destino_lat = destino.value.data.lat ?? 0
+        recorrido.value.destino_lng = destino.value.data.lng ?? 0
+        recorrido.value.destino_formateado = destino.value.formatted_address ?? ''
+
       } catch (error) {
         $q.notify({
             type: 'warning',
@@ -562,6 +577,7 @@
   
   onMounted(async () => {
     geoId = Geolocation.watchPosition({}, (newPosition, err) => {
+     
       position.value = newPosition;
     });
   });

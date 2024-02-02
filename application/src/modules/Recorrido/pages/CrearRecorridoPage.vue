@@ -1,5 +1,5 @@
 <template>
-    <q-page class="q-px-md">
+    <q-page class="q-px-md full-height">
         <div class="flex column justify-center items-center q-my-lg">
             <q-img
             class="q-my-md"

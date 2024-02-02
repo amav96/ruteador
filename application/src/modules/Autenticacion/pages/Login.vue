@@ -1,9 +1,9 @@
 <template>
-    <q-page>
-        <div class="q-pa-md login-container">
+    <q-page class="full-height">
+        <div class="q-pa-md">
             <q-form 
             @submit="onSubmit"
-            class="flex column justify-between q-px-md full-height"
+            class="flex column q-px-md "
             >
                 <div class="flex column flex-center full-width">
                     <q-img
@@ -43,8 +43,9 @@
                     </div>
                 </div>
 
-                <div class="flex justify-center q-my-sm">
+                <div class="flex justify-center q-my-lg ">
                     <q-btn
+                    class="full-width"
                     unelevated 
                     rounded 
                     color="deep-purple-6"
@@ -123,8 +124,5 @@ const onSubmit = async () => {
 
 <style lang="scss" scoped>
 
-.login-container{
-    height: 95vh;
-}
 
 </style>

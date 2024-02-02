@@ -1,6 +1,6 @@
 <template>
-    <q-layout >
-        <q-page-container>
+    <q-layout class="AppRoot-fullPage" >
+        <q-page-container class="AppMain__layer__PageAndTopBar">
             <router-view />
         </q-page-container>
     </q-layout>
@@ -8,6 +8,7 @@
   
   <script>
   import { ref } from 'vue'
+  
   
   export default {
     setup () {
@@ -17,3 +18,4 @@
     }
   }
   </script>
+

@@ -11,3 +11,25 @@
 pwa-camera-modal-instance, pwa-action-sheet{
     z-index: 99999;
 }
+
+
+.AppRoot-fullPage {
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    overflow-x: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+  
+.AppMain__layer__PageAndTopBar {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 0px !important;
+}
+
+.remove-min-height{
+    min-height: auto !important;
+}

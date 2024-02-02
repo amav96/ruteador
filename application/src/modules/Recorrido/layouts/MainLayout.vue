@@ -1,6 +1,6 @@
 <template>
-  <q-layout  view="lHh Lpr lFf" class="bg-grey-2 ">
-    <q-header >
+  <q-layout view="hHh Lpr lff" class="AppRoot-fullPage bg-grey-2">
+    <q-header style="position: relative !important;" >
       <q-toolbar class="bg-grey-2 flex row justify-between no-border">
         <q-btn
           flat
@@ -77,7 +77,7 @@
 
     <dialog-loading :open="cerrandoSesion" text="Saliendo de  la aplicacion" />
 
-    <q-page-container>
+    <q-page-container class="AppMain__layer__PageAndTopBar">
       <router-view />
     </q-page-container>
   </q-layout>

@@ -6,13 +6,13 @@ const routes: RouteRecordRaw[] = [
     path: '/recorridos',
     redirect: '/recorridos/crear-recorrido',
     meta: { requiresAuth: true},
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('src/modules/Recorrido/layouts/MainLayout.vue'),
     children: [
       { 
         path: 'listado', 
         name: 'recorrido-listado',
         meta: { requiresAuth: true},
-        component: () => import('src/modules/Recorrido/pages/RecorridosPage.vue'), 
+        component: () => import('src/modules/Recorrido/pages/ListadoRecorridosPage.vue'), 
       },
       { 
         path: ':recorrido_id', 

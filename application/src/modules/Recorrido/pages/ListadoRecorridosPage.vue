@@ -91,7 +91,7 @@
           <recorrido-pdf
           v-if="recorridoActual"
           :recorrido="recorridoActual"
-          @hide="abrirModalPDF = false"
+          @hide="closeRecorridoPdf"
           />
         </q-dialog>
         <dialog-loading :open="cargandoImagenes" text="Genenerando informe..." />
@@ -146,7 +146,7 @@ const getRecorridos = async () => {
     try {
         recorridos.value = []
         const params = {
-            incluir : ['paradas.paradaEstado', 'paradas.comprobantes', 'recorridoEstado'].join(','),
+            incluir : ['paradas.paradaEstado', 'paradas.comprobantes','paradas.items.comprobantes', 'recorridoEstado'].join(','),
             rider_id : usuario.id,
             page: pagination.page
         }
@@ -160,7 +160,7 @@ const getRecorridos = async () => {
             pagination.last_page = last_page
             pagination.next_page_url = next_page_url
             pagination.prev_page_url = prev_page_url
-            console.log(recorridosServer)
+            
         } 
     } catch (error) {
         
@@ -180,7 +180,7 @@ const descargarInforme = async (recorrido: RecorridoModel) => {
   let convertirImagenes = await convertirRecorridoParadasComprobantesABase64(recorrido)
   recorridoActual.value = convertirImagenes;
   abrirModalPDF.value = !abrirModalPDF.value
-  cargandoImagenes.value = false;
+  
 }
 
 const abrirModalPDF = ref<boolean>(false)
@@ -203,10 +203,32 @@ const convertirParadaComprobantesABase64 = async (parada: ParadaModel) => {
 const convertirRecorridoParadasComprobantesABase64 = async (recorrido: RecorridoModel) => {
   const paradasBase64 = await Promise.all(
     recorrido.paradas.map(async (parada) => {
-      return convertirParadaComprobantesABase64(parada);
+      const paradaConComprobantes = await convertirParadaComprobantesABase64(parada);
+      if (paradaConComprobantes.items && paradaConComprobantes.items.length > 0) {
+        const itemsConComprobantes = await Promise.all(
+          paradaConComprobantes.items.map(async (item) => {
+            const itemConComprobantes = await convertirComprobantesDeItemABase64(item);
+            return itemConComprobantes;
+          })
+        );
+        paradaConComprobantes.items = itemsConComprobantes;
+      }
+      return paradaConComprobantes;
     })
   );
   return { ...recorrido, paradas: paradasBase64 };
+};
+
+const convertirComprobantesDeItemABase64 = async (item: any) => {
+  if (item.comprobantes && item.comprobantes.length > 0) {
+    const comprobantesBase64 = await Promise.all(
+      item.comprobantes.map(async (comprobante: any) => {
+        return await convertirComprobanteABase64(comprobante);
+      })
+    );
+    return { ...item, comprobantes: comprobantesBase64 };
+  }
+  return item;
 };
 
 const getBase64Image = async (url: string): Promise<string> => {
@@ -248,6 +270,12 @@ const makeid = () => {
 
   return text;
 };
+
+const closeRecorridoPdf = () => {
+
+  abrirModalPDF.value = false
+  cargandoImagenes.value = false;
+}
 
 </script>
 

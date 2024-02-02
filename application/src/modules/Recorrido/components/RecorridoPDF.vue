@@ -69,6 +69,23 @@
                         </div>
 
                         <div 
+                        v-if="parada.items.length > 0 && parada.items.some((item) => item.comprobantes?.length > 0 )" 
+                        class="flex row items-center">
+                            <template
+                            v-for="(item, i) in parada.items"
+                            :key="i"
+                            >
+                                <img
+                                v-for="(comprobante, index) in item.comprobantes"
+                                :key="index"
+                                :src="`${comprobante.base64Image}`"
+                                style="height: 400px; max-width: 400px"
+                                />
+                            </template>
+                           
+                        </div>
+
+                        <div 
                         v-if="parada.comprobantes.length > 0" 
                         class="flex row items-center">
                             <img
@@ -115,7 +132,6 @@ onMounted(() => {
     }, 100);
 })
 
-
 const descargarInforme = async () => {
     var element = document.getElementById('element-to-print');
     
@@ -125,6 +141,11 @@ const descargarInforme = async () => {
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        onAfterDownload: function () {
+            // Esta función se ejecutará después de que el PDF se descargue
+            console.log("PDF descargado");
+            // Puedes realizar otras acciones aquí si es necesario
+        },
         pagebreak: {
             mode: ['avoid-all', 'css', 'legacy']
         },

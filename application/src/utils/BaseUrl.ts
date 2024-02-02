@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'http://50.16.53.15'
+export const API_BASE_URL = 'https://api.dimipropartners.com'

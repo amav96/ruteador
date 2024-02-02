@@ -74,7 +74,7 @@ import { toRefs, computed } from 'vue';
     // });
 
     const options = {
-      componentRestrictions: { country: 'ar' },
+      // componentRestrictions: { country: 'ar' },
     };
 
     // @ts-ignore

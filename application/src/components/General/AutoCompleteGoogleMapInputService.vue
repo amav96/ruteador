@@ -103,7 +103,7 @@ const initService = (): void => {
 
       const request = {
         input: inputValue,
-        componentRestrictions: { country: 'ar' },
+        // componentRestrictions: { country: 'ar' },
       };
 
       service.getPlacePredictions(request, displaySuggestions);

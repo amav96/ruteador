@@ -6,7 +6,7 @@
         transition-show="slide-up"
         transition-hide="slide-down"
         >
-            <q-card :class="['text-black flex column justify-between items-center q-pa-sm', bgColor]" style="height:100vh;">
+            <q-card :class="['text-black flex column justify-between items-center q-pa-sm', bgColor]" >
                 <div class="flex column justify-center items-center q-my-lg">
                     <div>
                     <q-icon 
