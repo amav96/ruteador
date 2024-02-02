@@ -134,6 +134,9 @@ onMounted(async() => {
     await getCodigosArea()
     if(cliente_id.value){
         await getCliente()
+    } else {
+        trayendoCliente.value = false
+        emit("formularioCargado", false)
     }
 })
 
@@ -167,10 +170,8 @@ const getCliente = async () => {
         trayendoCliente.value = false
         emit("formularioCargado", false)
        }
-    } else {
-        trayendoCliente.value = false
-        emit("formularioCargado", false)
     }
+
 }
 
 defineExpose({
