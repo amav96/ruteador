@@ -1,79 +1,83 @@
 <template>
-    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-        <q-input 
-        v-model="itemForm.track_id" 
-        color="deep-purple-6" 
-        label="Numero envio"
-        autocomplete="off"
-        >
-            <template v-slot:append>
-                <q-icon @click="startScan" name="qr_code_scanner" />
-            </template>
-        </q-input>
-    </div>
-    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-        <q-select 
-        label="Agencia paqueteria"
-        color="deep-purple-6"
-        v-model="itemForm.empresa_id" 
-        :options="usuarioStore.usuario.empresas" 
-        option-label="nombre"
-        option-value="id"
-        emit-value
-        map-options
-        :rules="[
-            val => !!val || '* Empresa obligatoria',
-        ]"
-        />
-    </div>
+        <skeleton-item :mostrar="trayendoItem" />
+        <template v-if="!trayendoItem">
 
-    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-        <q-select 
-        label="Proovedor"
-        color="deep-purple-6"
-        v-model="itemForm.item_proveedor_id" 
-        :options="proveedoresItems" 
-        option-label="nombre"
-        option-value="id"
-        emit-value
-        map-options
-        :rules="[
-            val => !!val || '* Proveedor obligatorio',
-        ]"
-        />
-    </div>
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-input 
+            v-model="itemForm.track_id" 
+            color="deep-purple-6" 
+            label="Numero envio"
+            autocomplete="off"
+            >
+                <template v-slot:append>
+                    <q-icon @click="startScan" name="qr_code_scanner" />
+                </template>
+            </q-input>
+        </div>
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-select 
+            label="Agencia paqueteria"
+            color="deep-purple-6"
+            v-model="itemForm.empresa_id" 
+            :options="usuarioStore.usuario.empresas" 
+            option-label="nombre"
+            option-value="id"
+            emit-value
+            map-options
+            :rules="[
+                val => !!val || '* Empresa obligatoria',
+            ]"
+            />
+        </div>
 
-    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-        <q-select 
-        label="Tipo paquete"
-        color="deep-purple-6"
-        v-model="itemForm.item_tipo_id" 
-        :options="itemsTipos" 
-        option-label="nombre"
-        option-value="id"
-        emit-value
-        map-options
-        :rules="[
-            val => !!val || '* Tipo de paquete obligatorio',
-        ]"
-        />
-    </div>
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-select 
+            label="Proovedor"
+            color="deep-purple-6"
+            v-model="itemForm.item_proveedor_id" 
+            :options="proveedoresItems" 
+            option-label="nombre"
+            option-value="id"
+            emit-value
+            map-options
+            :rules="[
+                val => !!val || '* Proveedor obligatorio',
+            ]"
+            />
+        </div>
 
-    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-        <q-select 
-        label="Estado"
-        color="deep-purple-6"
-        v-model="itemForm.item_estado_id" 
-        :options="itemEstadosFiltrados" 
-        option-label="nombre"
-        option-value="id"
-        emit-value
-        map-options
-        :rules="[
-            val => !!val || '* Tipo de paquete obligatorio',
-        ]"
-        />
-    </div>
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-select 
+            label="Tipo paquete"
+            color="deep-purple-6"
+            v-model="itemForm.item_tipo_id" 
+            :options="itemsTipos" 
+            option-label="nombre"
+            option-value="id"
+            emit-value
+            map-options
+            :rules="[
+                val => !!val || '* Tipo de paquete obligatorio',
+            ]"
+            />
+        </div>
+
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+            <q-select 
+            label="Estado"
+            color="deep-purple-6"
+            v-model="itemForm.item_estado_id" 
+            :options="itemEstadosFiltrados" 
+            option-label="nombre"
+            option-value="id"
+            emit-value
+            map-options
+            :rules="[
+                val => !!val || '* Tipo de paquete obligatorio',
+            ]"
+            />
+        </div>
+    </template>
 </template>
 
 <script setup lang="ts">
@@ -86,6 +90,7 @@ import { ItemEstadoModel, ItemRequestModel } from 'src/models/Item.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { toRefs } from 'vue';
 import ItemRepository from 'src/repositories/Item.repository'
+import SkeletonItem from 'src/modules/Recorrido/components/Parada/Item/SkeletonItem.vue'
 
 const itemRepository = new ItemRepository()
 
@@ -180,19 +185,28 @@ onMounted(async() => {
 
 const itemEstadosFiltrados = computed(() => itemsEstados.value.filter((i: ItemEstadoModel) => i.tipo === 'positivo'))
 
+const trayendoItem = ref<boolean>(true)
 const getItem = async () => {
     if(item_id.value){
-        const response = await itemRepository.get(item_id.value);
-        if(response.length > 0){
-            const [ item ] = response;
-            itemForm.value.track_id = item.track_id
-            itemForm.value.empresa_id = item.empresa_id
-            itemForm.value.item_tipo_id = item.item_tipo_id
-            itemForm.value.item_proveedor_id = item.item_proveedor_id
-            itemForm.value.destinatario = item.destinatario
-            itemForm.value.item_estado_id = item.item_estado_id
+        try {
+            trayendoItem.value = true;
+            const response = await itemRepository.get(item_id.value);
+            if(response.length > 0){
+                const [ item ] = response;
+                itemForm.value.track_id = item.track_id
+                itemForm.value.empresa_id = item.empresa_id
+                itemForm.value.item_tipo_id = item.item_tipo_id
+                itemForm.value.item_proveedor_id = item.item_proveedor_id
+                itemForm.value.destinatario = item.destinatario
+                itemForm.value.item_estado_id = item.item_estado_id
+            }
+        } catch (error) {
+            
+        } finally {
+            trayendoItem.value = false;
         }
-        
+    } else {
+        trayendoItem.value = false;
     }
 }
 

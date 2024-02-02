@@ -6,7 +6,7 @@
         >
         <q-card>
             <div 
-            @click="router.push({name: 'recorrido', params:{ recorrido_id: route.params.recorrido_id}})" 
+            @click="back" 
             class="full-width q-mb-lg q-pa-sm">
                 <q-icon 
                 name="arrow_back" 
@@ -44,7 +44,10 @@ watch(paradas, (value) => {
 })
 
 onMounted(async () => {
+    let domMap = document.getElementById('map')
+    console.log(domMap)
     await nextTick(); // Asegura que el DOM se ha actualizado
+   
     if(recorrido.value){
         iniciarMapa();
         asignarEventos()
@@ -59,14 +62,7 @@ const asignarEventos = () => {
  
 }
 
-const paradasVisitables = computed<ParadaModel[]>(() => {
-    if (paradas?.value) {
-    return paradas.value.filter((p) => p.parada_estado.codigo !== 'visitado' && p.parada_estado.tipo !== 'negativo');
-    } else {
-      // Handle the case where recorrido or its properties are null or undefined
-      return [];
-    }
-  })
+const paradasVisitables = computed<ParadaModel[]>(() => paradas?.value)
 
 const openModal = ref<boolean>(true)
 
@@ -91,7 +87,7 @@ const iniciarMapa = () => {
     googleMaps.markerMain = new google.maps.Marker({
         position: myPosition,
         map: googleMaps.map,
-        icon: `https://api.devuelvoya.com/images/icons/green-marker.png`,
+        icon: `https://api.devuelvoya.com/images/icons/yellow-marker.png`,
     });
 
     crearMarcadorPosiciones()
@@ -129,7 +125,7 @@ const crearMarcadorPosiciones = () => {
 }
 
 const marcarFinalRecorrido = () => {
-    let iconCustom = `https://api.devuelvoya.com/images/icons/red-marker.png`;
+    let iconCustom = `https://api.devuelvoya.com/images/icons/yellow-marker.png`;
     const { destino_lat, destino_lng } = recorrido.value
     const coord = new google.maps.LatLng(destino_lat, destino_lng);
 
@@ -144,13 +140,14 @@ const marcarFinalRecorrido = () => {
 const crearMarcador = (coord : any, point : ParadaModel) => {
     
     const html = popUp(point)
-
-    let iconCustom = `https://api.devuelvoya.com/images/icons/blue-marker.png`;
+   
+    let icon = point.parada_estado.codigo === 'visitado' ? 'green-marker.png' : point.parada_estado.tipo === 'negativo' ? 'red-marker.png' : 'blue-marker.png'
+    let urlIcon = `https://api.devuelvoya.com/images/icons/${icon}`;
 
     const marker = new google.maps.Marker({
         position: coord,
         map: googleMaps.map,
-        icon: iconCustom,
+        icon: urlIcon,
     });
 
     google.maps.event.addListener(marker, 'click', () => {
@@ -197,6 +194,9 @@ const navegar = (event: any) => {
     window.open(url);
 }
 
+const back = () => {
+    router.push({name: 'recorrido', params:{ recorrido_id: route.params.recorrido_id}})
+}
 
 </script>
 

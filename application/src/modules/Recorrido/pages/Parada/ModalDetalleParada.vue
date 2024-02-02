@@ -6,7 +6,7 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-      <q-card class="text-black flex column no-wrap justify-between " style="height:100vh;">
+      <q-card class="text-black flex column no-wrap justify-between"  >
         <div class>
             <div class="full-width q-pa-sm">
                 <q-icon 
@@ -169,7 +169,7 @@
         <dialog-loading :open="cargandoComprobante" text="Cargando comprobante" />
 
         <!-- acciones  -->
-        <div v-if="paqueteEntregable" class="flex column q-pa-sm">
+        <div v-if="!cargandoActualizarEstado && paqueteEntregable" class="flex column q-pa-sm">
             <q-btn 
             class="q-my-sm q-py-sm" 
             label="Entregar" 

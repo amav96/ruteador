@@ -197,8 +197,9 @@ const crearCliente = async () : Promise<ClienteModel | null> => {
     let response = null
     guardandoCliente.value = true;
     try {
+        
         // @ts-ignore
-        clienteForm.value.clientes_numeros = clientesNumerosForm.value.filter((n: any) => n.numero !== undefined && n.numero !== '')
+        clienteForm.value.clientes_numeros = clientesNumerosForm.value.filter((n: any) => n.numero !== undefined && n.numero !== null&&  n.numero !== '')
         // @ts-ignore
         response = await clienteRepository.create(clienteForm.value)
 
