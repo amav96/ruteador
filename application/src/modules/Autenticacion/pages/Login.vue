@@ -65,9 +65,9 @@
 
                 
 
-                <GoogleLogin 
+                <!-- <GoogleLogin 
                 popup-type="TOKEN"
-                :callback="callback">
+                :callback="callback"> -->
                     <div class="flex justify-center">
                         <q-btn
                         :class="[breakpoint.xs ? 'full-width' : '', 'text-black']"
@@ -75,13 +75,13 @@
                         color="white"
                         label="Ingresar con Google" 
                         type="button"
-                       
+                        @click="callback"
                         :disabled="formLoading"
                         >
                             <img style="width: 25px;margin-left: 10px;" :src="google" />
                         </q-btn>
                     </div>
-                </GoogleLogin>
+                <!-- </GoogleLogin> -->
             </q-form>
 
             <DialogLoading :open="formLoading" text="Autenticando..." />
@@ -92,7 +92,7 @@
 <script setup lang="ts">
 
 import logo from 'src/assets/logo.jpg'
-import { ref, computed, reactive } from "vue"
+import { ref, computed, reactive, onMounted } from "vue"
 import { useQuasar } from 'quasar'
 import { isValidEmail } from 'src/utils/Validations'
 import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
@@ -100,9 +100,19 @@ import { LoginModel } from 'src/models/Autenticacion.model';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { useRouter } from 'vue-router';
-import { decodeCredential } from 'vue3-google-login'
 import google from 'src/assets/google.png'
 import { UsuarioModel } from 'src/models/Usuario.model';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+
+const GOOGLE_CLIENT_ID : string = process.env.GOOGLE_CLIENT_ID as string
+onMounted(() => {
+  GoogleAuth.initialize({
+    clientId: GOOGLE_CLIENT_ID,
+    scopes: ['profile', 'email'],
+    grantOfflineAccess: true,
+    });
+});
+
 
 const autenticacionRepository = new AutenticacionRepository();
 const usuarioStore = useUsuarioStore()
@@ -155,16 +165,26 @@ const completarLogin = (usuario: UsuarioModel, token: string) => {
     router.push({name: 'crear-recorrido'})
 }
 
-const callback = async (googleData: any) => {
-    formLoading.value = true
+const callback = async () => {
+    
     try {
-
-        const { access_token } = googleData;
-        const response = await autenticacionRepository.googleAuthLogin({token: access_token})
-
-        const { usuario , token } = response;
-        if(usuario && token){
-            completarLogin(usuario, token)
+        const googleData = await GoogleAuth.signIn();
+        formLoading.value = true
+        
+        if(googleData && googleData.authentication){
+            const {  accessToken }  = googleData.authentication;
+            const response = await autenticacionRepository.googleAuthLogin({token: accessToken})
+            const { usuario , token } = response;
+            if(usuario && token){
+                completarLogin(usuario, token)
+            }
+        } else {
+            $q.notify({
+                type: 'negative',
+                message: 'No hemos podido iniciar correctamente con google',
+                position: 'top',
+                timeout: 2000
+            })
         }
         
     } catch (error) {

@@ -133,6 +133,16 @@ import google from 'src/assets/google.png'
 import { UsuarioModel } from 'src/models/Usuario.model';
 import { useDataProvider } from 'src/composables/DataProvider';
 import { onMounted } from 'vue';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+
+const GOOGLE_CLIENT_ID : string = process.env.GOOGLE_CLIENT_ID as string
+onMounted(() => {
+  GoogleAuth.initialize({
+    clientId: GOOGLE_CLIENT_ID,
+    scopes: ['profile', 'email'],
+    grantOfflineAccess: true,
+    });
+});
 
 const autenticacionRepository = new AutenticacionRepository();
 const usuarioStore = useUsuarioStore()
@@ -195,20 +205,30 @@ const completarRegistro = (usuario: UsuarioModel, token: string) => {
     router.push({name: 'crear-recorrido'})
 }
 
-const callback = async (googleData: any) => {
-    formLoading.value = true
+const callback = async () => {
+   
     try {
+        const googleData = await GoogleAuth.signIn();
+        formLoading.value = true
+        if(googleData && googleData.authentication){
+            const {  accessToken }  = googleData.authentication;
+            const response = await autenticacionRepository.googleAuthRegistrar({token: accessToken})
 
-        const { access_token } = googleData;
-        const response = await autenticacionRepository.googleAuthRegistrar({token: access_token})
-
-        const { usuario , token } = response;
-        if(usuario && token){
-            completarRegistro(usuario, token)
+            const { usuario , token } = response;
+            if(usuario && token){
+                completarRegistro(usuario, token)
+            }
+        } else {
+            $q.notify({
+                type: 'negative',
+                message: 'No hemos podido iniciar correctamente con google',
+                position: 'top',
+                timeout: 2000
+            })
         }
         
     } catch (error) {
-   
+        console.log(error)
     } finally {
         formLoading.value = false
     }
