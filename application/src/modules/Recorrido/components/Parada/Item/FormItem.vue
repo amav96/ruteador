@@ -1,4 +1,5 @@
 <template>
+    
     <skeleton-item :mostrar="trayendoItem" />
     <template v-if="!trayendoItem">
 
@@ -9,9 +10,6 @@
             label="Numero envio"
             autocomplete="off"
             >
-                <template v-slot:append>
-                    <q-icon @click="startScan" name="qr_code_scanner" />
-                </template>
             </q-input>
         </div>
         <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
@@ -84,9 +82,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar'
 import { useDataProvider } from 'src/composables/DataProvider'
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { onBeforeMount } from 'vue';
-import { ItemEstadoModel, ItemRequestModel } from 'src/models/Item.model';
+import { ItemEstadoModel, ItemRequestModel, ItemModel } from 'src/models/Item.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { toRefs } from 'vue';
 import ItemRepository from 'src/repositories/Item.repository'
@@ -98,12 +94,19 @@ const emit = defineEmits<{
 
 const itemRepository = new ItemRepository()
 
-const props = withDefaults(defineProps<{item_id?: number | string | null}>(), {
+interface Props {
+    item_id?: number | string | null
+    item?: ItemModel | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
   item_id: null,
+  item: null
 });
 
 const {
-    item_id
+    item_id,
+    item
 } = toRefs(props);
 
 const usuarioStore = useUsuarioStore()
@@ -117,56 +120,6 @@ const itemForm = ref<ItemRequestModel>({
     item_tipo_id: 1,
     item_proveedor_id: 1,
     item_estado_id: 1
-})
-
-const startScan = async () => {
-
-  // Check camera permission
-  // This is just a simple example, check out the better checks below
-  await BarcodeScanner.checkPermission({ force: true });
-
-  // make background of WebView transparent
-  // note: if you are using ionic this might not be enough, check below
-  BarcodeScanner.hideBackground();
-
-   // Configura el intervalo para verificar la presencia del elemento 'video'
-   let intervalId = setInterval(() => {
-    const videoElement = document.getElementById('video');
-    if (videoElement) {
-      const videoParent : any = videoElement.parentNode;
-      if (videoParent && videoParent.style.zIndex !== '9999') {
-        // Aplica estilos al padre del video si aún no se ha aplicado
-        videoParent.style.zIndex = '9999';
-        // Otros estilos que desees aplicar al div padre
-
-        // Detén el intervalo después de aplicar los estilos
-        clearInterval(intervalId);
-      }
-    }
-  }, 800); 
-
-  const result : any = await BarcodeScanner.startScan(); // start scanning and wait for a result
-
- 
-
-  // if the result has content
-  if (result.hasContent) {
-    const { id } = JSON.parse(result.content)
-    if(id){
-        itemForm.value.track_id = id
-    }
-  }
-
-  stopScan()
-};
-
-const stopScan = () => {
-  BarcodeScanner.showBackground();
-  BarcodeScanner.stopScan();
-};;
-
-onBeforeMount(() => {
-    stopScan()
 })
 
 const {
@@ -186,7 +139,20 @@ onMounted(async() => {
     await getItemsEstados()
     // Solo para editar
     await getItem();
+    if(item.value){
+        autoCompletarItem()
+    }
 })
+
+const autoCompletarItem = () => {
+    if(item.value){
+        const { item_estado_id, item_proveedor_id, item_tipo_id, track_id } = item.value
+        if(item_estado_id) itemForm.value.item_estado_id = item_estado_id
+        if(item_proveedor_id) itemForm.value.item_proveedor_id = item_proveedor_id
+        if(item_tipo_id) itemForm.value.item_tipo_id = item_tipo_id
+        if(track_id) itemForm.value.track_id = track_id
+    }
+}
 
 const itemEstadosFiltrados = computed(() => itemsEstados.value.filter((i: ItemEstadoModel) => i.tipo === 'positivo'))
 
@@ -222,7 +188,6 @@ defineExpose({
     itemForm
 })
 
-
 </script>
 
 <style>
@@ -234,6 +199,13 @@ body.barcode-scanner-active {
 .barcode-scanner-modal {
   visibility: visible;
 }
+
+.barcode-hide{
+    background: red;
+    z-index: 9999;
+    position: absolute;
+}
+
 
 
 </style>

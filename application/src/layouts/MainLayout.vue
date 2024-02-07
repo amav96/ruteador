@@ -37,7 +37,7 @@
         <q-scroll-area class="fit">
           <q-list padding class="menu-list">
             
-            <q-item @click="router.push({name: 'recorrido-listado'})" clickable v-ripple>
+            <q-item @click="router.push({name: 'listado-recorrido'})" clickable v-ripple>
               <q-item-section avatar>
                 <q-icon color="deep-purple-13" name="route" />
               </q-item-section>
@@ -55,6 +55,17 @@
 
               <q-item-section>
                 Crear recorrido
+              </q-item-section>
+            </q-item>
+            <q-separator />
+
+            <q-item v-if="usuarioStore.autorizado()" @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="people" />
+              </q-item-section>
+
+              <q-item-section>
+                Usuarios
               </q-item-section>
             </q-item>
             <q-separator />
@@ -109,7 +120,7 @@ const cerrarSesion = async () => {
 
   if(cerrandoSesion.value) return
 
-  const { logout } = usuarioStore
+  const { logout, autorizado } = usuarioStore
   try {
     cerrandoSesion.value = true;
     await autenticacionRepository.logout()

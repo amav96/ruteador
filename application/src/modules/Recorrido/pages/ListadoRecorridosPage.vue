@@ -73,13 +73,16 @@
             </q-item>
         </div>
 
-        <div v-if="!cargandoRecorrido" class="flex justify-center q-my-sm">
+        <div v-if="!cargandoRecorrido && recorridos.length > 0" class="flex justify-center q-my-sm">
             <q-pagination
             v-model="pagination.page"
             :max="pagination.last_page"
             max-page="10"
             direction-links
             />
+        </div>
+        <div v-if="!cargandoRecorrido && recorridos.length === 0" class="flex justify-center q-my-sm">
+          Aun no hay recorridos
         </div>
         <q-dialog
         v-model="abrirModalPDF"
@@ -146,7 +149,7 @@ const getRecorridos = async () => {
     try {
         recorridos.value = []
         const params = {
-            incluir : ['paradas.paradaEstado', 'paradas.comprobantes','paradas.items.comprobantes', 'recorridoEstado'].join(','),
+            incluir : ['paradas.paradaEstado', 'paradas.comprobantes','paradas.items.comprobantes', 'recorridoEstado'],
             rider_id : usuario.id,
             page: pagination.page
         }

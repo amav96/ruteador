@@ -38,20 +38,39 @@ export default route(function (/* { store, ssrContext } */) {
     const usuarioStore = useUsuarioStore()
     const {
       usuarioAutenticado,
-      getUsuario
+      getUsuario,
+      logout,
+      autorizado
     } = usuarioStore
     
     if(to.meta.requiresAuth ){
-
+      
       if(await usuarioAutenticado()){
-        await getUsuario()
-        next()
+          if(!await getUsuario()){
+            logout()
+            next('/autenticacion/login')
+          } else {
+
+            if(!to.meta.gate){
+              next()
+            } else {
+              if(autorizado(to.meta.gate as string)){
+                next()
+              } else {
+                console.log("no")
+                next('/sin-permisos')
+              }
+              
+            }
+          }
+      
+        
       } else {
         next('/autenticacion/login')
       }
     } else {
       if(to.path === "/"){
-        next('recorridos/recorrido-listado');
+        next('recorridos/listado-recorrido');
       } else {
         next();
       }

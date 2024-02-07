@@ -6,8 +6,8 @@
       transition-show="slide-up"
       transition-hide="slide-down"
     >
-      <q-card class="text-black q-pa-sm flex justify column no-wrap items-center" style="height:100vh;">
-        <div class="q-mb-md full-width">
+    <q-card class="text-black flex justify-between column no-wrap items-center" >
+        <div class="q-mb-md full-width q-pa-sm">
             <q-icon 
             @click="router.push({name: 'parada'})" 
             name="arrow_back" 
@@ -15,64 +15,55 @@
             size="sm"
             />
         </div>
-
-        <!-- <div class="q-mb-lg full-width">
-            <q-btn 
-            @click="router.push({name: 'parada'})" 
-            round 
-            size="sm" 
-            color="deep-purple-13" 
-            icon="arrow_back" 
-            />
-        </div> -->
-
-        <div    
-        :class="['flex row justify-between text-weight-bold text-h6 q-mb-xs cursor-pointer', breakpoint.xs ? 'full-width' : '']">
-            <div
-            @click="mostrarInformacionPaquete = !mostrarInformacionPaquete" 
-            >
-                Paquete
-            </div>
-            <div>
-                <q-icon 
+        <div style="flex: 1;overflow: auto;" class="text-black flex column no-wrap full-width">
+            
+            <div    
+            :class="['q-pa-sm flex row justify-between text-weight-bold text-h6 q-mb-xs cursor-pointer', breakpoint.xs ? 'full-width' : '']">
+                <div
                 @click="mostrarInformacionPaquete = !mostrarInformacionPaquete" 
-                :name="`${mostrarInformacionPaquete ? 'expand_more' : 'expand_less' }`" 
-                />
+                >
+                    Paquete
+                </div>
+                <div>
+                    <q-icon 
+                    @click="mostrarInformacionPaquete = !mostrarInformacionPaquete" 
+                    :name="`${mostrarInformacionPaquete ? 'expand_more' : 'expand_less' }`" 
+                    />
+                </div>
             </div>
-        </div>
 
-        <div class="full-width justify-center items-center flex column" v-show="mostrarInformacionPaquete">
-            <form-item 
-            :item_id="route.params.item_id as string ?? null"
-            @formulario-cargado="cargandoFomularios = $event"
-            ref="formItemRef"
-            /> 
-        </div>
-        
-        <div 
-        :class="['flex row justify-between text-weight-bold text-h6 q-my-lg cursor-pointer', breakpoint.xs ? 'full-width' : '']">
+            <div class="q-pa-sm full-width justify-center items-center flex column" v-show="mostrarInformacionPaquete">
+                <form-item 
+                :item_id="route.params.item_id as string ?? null"
+                @formulario-cargado="cargandoFomularios = $event"
+                ref="formItemRef"
+                /> 
+            </div>
+            
             <div 
-            @click="mostrarInformacionContacto = !mostrarInformacionContacto" 
-            >
-                Contacto
-            </div>
-            <div>
-                <q-icon 
+            :class="['q-pa-sm flex row justify-between text-weight-bold text-h6 q-my-lg cursor-pointer', breakpoint.xs ? 'full-width' : '']">
+                <div 
                 @click="mostrarInformacionContacto = !mostrarInformacionContacto" 
-                :name="`${mostrarInformacionContacto ? 'expand_more' : 'expand_less' }`" 
-                />
+                >
+                    Contacto
+                </div>
+                <div>
+                    <q-icon 
+                    @click="mostrarInformacionContacto = !mostrarInformacionContacto" 
+                    :name="`${mostrarInformacionContacto ? 'expand_more' : 'expand_less' }`" 
+                    />
+                </div>
+            </div>
+    
+            <div class="q-pa-sm full-width justify-center items-center flex column" v-show="mostrarInformacionContacto">
+                <cliente-form 
+                :cliente_id="route.params.cliente_id as string ?? null"
+                @formulario-cargado="cargandoFomularios = $event"
+                ref="formContactoRef"
+                /> 
             </div>
         </div>
-  
-        <div class="full-width justify-center items-center flex column" v-show="mostrarInformacionContacto">
-            <cliente-form 
-            :cliente_id="route.params.cliente_id as string ?? null"
-            @formulario-cargado="cargandoFomularios = $event"
-            ref="formContactoRef"
-            /> 
-        </div>
-        
-        <div :class="[breakpoint.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
+        <div :class="[breakpoint.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg q-pa-sm']" >
             <q-btn
             unelevated 
             rounded 
@@ -84,8 +75,7 @@
             :disabled="guardandoCliente || guardandoItem || cargandoFomularios"
             />
         </div>
-            
-      </q-card>
+    </q-card>
     </q-dialog>
 </template>
 

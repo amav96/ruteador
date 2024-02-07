@@ -1,5 +1,5 @@
 <template>
-    <q-page class="q-px-md full-height">
+    <q-page class="q-px-md " style="min-height:auto">
         <div class="flex column justify-center items-center q-my-lg">
             <q-img
             class="q-my-md"
@@ -84,7 +84,7 @@ const crearRecorrido = async () => {
             crearLoading.value = true
             const response = await recorridoRepository.create({
                 rider_id : usuario.id,
-                inicio : inicio.value.dia + inicio.value.hora + ':00'
+                inicio : inicio.value.dia + ' ' + inicio.value.hora 
             });
           
             // @ts-ignore
@@ -115,6 +115,7 @@ const abrirModalFunc = () => {
     const formatoHora = (fecha: Date) => {
         const hora = fecha.getHours().toString().padStart(2, '0');
         const minutos = fecha.getMinutes().toString().padStart(2, '0');
+       
         return `${hora}:${minutos}`;
     };
 

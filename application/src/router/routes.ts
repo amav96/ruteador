@@ -6,11 +6,11 @@ const routes: RouteRecordRaw[] = [
     path: '/recorridos',
     redirect: '/recorridos/crear-recorrido',
     meta: { requiresAuth: true},
-    component: () => import('src/modules/Recorrido/layouts/MainLayout.vue'),
+    component: () => import('src/layouts/MainLayout.vue'),
     children: [
       { 
         path: 'listado', 
-        name: 'recorrido-listado',
+        name: 'listado-recorrido',
         meta: { requiresAuth: true},
         component: () => import('src/modules/Recorrido/pages/ListadoRecorridosPage.vue'), 
       },
@@ -23,6 +23,13 @@ const routes: RouteRecordRaw[] = [
             path: 'buscar-direccion/:addressValue?/:id?/:origin?/:destination?',
             name: 'buscar-direccion',
             component: () => import('src/modules/Recorrido/pages/BuscarDireccion.vue'), 
+            children : [
+              {
+                path: 'detectar-propiedades',
+                name: 'detectar-propiedades',
+                component: () => import('src/modules/Recorrido/pages/Parada/ModalDetectarParada.vue'), 
+              }
+            ]
           },
           {
             path: 'parada/:parada_id',
@@ -66,16 +73,38 @@ const routes: RouteRecordRaw[] = [
         path: 'login',
         name: 'login',
         component: () => import('src/modules/Autenticacion/pages/Login.vue'), 
+        
+      },
+      {
+        path: 'registrar',
+        name: 'registrar',
+        component: () => import('src/modules/Autenticacion/pages/Registrar.vue'), 
       }
     ]
   },
- 
+  {
+    path: '/usuarios',
+    meta: { requiresAuth: true, gate: 'listar_usuarios' },
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [
+      {
+        path: 'listado',
+        name: 'listado-usuarios',
+        component: () => import('src/modules/Usuario/pages/ListadoUsuariosPage.vue'), 
+      }
+    ]
+  },
 
+ 
   // Always leave this as last one,
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
+  },
+  {
+    path: '/sin-permisos',
+    component: () => import('pages/403.vue'),
   },
 ];
 

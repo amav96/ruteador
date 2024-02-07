@@ -7,6 +7,7 @@ export interface ClienteModel {
         nombre: string
     }
     numero_documento: string | null;
+    observaciones?: string | null;
     empresa_id?: number;
     creado_por?: number;
     created_at?: string;

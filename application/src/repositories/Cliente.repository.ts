@@ -1,5 +1,6 @@
 import { ClienteModel, ClienteRequestModel } from 'src/models/Cliente.model';
-import request from 'src/utils/ApiResponseCapacitor.util';
+import request from 'src/utils/ApiResponse.helper';
+
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class ClienteRepository {

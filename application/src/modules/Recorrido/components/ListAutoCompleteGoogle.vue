@@ -1,6 +1,5 @@
 <template>
   <div >
-
     <q-list bordered separator>
       <q-item 
       clickable 
@@ -44,9 +43,9 @@ import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/
 import { toRefs, watch } from 'vue';
 
 const emit = defineEmits<{
-  (e: 'selectedAddress', data: GooglePlacesAutocompleteResponseModel): void
-  (e: 'selectOrigin', value: GooglePlacesAutocompleteResponseModel | AutoGpsModel): void
-  (e: 'selectDestination', value: GooglePlacesAutocompleteResponseModel): void
+  (e: 'paradaSeleccionada', data: GooglePlacesAutocompleteResponseModel): void
+  (e: 'origenSeleccionado', value: GooglePlacesAutocompleteResponseModel | AutoGpsModel): void
+  (e: 'destinoSeleccionado', value: GooglePlacesAutocompleteResponseModel): void
 }>()
 
 // @ts-ignore
@@ -69,9 +68,9 @@ const selected = (item: GooglePlacesAutocompleteResponseModel) => {
     .then(({ results } : any) => {
       if(results[0]){
         if(destination.value){
-          emit('selectDestination', results[0])
+          emit('destinoSeleccionado', results[0])
         } else {
-          emit('selectedAddress', results[0])
+          emit('paradaSeleccionada', results[0])
         }
       
       }
@@ -80,7 +79,7 @@ const selected = (item: GooglePlacesAutocompleteResponseModel) => {
 }
 
 const selectAutoOrigin = () => {
-  emit('selectOrigin', { auto: true})
+  emit('origenSeleccionado', { auto: true})
 }
 
 

@@ -61,7 +61,7 @@
         <!-- acciones -->
         <div class="flex row items-center justify-center q-mt-xs q-mb-xs q-gutter-md">
           <!-- agregar parada -->
-          <div @click="goToSeleccionarParada" class="flex column items-center" :style="`${breakpoint.xs || breakpoint.sm ? 'flex-grow: 1' : ''}`">
+          <div v-if="!recorridoFinalizado" @click="goToSeleccionarParada" class="flex column items-center" :style="`${breakpoint.xs || breakpoint.sm ? 'flex-grow: 1' : ''}`">
             <q-btn  round color="deep-purple-13" icon="add" />
             <div class="pointer q-mt-sm">
               <strong>Parada</strong>
@@ -80,7 +80,6 @@
                   {{recorrido?.optimizado ? 'Optimizado' : 'Optimizar'  }}
                 </strong>
               </div>
-
             </template>
           </div>
           <!-- ver mapa -->
@@ -200,9 +199,9 @@
         <dialog-loading :open="actualizandoRecorridoEstado" text="Actualizando recorrido" />
 
         <router-view
-          @selected-address="paradaSeleccionada"
-          @select-origin="origenSeleccionado"
-          @select-destination="destinoSeleccionado"
+          @parada-seleccionada="paradaSeleccionada"
+          @origen-seleccionado="origenSeleccionado"
+          @destino-seleccionado="destinoSeleccionado"
           @actualizar-estado-parada="actualizarEstadoParada"
         ></router-view>
 
@@ -221,13 +220,12 @@
   import { ParadaModel } from 'src/models/Parada.model';
   import DialogLoading from 'src/components/General/DialogLoading.vue'
   import SkeletonParadas from 'src/modules/Recorrido/components/Parada/SkeletonParadas.vue'
-  import { geoposicionar, formatearGeposiciones, formatearGoogleAddress } from 'src/utils/Google';
+  import { geoposicionar, formatearGeposiciones, formatearGoogleAddress, direccionLegible } from 'src/utils/Google';
   import { useUsuarioStore } from 'src/stores/Usuario'
   import { useRecorridoStore } from 'src/stores/Recorrido'
-  import { FormateadorGoogleAddressModel } from 'src/models/Google.model';
   import { PARADA_ESTADOS, RECORRIDO_ESTADOS } from 'src/utils/DataProviders';
   import { storeToRefs } from 'pinia';
-  
+
   const router = useRouter();
   const route = useRoute();
 
@@ -273,7 +271,7 @@
     try {
       const recorridoId = Number(recorrido_id)
       if(Number.isNaN(recorridoId)){
-        router.push({name: 'recorrido-listado'})
+        router.push({name: 'listado-recorrido'})
       }
       cargandoRecorrido.value = true;
       const response = await recorridoRepository.get(recorridoId, params);
@@ -329,7 +327,7 @@
         }
         
       } else {
-        router.push({name: 'recorrido-listado'})
+        router.push({name: 'listado-recorrido'})
       }
       
     } catch (error) {
@@ -343,15 +341,8 @@
     router.push({ name: 'buscar-direccion' });
   };
   
-  const direccionLegible = ( data: FormateadorGoogleAddressModel, direccionAuxiliar : string) : string => {
-
-    if(data.calle && data.numero){
-      return `${data.calle} ${data.numero}`
-    }
-    return `${direccionAuxiliar}`
-  }
-
   const paradaSeleccionada = async (data: GooglePlacesAutocompleteResponseModel) => {
+    
     if(data.id){
       actualizarParada(data)
     } else {
@@ -361,14 +352,13 @@
   };
   
   const agregarParada = async (data: GooglePlacesAutocompleteResponseModel) => {
+   
     const { geometry: { location : { lat , lng} } , formatted_address } = data;
     const resultadoFormateo = formatearGoogleAddress(data.address_components) 
     const {
       localidad,
       provincia,
       codigo_postal,
-      numero,
-      calle
     } = resultadoFormateo
 
     try {
@@ -387,7 +377,7 @@
       const { parada } = response;
 
       if(parada){
-        paradas.value.push(parada)
+        paradas.value.unshift(parada)
         if(recorrido.value){
           recorrido.value.optimizado = 0;
         }
@@ -399,7 +389,8 @@
     }
 
   };
-  
+
+
   const actualizarParada = async (data: GooglePlacesAutocompleteResponseModel) => {
     const { geometry: { location : { lat , lng} } , formatted_address, id } = data;
     const resultadoFormateo = formatearGoogleAddress(data.address_components) 
@@ -466,7 +457,6 @@
   
   const origenSeleccionado = async (value : GooglePlacesAutocompleteResponseModel | AutoGpsModel) => {
     let origen_formateado : string = ''
-   
     if ('formatted_address' in value) {
       const {formatted_address, geometry } = value;
       origen.value.formatted_address = formatted_address;
@@ -477,7 +467,6 @@
       }
 
     } else if('auto' in value){
-      
       if(position.value?.coords){
         const { latitude , longitude } = position.value.coords
         const geo = await geoposicionar(latitude, longitude)
@@ -509,8 +498,6 @@
       });
       return
     }
-
-    
   
     try {
       
@@ -533,11 +520,11 @@
       
     } catch (error) {
 
-      // $q.notify({
-      //     type: 'warning',
-      //     message: JSON.stringify(error),
-      //     timeout: 8000
-      // });
+     $q.notify({
+         type: 'warning',
+         message: JSON.stringify(error),
+         timeout: 8000
+     });
     }
 
   };
@@ -742,14 +729,6 @@
       optimizandoRecorrido.value = false;
     }
 
-  }
-
-  const heightScrollPararadas = () => {
-    if(breakpoint.value.height < 800){
-      return '50vh'
-    } else {
-      return '55vh'
-    }
   }
 
   const recorridoFinalizado = computed(() => recorrido.value?.recorrido_estado_id === RECORRIDO_ESTADOS.FINALIZADO)

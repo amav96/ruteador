@@ -1,5 +1,5 @@
 import { ParadaEstadoRequestModel, ParadaModel, ParadaRequestModel, UrlTemporariaParadaComprobanteRequestModel, UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
-import request from 'src/utils/ApiResponseCapacitor.util';
+import request from 'src/utils/ApiResponse.helper';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class ParadaRepository {
@@ -15,7 +15,7 @@ export default class ParadaRepository {
             return response.data;
       
           } catch (error) {
-            console.log(error)
+
             throw error
           }
     }

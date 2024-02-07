@@ -26,7 +26,6 @@ const request = async (call: ApiRequest): Promise<ApiResponse> => {
       data: call.data,
       params: call.params,
       headers: {
-        [call.method === 'GET' ? 'Accept' : 'Content-type']: 'application/json, text/plain, */*',
         ...call.extraHeaders,
       },
     };

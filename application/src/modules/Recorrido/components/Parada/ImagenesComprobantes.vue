@@ -84,14 +84,16 @@ const eliminarComprobante = async (comprobante: ItemComprobanteModel | ParadaCom
     eliminandoComprobante.value = true;
 
     const { id } = comprobante;
+
+    // @ts-ignore
+    comprobantesLocales.value =  comprobantesLocales.value.filter((c: ItemComprobanteModel | ParadaComprobanteModel) => c.id !== id)
     try {
       if(modelo.value === 'ItemComprobante'){
         await itemRepository.eliminarItemComprobante(id)
       } else if(modelo.value === 'ParadaComprobante'){
         await paradaRepository.eliminarParadaComprobante(id)
       }
-      // @ts-ignore
-      comprobantesLocales.value =  comprobantesLocales.value.filter((c: ItemComprobanteModel | ParadaComprobanteModel) => c.id !== id)
+      
       emit("actualizarComprobantes", comprobantesLocales.value)
 
       imgsRef.value = comprobantesLocales.value.map((comprobante: ItemComprobanteModel | ParadaComprobanteModel) => `${pathBucket.value}${comprobante.path}`)

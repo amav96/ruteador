@@ -1,6 +1,6 @@
 import { ParadaModel } from 'src/models/Parada.model';
-import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel, UpdateEstadoRequest, RecorridoPaginacionModel} from 'src/models/Recorrido.model';
-import request from 'src/utils/ApiResponseCapacitor.util';
+import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel, UpdateEstadoRequest, RecorridoPaginacionModel, PropiedadesDetectadasModel} from 'src/models/Recorrido.model';
+import request from 'src/utils/ApiResponse.helper';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class RecorridoRepository {
@@ -139,11 +139,30 @@ export default class RecorridoRepository {
 
   async updateEstado(data : UpdateEstadoRequest ,recorridoId : number) {
     try {
+      
       const response = await request({
         url:  API_BASE_URL + `/api/recorridos/${recorridoId}/estado`,
         method: 'PATCH',
         data,
         auth: true
+      });
+      
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async detectarPropiedades(data : FormData) : Promise<{ propiedades : PropiedadesDetectadasModel}> {
+    try {
+      
+      const response = await request({
+        url:  API_BASE_URL + `/api/recorridos/detectar-propiedades`,
+        method: 'POST',
+        data,
+        auth: true,
+        
       });
       
       return response.data;

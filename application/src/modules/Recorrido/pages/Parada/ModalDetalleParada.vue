@@ -286,8 +286,11 @@ import { useUsuarioStore } from 'src/stores/Usuario'
 import {useDataProvider} from 'src/composables/DataProvider'
 import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.vue';
 import ImagenesComprobantes from '../../components/Parada/ImagenesComprobantes.vue';
-import { Camera, CameraResultType } from '@capacitor/camera';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { uploadFileToS3 } from 'src/utils/AWS'
+import Compressor from 'compressorjs';
+import { getId } from 'src/utils/Util';
+import { base64ToFile } from 'src/utils/Image';
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -354,7 +357,7 @@ const getParada = async () => {
                 'items.comprobantes',
                 'paradaEstado',
                 'comprobantes'
-            ].join(',')
+            ]
         }
         
         const response  = await paradaRepository.getParada(params, parada_id as string)
@@ -525,34 +528,59 @@ const paqueteGestionado = computed(() => items.value.length > 0  &&
 const estadoParadaMostrable = computed(() => parada.value?.parada_estado.codigo === 'visitado' || parada.value?.parada_estado.tipo === 'negativo')
 
 const takePicture = async (item?: ItemModel) => {
-  const image = await Camera.getPhoto({
-    quality: 90,
-    allowEditing: true,
-    resultType: CameraResultType.Uri
-  });
-  if(image.webPath){
-    let nombre_archivo = image.webPath?.split('/')[3] ?? "name"
-   
-    // Obtén el contenido binario de la imagen usando fetch
-    const responseImage = await fetch(image.webPath);
-    const blob = await responseImage.blob();
+    const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt
+    });
+  if(image.base64String){
+    cargandoComprobante.value = true
+   try {
 
-    // Crea un objeto File a partir del Blob y asigna el nombre del archivo
-    const file = new File([blob], nombre_archivo);
+    const { base64String, format } = image
   
+    const filename = getId() + "." + format; // Combi
+    const mimeType = "image/" + format; // Tipo MIME
+    
+    const file = await base64ToFile(base64String, filename, mimeType);
+  
+    let formData = new FormData();
+    formData.append('file', file, filename);
+        
     if(item){
-        generarUrlItemComprobante(nombre_archivo, file, item)
+        generarUrlItemComprobante(filename, file, item)
     } else {
-        generarUrlParadaComprobante(nombre_archivo, file)
+        generarUrlParadaComprobante(filename, file)
     }
+   } catch (error) {
+    cargandoComprobante.value = false
+   }
   }
 
+};
+
+const compressImage = (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    new Compressor(file, {
+      quality: 0.2,
+      maxWidth: 720, // Máximo ancho permitido
+      maxHeight: 720, // Máxima altura permitida
+      success(result : File) {
+        resolve(result);
+      },
+      error(err) {
+        console.error(err.message);
+        reject(err);
+      },
+    });
+  });
 };
 
 const cargandoComprobante = ref<boolean>(false)
 const generarUrlItemComprobante = async (nombre_archivo: string, file: File, item: ItemModel) => {
 
-    cargandoComprobante.value = true
+    
     let response : UrlTemporariaItemComprobanteResponseModel | null = null
     try {
         response = await itemRepository.generarUrlTemporariaComprobante({
@@ -589,7 +617,6 @@ const generarUrlItemComprobante = async (nombre_archivo: string, file: File, ite
 const generarUrlParadaComprobante = async (nombre_archivo: string, file: File) => {
     if(parada.value){
 
-        cargandoComprobante.value = true
         let response : UrlTemporariaParadaComprobanteResponseModel | null = null
         try {
             response = await paradaRepository.generarUrlTemporariaComprobante({

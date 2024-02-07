@@ -1,7 +1,6 @@
 <template>
     <q-page class="full-height">
         <div class="q-pa-md">
-           
             <q-form 
             @submit="onSubmit"
             class="flex column q-px-md "
@@ -13,9 +12,17 @@
                         class="q-mb-lg q-mt-md"
                     />
                     <div class="full-width text-h6 q-mb-lg text-deep-purple-6 text-center">
-                        <strong>Ingresar a mi cuenta</strong>
+                        <strong>Registrar mi cuenta</strong>
                     </div>
-                    
+                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width']" >
+                        <q-input 
+                        v-model="formLogin.nombre" 
+                        color="deep-purple-6" 
+                        label="Nombre"
+                        autocomplete="off"
+                        :rules="[ val => val && val.length > 0 || 'Ingrese nombre']" 
+                         />
+                    </div>
                     <div :class="[breakpoint.xs ? 'full-width' : 'small-width']" >
                         <q-input 
                         v-model="formLogin.email" 
@@ -43,12 +50,36 @@
                             </template>
                         </q-input>
                     </div>
-                    <!-- <div :class="['text-deep-purple-6 row full-width text-subtitle1', breakpoint.xs ? 'justify-end' : 'justify-center']">
-                        <strong>¿Olvidaste tu contraseña?</strong>
-                    </div> -->
-                    <div @click="router.push({name: 'registrar'})" :class="['text-deep-purple-6 row full-width text-subtitle1', breakpoint.xs ? 'justify-end' : 'justify-center']">
-                        <strong>Registrarme</strong>
+
+                    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+                    <q-select
+                    label="Codigo area"
+                    color="deep-purple-6"
+                    v-model="formLogin.pais_id"
+                    :options="paises"
+                    option-label="nombre"
+                    option-value="id"
+                    emit-value
+                    map-options
+                    >
+                    <template v-slot:option="scope">
+                        <q-item v-bind="scope.itemProps">
+                            <q-item-section>
+                                <q-item-label>{{ scope.opt.nombre }}</q-item-label>
+                            </q-item-section>
+                            <q-item-section avatar>
+                                <q-avatar>
+                                    <img :src="`https://flagsapi.com/${scope.opt.bandera}/flat/64.png`">
+                                </q-avatar>
+                            </q-item-section>
+                        </q-item>
+                    </template>
+                    </q-select>
                     </div>
+                    <div @click="router.push({name: 'login'})" :class="['text-deep-purple-6 row full-width text-subtitle1', breakpoint.xs ? 'justify-end' : 'justify-center']">
+                        <strong>¿Ya tenes cuenta? Iniciar sesión</strong>
+                    </div>
+                    
                 </div>
 
                 <div class="flex justify-center q-my-lg ">
@@ -57,13 +88,11 @@
                     unelevated 
                     rounded 
                     color="deep-purple-6"
-                    label="Ingresar a mi cuenta" 
+                    label="Crear mi cuenta" 
                     type="submit"
                     :disabled="formularioVacio || formLoading"
                     />
                 </div>
-
-                
 
                 <GoogleLogin 
                 popup-type="TOKEN"
@@ -73,7 +102,7 @@
                         :class="[breakpoint.xs ? 'full-width' : '', 'text-black']"
                         rounded 
                         color="white"
-                        label="Ingresar con Google" 
+                        label="Registrarme con Google" 
                         type="button"
                        
                         :disabled="formLoading"
@@ -84,7 +113,7 @@
                 </GoogleLogin>
             </q-form>
 
-            <DialogLoading :open="formLoading" text="Autenticando..." />
+            <DialogLoading :open="formLoading" text="Registrando..." />
         </div>
     </q-page>
 </template>
@@ -96,13 +125,14 @@ import { ref, computed, reactive } from "vue"
 import { useQuasar } from 'quasar'
 import { isValidEmail } from 'src/utils/Validations'
 import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
-import { LoginModel } from 'src/models/Autenticacion.model';
+import { RegistrarRequestModel } from 'src/models/Autenticacion.model';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { useRouter } from 'vue-router';
-import { decodeCredential } from 'vue3-google-login'
 import google from 'src/assets/google.png'
 import { UsuarioModel } from 'src/models/Usuario.model';
+import { useDataProvider } from 'src/composables/DataProvider';
+import { onMounted } from 'vue';
 
 const autenticacionRepository = new AutenticacionRepository();
 const usuarioStore = useUsuarioStore()
@@ -112,13 +142,24 @@ const router = useRouter();
 const $q = useQuasar()
 const breakpoint = computed(() => $q.screen)
 
-const formLogin = reactive<LoginModel>({
+const {
+    paises,
+    getPaises,
+} = useDataProvider()
+
+onMounted(async() => {
+    await getPaises()
+})
+
+const formLogin = reactive<RegistrarRequestModel>({
+    nombre: '',
     email: '',
-    password: ''
+    password: '',
+    pais_id: 1
 })
 const formLoading = ref<boolean>(false);
 
-const formularioVacio = computed(() => !formLogin.email || !formLogin.password)
+const formularioVacio = computed(() => !formLogin.email || !formLogin.password || !formLogin.nombre)
 
 const isPwd = ref<boolean>(true);
 
@@ -126,18 +167,17 @@ const onSubmit = async () => {
     formLoading.value = true
 
     try {
-
-        const response = await autenticacionRepository.login(formLogin)
+        const response = await autenticacionRepository.registrar(formLogin)
         const { usuario , token } = response;
         if(usuario && token){
-            completarLogin(usuario, token)
+            completarRegistro(usuario, token)
         }
 
     } catch (error : any) {
-
+        alert(JSON.stringify(error))
         const { data } = error;
         
-        let mensaje = data && data.message ?  data.message : 'No se puede iniciar correctamente';
+        let mensaje = data && data.message ?  data.message : 'No se pudo registrar correctamente';
         $q.notify({
           type: 'negative',
           message: mensaje,
@@ -149,7 +189,7 @@ const onSubmit = async () => {
     }
 }
 
-const completarLogin = (usuario: UsuarioModel, token: string) => {
+const completarRegistro = (usuario: UsuarioModel, token: string) => {
     usuarioStore.setUsuario(usuario);
     usuarioStore.setToken(token);
     router.push({name: 'crear-recorrido'})
@@ -160,15 +200,15 @@ const callback = async (googleData: any) => {
     try {
 
         const { access_token } = googleData;
-        const response = await autenticacionRepository.googleAuthLogin({token: access_token})
+        const response = await autenticacionRepository.googleAuthRegistrar({token: access_token})
 
         const { usuario , token } = response;
         if(usuario && token){
-            completarLogin(usuario, token)
+            completarRegistro(usuario, token)
         }
         
     } catch (error) {
-        console.log(error)
+   
     } finally {
         formLoading.value = false
     }

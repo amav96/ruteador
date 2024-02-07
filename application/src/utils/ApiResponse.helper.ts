@@ -34,6 +34,7 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
                 data: response.data,
                 status: response.status,
                 statusText: response.statusText,
+                //@ts-ignore
                 headers: response.headers
             });
         };
@@ -54,7 +55,7 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
             params: call.params as any,
             responseType: call.responseType,
             headers: {
-                'Content-Type': 'application/json',
+               
                 ...call.extraHeaders
             }
         };

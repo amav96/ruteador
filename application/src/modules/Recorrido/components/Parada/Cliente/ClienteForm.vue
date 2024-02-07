@@ -2,11 +2,11 @@
         <skeleton-cliente :mostrar="trayendoCliente" />
         <template v-if="!trayendoCliente">
             <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-                <q-select 
+                <q-select
                 label="Tipo documento"
                 color="deep-purple-6"
-                v-model="clienteForm.tipo_documento_id" 
-                :options="tiposDocumentos" 
+                v-model="clienteForm.tipo_documento_id"
+                :options="tiposDocumentos"
                 option-label="nombre"
                 option-value="id"
                 emit-value
@@ -14,14 +14,14 @@
                 :rules="[
                     val => !!val || '* Debes elegir tipo documento',
                 ]"
-                
+
                 />
             </div>
 
             <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-                <q-input 
-                v-model="clienteForm.numero_documento" 
-                color="deep-purple-6" 
+                <q-input
+                v-model="clienteForm.numero_documento"
+                color="deep-purple-6"
                 label="Numero documento"
                 autocomplete="off"
                 :rules="[
@@ -31,24 +31,35 @@
             </div>
 
             <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-                <q-input 
-                v-model="clienteForm.nombre" 
-                color="deep-purple-6" 
+                <q-input
+                v-model="clienteForm.nombre"
+                color="deep-purple-6"
                 label="Destinatario / Nombre"
                 autocomplete="off"
                 />
             </div>
 
-            <template 
+            <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+                <q-input
+                v-model="clienteForm.observaciones"
+                color="deep-purple-6"
+                label="Observaciones"
+                autocomplete="off"
+                type="textarea"
+                autogrow
+                />
+            </div>
+
+            <template
             v-for="(item,index) in clientesNumerosForm"
             :key="index"
             >
                 <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-                    <q-select 
+                    <q-select
                     label="Codigo area"
                     color="deep-purple-6"
-                    v-model="item.codigo_area_id" 
-                    :options="codigosArea" 
+                    v-model="item.codigo_area_id"
+                    :options="codigosArea"
                     option-label="codigo"
                     option-value="id"
                     emit-value
@@ -68,18 +79,18 @@
                     </template>
                     </q-select>
                 </div>
-        
+
                 <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
-                    <q-input 
-                    v-model="item.numero" 
-                    color="deep-purple-6" 
+                    <q-input
+                    v-model="item.numero"
+                    color="deep-purple-6"
                     label="Numero celular"
                     autocomplete="off"
                     />
                 </div>
             </template>
         </template>
-    
+
 </template>
 
 <script setup lang="ts">
@@ -94,12 +105,19 @@ const emit = defineEmits<{
   (e: 'formularioCargado', data: boolean ): void
 }>()
 
-const props = withDefaults(defineProps<{cliente_id?: number | string | null}>(), {
+interface Props {
+    cliente_id?: number | string | null
+    cliente?: ClienteModel | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
   cliente_id: null,
+  cliente: null
 });
 
 const {
-    cliente_id
+    cliente_id,
+    cliente
 } = toRefs(props);
 
 const clienteRepository = new ClienteRepository();
@@ -111,6 +129,7 @@ const clienteForm = ref<ClienteModel>({
     tipo_documento_id : 1,
     numero_documento: null,
     nombre: null,
+    observaciones: null
 })
 
 const clientesNumerosForm = ref<any>([
@@ -132,13 +151,32 @@ onMounted(async() => {
     emit("formularioCargado", true)
     await getTipoDocumentos()
     await getCodigosArea()
+    // edicion
     if(cliente_id.value){
         await getCliente()
     } else {
         trayendoCliente.value = false
         emit("formularioCargado", false)
     }
+    // creacion asistida
+    if(cliente.value){
+        autoCompletarCliente()
+    }
 })
+
+const autoCompletarCliente = () => {
+    if(cliente.value){
+        const { clientes_numeros, nombre, numero_documento,  observaciones, tipo_documento_id } = cliente.value
+        // if(codigo_area_id) clienteForm.value.codigo_area_id = codigo_area_id
+        if(nombre) clienteForm.value.nombre = nombre
+        if(numero_documento) clienteForm.value.numero_documento = numero_documento
+        if(observaciones) clienteForm.value.observaciones = observaciones
+        if(tipo_documento_id) clienteForm.value.tipo_documento_id = tipo_documento_id
+        if(clientes_numeros){
+            clientesNumerosForm.value = clientes_numeros
+        }
+    }
+}
 
 const trayendoCliente = ref<boolean>(true)
 const getCliente = async () => {
@@ -165,7 +203,7 @@ const getCliente = async () => {
             }
         }
        } catch (error) {
-        
+
        } finally {
         trayendoCliente.value = false
         emit("formularioCargado", false)

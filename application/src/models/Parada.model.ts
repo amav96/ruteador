@@ -9,7 +9,8 @@ export interface ParadaRequestModel {
     codigo_postal: string;
     localidad: string;
     provincia: string;
-    rider_id: number
+    rider_id: number,
+    tipo_domicilio?: string
 }
 
 export interface ParadaEstadoRequestModel {

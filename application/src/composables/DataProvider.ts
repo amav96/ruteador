@@ -12,6 +12,7 @@ const itemsTipos = ref<any>([])
 const proveedoresItems = ref<any>([])
 const itemsEstados = ref<any>([])
 const paradasEstados = ref<any>([])
+const paises = ref<any>([])
 
 export function useDataProvider() {
 
@@ -85,6 +86,16 @@ export function useDataProvider() {
     }
    }
 
+   const getPaises = async (params: any = {}) => {
+    if(paises.value.length === 0){
+        const response = await dataProviderRepository.getPaises(params);
+        paises.value = response;
+        return paises.value
+    } else {
+        return paises.value
+    }
+   }
+
   return { 
     getTipoDocumentos,
     tiposDocumentos,
@@ -99,6 +110,8 @@ export function useDataProvider() {
     itemsEstados,
     getItemsEstados,
     paradasEstados,
-    getParadasEstados
+    getParadasEstados,
+    paises,
+    getPaises
    }
 }

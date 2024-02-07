@@ -1,17 +1,19 @@
 import { defineStore } from 'pinia'
 import { ParadaModel } from 'src/models/Parada.model';
-import { RecorridoModel } from 'src/models/Recorrido.model';
+import { PropiedadesDetectadasModel, RecorridoModel } from 'src/models/Recorrido.model';
 
 interface RecorridoStoreModel{
   recorrido : RecorridoModel,
-  paradas: ParadaModel[]
+  paradas: ParadaModel[],
+  propiedadesDetectadas: PropiedadesDetectadasModel
 }
 
 export const useRecorridoStore = defineStore('recorrido', {
     state: () =>
     ({
       recorrido: null as unknown as RecorridoModel,
-      paradas: []
+      paradas: [],
+      propiedadesDetectadas : null as unknown as PropiedadesDetectadasModel,
     } as RecorridoStoreModel),
 
   actions: {

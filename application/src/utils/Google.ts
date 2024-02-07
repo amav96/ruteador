@@ -1,5 +1,5 @@
 import { get } from 'http';
-import request from './ApiResponseCapacitor.util'
+import request from './ApiResponse.helper'
 import { FormateadorGoogleAddressModel } from 'src/models/Google.model';
 
 export const formatearGoogleAddress = (addressComponents: any[]) :FormateadorGoogleAddressModel => {
@@ -73,17 +73,25 @@ export const GPS = () => {
   }));
 };
 
-export const geoposicionar = async (lat: string, lng: string) => {
+export const geoposicionar = async (lat?: string, lng?: string, address?: string) => {
   try {
+    const key : string = process.env.VUE_APP_GOOGLE_MAPS_API_KEY as string
+
+    let params : any = {
+      key
+    }
+    if(lat && lng){
+      
+      params.latlng = `${lat},${lng}`;
+    } else if(address){
+      params.address = address
+    }
 
     const response = await request({
       url: 'https://maps.googleapis.com/maps/api/geocode/json',
       method: 'GET',
+      params,
       // @ts-ignore
-      params: {
-        latlng: `${lat},${lng}`,
-        key: 'AIzaSyAD2gY2H88XBrGUz8sJVWYpAWkkz6n38Ds'
-      }
     })
 
     return response.data
@@ -101,4 +109,12 @@ export const formatearGeposiciones = (data: any) => {
     lat: item.geometry.location.lat,
     lng: item.geometry.location.lng,
   }
+}
+
+export const direccionLegible = ( data: FormateadorGoogleAddressModel, direccionAuxiliar : string) : string => {
+
+  if(data.calle && data.numero){
+    return `${data.calle} ${data.numero}`
+  }
+  return `${direccionAuxiliar}`
 }

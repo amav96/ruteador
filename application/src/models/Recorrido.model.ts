@@ -95,3 +95,18 @@ export interface CoordenadasModel{
 export interface UpdateEstadoRequest {
     recorrido_estado_id: number
 }
+
+export interface PropiedadesDetectadasModel {
+    direccion: string;
+    nombre: string;
+    numero_documento: string;
+    track_id: string;
+    observaciones: string;
+    tipo_documento_id: number;
+    item_proveedor_id: number;
+    tipo_domicilio: string;
+    item_tipo_id: number;
+    item_estado_id: number;
+    numero_telefono: string;
+    codigo_area_id: number;
+}

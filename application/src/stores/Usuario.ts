@@ -25,6 +25,7 @@ export const useUsuarioStore = defineStore('usuario', {
       this.usuario = usuario
     },
     async usuarioAutenticado(): Promise<boolean> {
+      
       if(!this.usuario || !this.token){
         let tokenAutenticado = await Preferences.get({ key: _TOKEN });
         if(!tokenAutenticado.value){
@@ -70,6 +71,9 @@ export const useUsuarioStore = defineStore('usuario', {
       // @ts-ignore
       this.usuario = null
       await Preferences.remove({ key: _TOKEN });
+    },
+    autorizado(permiso?: string | string[]){
+      return this.usuario?.email === 'alvaroamav96@gmail.com'
     }
   },
 })

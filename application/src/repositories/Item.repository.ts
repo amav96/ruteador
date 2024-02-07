@@ -1,5 +1,5 @@
 import { ItemEstadoRequestModel, ItemModel, ItemRequestModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
-import request from 'src/utils/ApiResponseCapacitor.util';
+import request from 'src/utils/ApiResponse.helper';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class ItemRepository {
