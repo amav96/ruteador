@@ -1,5 +1,5 @@
 import { ParadaModel } from 'src/models/Parada.model';
-import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel, UpdateEstadoRequest, RecorridoPaginacionModel, PropiedadesDetectadasModel} from 'src/models/Recorrido.model';
+import { RecorridoModel, RecorridoFormModel, RecorridoResponseModel, UpdateOrigenRequest, UpdateDestinoRequest, UpdateOrigenActualRequest, OptimizarRecorridoRequestModel, UpdateEstadoRequest, RecorridoPaginacionModel, PropiedadesDetectadasModel, InformeRequestModel} from 'src/models/Recorrido.model';
 import request from 'src/utils/ApiResponse.helper';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
@@ -170,6 +170,23 @@ export default class RecorridoRepository {
     } catch (error) {
       throw error
     }
+  }
+
+  async informe(data : InformeRequestModel): Promise<RecorridoResponseModel>{
+
+    try {
+      const response = await request({
+        url: API_BASE_URL + '/api/recorridos/informe',
+        method: 'POST',
+        data,
+        auth: true
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+    
   }
 
 

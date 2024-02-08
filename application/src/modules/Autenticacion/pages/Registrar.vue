@@ -8,13 +8,13 @@
                 <div class="flex column flex-center full-width">
                     <q-img
                         :src="logo"
-                        style="max-width: 130px"
+                        style="max-width: 50px"
                         class="q-mb-lg q-mt-md"
                     />
                     <div class="full-width text-h6 q-mb-lg text-deep-purple-6 text-center">
                         <strong>Registrar mi cuenta</strong>
                     </div>
-                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width']" >
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width']" >
                         <q-input 
                         v-model="formLogin.nombre" 
                         color="deep-purple-6" 
@@ -23,7 +23,7 @@
                         :rules="[ val => val && val.length > 0 || 'Ingrese nombre']" 
                          />
                     </div>
-                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width']" >
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width']" >
                         <q-input 
                         v-model="formLogin.email" 
                         color="deep-purple-6" 
@@ -32,7 +32,7 @@
                         :rules="[ val => val && isValidEmail(val) || 'Ingrese email válido']" 
                          />
                     </div>
-                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width', 'q-my-md']">
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width', 'q-my-md']">
                         <q-input 
                         v-model="formLogin.password" 
                         color="deep-purple-6" 
@@ -51,7 +51,7 @@
                         </q-input>
                     </div>
 
-                    <div :class="[breakpoint.xs ? 'full-width' : 'media-width']" >
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'media-width']" >
                     <q-select
                     label="Codigo area"
                     color="deep-purple-6"
@@ -84,7 +84,7 @@
 
                 <div class="flex justify-center q-my-lg ">
                     <q-btn
-                    :class="[breakpoint.xs ? 'full-width' : '']"
+                    :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : '']"
                     unelevated 
                     rounded 
                     color="deep-purple-6"
@@ -99,7 +99,7 @@
                 :callback="callback">
                     <div class="flex justify-center">
                         <q-btn
-                        :class="[breakpoint.xs ? 'full-width' : '', 'text-black']"
+                        :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : '', 'text-black']"
                         rounded 
                         color="white"
                         label="Registrarme con Google" 
@@ -120,7 +120,7 @@
 
 <script setup lang="ts">
 
-import logo from 'src/assets/logo.jpg'
+import logo from 'src/assets/rendereable logo.png'
 import { ref, computed, reactive } from "vue"
 import { useQuasar } from 'quasar'
 import { isValidEmail } from 'src/utils/Validations'

@@ -62,7 +62,7 @@
                       <q-menu>
                         <q-list  >
                           <q-item @click="descargarInforme(recorrido)" clickable v-close-popup >
-                            <q-item-section>Descargar informe</q-item-section>
+                            <q-item-section>Generar informe</q-item-section>
                           </q-item>
                         </q-list>
                       </q-menu>
@@ -84,20 +84,8 @@
         <div v-if="!cargandoRecorrido && recorridos.length === 0" class="flex justify-center q-my-sm">
           Aun no hay recorridos
         </div>
-        <q-dialog
-        v-model="abrirModalPDF"
-        persistent
-        :maximized="true"
-        transition-show="slide-up"
-        transition-hide="slide-down"
-          >
-          <recorrido-pdf
-          v-if="recorridoActual"
-          :recorrido="recorridoActual"
-          @hide="closeRecorridoPdf"
-          />
-        </q-dialog>
-        <dialog-loading :open="cargandoImagenes" text="Genenerando informe..." />
+       
+        <dialog-loading :open="cargandoImagenes" text="Generando informe..." />
     </div>
 </template>
 
@@ -106,15 +94,14 @@
 import { RecorridoModel, RecorridoPaginacionModel } from 'src/models/Recorrido.model';
 import RecorridoRepository from 'src/repositories/Recorrido.repository';
 import { useUsuarioStore } from 'src/stores/Usuario';
-import RecorridoPdf from 'src/modules/Recorrido/components/RecorridoPDF.vue'
 import { computed, watch, onMounted, reactive } from 'vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ParadaComprobanteModel, ParadaModel } from 'src/models/Parada.model';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
-
+import { useQuasar } from 'quasar';
 
 const router = useRouter();
+const $q = useQuasar();
 
 const recorridoRepository = new RecorridoRepository();
 
@@ -172,112 +159,31 @@ const getRecorridos = async () => {
     }
 };
 
-const S3BUCKETLAGUAGUA : string = process.env.S3BUCKETLAGUAGUA as string
 const skeletonRecorridos = [1,2,3,4,5];
 
-const recorridoActual = ref<RecorridoModel | null>(null)
 const cargandoImagenes = ref<boolean>(false)
 const descargarInforme = async (recorrido: RecorridoModel) => {
   
   cargandoImagenes.value = true;
-  let convertirImagenes = await convertirRecorridoParadasComprobantesABase64(recorrido)
-  recorridoActual.value = convertirImagenes;
-  abrirModalPDF.value = !abrirModalPDF.value
-  
-}
 
-const abrirModalPDF = ref<boolean>(false)
+  try {
+    const response = await recorridoRepository.informe({
+      recorrido_id: recorrido.id,
+      rider_id: usuario.id
+    });
 
-const convertirComprobanteABase64 = async (comprobante: ParadaComprobanteModel) => {
-  
-  const base64Image = await getBase64Image(`${S3BUCKETLAGUAGUA}${comprobante.path}`);
-  return { ...comprobante, base64Image };
-};
+    $q.notify({
+      type: 'positive',
+      message: 'Informe enviado a ' + usuario.email,
+      timeout: 5000
+    });
 
-const convertirParadaComprobantesABase64 = async (parada: ParadaModel) => {
-  const comprobantesBase64 = await Promise.all(
-    parada.comprobantes.map(async (comprobante) => {
-      return await convertirComprobanteABase64(comprobante);
-    })
-  );
-  return { ...parada, comprobantes: comprobantesBase64 };
-};
-
-const convertirRecorridoParadasComprobantesABase64 = async (recorrido: RecorridoModel) => {
-  const paradasBase64 = await Promise.all(
-    recorrido.paradas.map(async (parada) => {
-      const paradaConComprobantes = await convertirParadaComprobantesABase64(parada);
-      if (paradaConComprobantes.items && paradaConComprobantes.items.length > 0) {
-        const itemsConComprobantes = await Promise.all(
-          paradaConComprobantes.items.map(async (item) => {
-            const itemConComprobantes = await convertirComprobantesDeItemABase64(item);
-            return itemConComprobantes;
-          })
-        );
-        paradaConComprobantes.items = itemsConComprobantes;
-      }
-      return paradaConComprobantes;
-    })
-  );
-  return { ...recorrido, paradas: paradasBase64 };
-};
-
-const convertirComprobantesDeItemABase64 = async (item: any) => {
-  if (item.comprobantes && item.comprobantes.length > 0) {
-    const comprobantesBase64 = await Promise.all(
-      item.comprobantes.map(async (comprobante: any) => {
-        return await convertirComprobanteABase64(comprobante);
-      })
-    );
-    return { ...item, comprobantes: comprobantesBase64 };
-  }
-  return item;
-};
-
-const getBase64Image = async (url: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      ctx.drawImage(img, 0, 0, img.width, img.height);
-
-      const dataURL = canvas.toDataURL('image/jpeg'); // Puedes cambiar el formato según tus necesidades
-
-      resolve(dataURL);
-    };
-
-    img.onerror = function (error) {
-      console.log(error)
-      reject(new Error('Error al cargar la imagen'));
-    };
+  } catch (error) {
     
-    console.log(url)
-    img.src = `${url}?_random=${makeid()}`;
-  });
-};
-
-const makeid = () => {
-  var text = '';
-  var possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (var i = 0; i < 5; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-};
-
-const closeRecorridoPdf = () => {
-
-  abrirModalPDF.value = false
-  cargandoImagenes.value = false;
+  } finally {
+    cargandoImagenes.value = false;
+  }
+  
 }
 
 </script>

@@ -290,7 +290,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { uploadFileToS3 } from 'src/utils/AWS'
 import Compressor from 'compressorjs';
 import { getId } from 'src/utils/Util';
-import { base64ToFile } from 'src/utils/Image';
+import { base64ToFile, compressImage } from 'src/utils/Image';
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -543,7 +543,7 @@ const takePicture = async (item?: ItemModel) => {
     const filename = getId() + "." + format; // Combi
     const mimeType = "image/" + format; // Tipo MIME
     
-    const file = await base64ToFile(base64String, filename, mimeType);
+    const file = await compressImage(await base64ToFile(base64String, filename, mimeType));
   
     let formData = new FormData();
     formData.append('file', file, filename);
@@ -558,23 +558,6 @@ const takePicture = async (item?: ItemModel) => {
    }
   }
 
-};
-
-const compressImage = (file: File): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    new Compressor(file, {
-      quality: 0.2,
-      maxWidth: 720, // Máximo ancho permitido
-      maxHeight: 720, // Máxima altura permitida
-      success(result : File) {
-        resolve(result);
-      },
-      error(err) {
-        console.error(err.message);
-        reject(err);
-      },
-    });
-  });
 };
 
 const cargandoComprobante = ref<boolean>(false)

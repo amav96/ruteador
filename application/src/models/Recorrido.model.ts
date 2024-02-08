@@ -110,3 +110,8 @@ export interface PropiedadesDetectadasModel {
     numero_telefono: string;
     codigo_area_id: number;
 }
+
+export interface InformeRequestModel {
+    rider_id: number;
+    recorrido_id: number
+}

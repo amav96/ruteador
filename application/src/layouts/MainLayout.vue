@@ -14,7 +14,7 @@
 
         <q-img
           :src="logo"
-          style="max-width: 100px"
+          style="max-width: 30px"
         />
         
         <q-btn
@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import logo from 'src/assets/logo.jpg'
+import logo from 'src/assets/rendereable logo.png'
 import { useRoute, useRouter } from 'vue-router';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import DialogLoading from 'src/components/General/DialogLoading.vue'

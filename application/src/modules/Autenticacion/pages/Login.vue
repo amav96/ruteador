@@ -9,14 +9,14 @@
                 <div class="flex column flex-center full-width">
                     <q-img
                         :src="logo"
-                        style="max-width: 130px"
+                        style="max-width: 50px"
                         class="q-mb-lg q-mt-md"
                     />
                     <div class="full-width text-h6 q-mb-lg text-deep-purple-6 text-center">
                         <strong>Ingresar a mi cuenta</strong>
                     </div>
                     
-                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width']" >
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width']" >
                         <q-input 
                         v-model="formLogin.email" 
                         color="deep-purple-6" 
@@ -25,7 +25,8 @@
                         :rules="[ val => val && isValidEmail(val) || 'Ingrese email válido']" 
                          />
                     </div>
-                    <div :class="[breakpoint.xs ? 'full-width' : 'small-width', 'q-my-md']">
+                    
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width', 'q-my-md']">
                         <q-input 
                         v-model="formLogin.password" 
                         color="deep-purple-6" 
@@ -49,28 +50,22 @@
                     <div @click="router.push({name: 'registrar'})" :class="['text-deep-purple-6 row full-width text-subtitle1', breakpoint.xs ? 'justify-end' : 'justify-center']">
                         <strong>Registrarme</strong>
                     </div>
-                </div>
 
-                <div class="flex justify-center q-my-lg ">
-                    <q-btn
-                    :class="[breakpoint.xs ? 'full-width' : '']"
-                    unelevated 
-                    rounded 
-                    color="deep-purple-6"
-                    label="Ingresar a mi cuenta" 
-                    type="submit"
-                    :disabled="formularioVacio || formLoading"
-                    />
-                </div>
-
-                
-
-                <!-- <GoogleLogin 
-                popup-type="TOKEN"
-                :callback="callback"> -->
-                    <div class="flex justify-center">
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width', 'flex justify-center q-my-lg']" >
                         <q-btn
-                        :class="[breakpoint.xs ? 'full-width' : '', 'text-black']"
+                        :class="['full-width']"
+                        unelevated 
+                        rounded 
+                        color="deep-purple-6"
+                        label="Ingresar a mi cuenta" 
+                        type="submit"
+                        :disabled="formularioVacio || formLoading"
+                        />
+                    </div>
+
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width', 'flex justify-center']" >
+                        <q-btn
+                        :class="['full-width text-black']"
                         rounded 
                         color="white"
                         label="Ingresar con Google" 
@@ -81,6 +76,9 @@
                             <img style="width: 25px;margin-left: 10px;" :src="google" />
                         </q-btn>
                     </div>
+                </div>
+
+                
                 <!-- </GoogleLogin> -->
             </q-form>
 
@@ -91,7 +89,7 @@
 
 <script setup lang="ts">
 
-import logo from 'src/assets/logo.jpg'
+import logo from 'src/assets/rendereable logo.png'
 import { ref, computed, reactive, onMounted } from "vue"
 import { useQuasar } from 'quasar'
 import { isValidEmail } from 'src/utils/Validations'
@@ -109,7 +107,6 @@ onMounted(() => {
   GoogleAuth.initialize({
     clientId: GOOGLE_CLIENT_ID,
     scopes: ['profile', 'email'],
-    grantOfflineAccess: true,
     });
 });
 

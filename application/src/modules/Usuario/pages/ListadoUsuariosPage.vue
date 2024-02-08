@@ -28,6 +28,9 @@
           <q-td key="usuario_consumo.consumo_detectar" :props="props"> 
             {{ props.row.usuario_consumo ? props.row.usuario_consumo.consumo_detectar : '' }} 
           </q-td>
+          <q-td key="usuario_consumo.cantidad_informes" :props="props"> 
+            {{ props.row.usuario_consumo ? props.row.usuario_consumo.cantidad_informes : '' }} 
+          </q-td>
         </q-tr>
       </template>
     </q-table>
@@ -83,7 +86,9 @@ const columns : any = [
   { name: 'usuario_consumo.consumo_optimizar', align: 'center', label: 'Importe Optimizaciones', field: 'usuario_consumo.consumo_optimizar' },
   { name: 'usuario_consumo.cantidad_detectar', align: 'center', label: 'Visiones', field: 'usuario_consumo.cantidad_detectar' },
   { name: 'usuario_consumo.consumo_detectar', align: 'center', label: 'Importe vision', field: 'usuario_consumo.consumo_detectar' },
+  { name: 'usuario_consumo.cantidad_informes', align: 'center', label: 'Informes generados', field: 'usuario_consumo.cantidad_informes' },
 ]
+
 
 const trayendoUsuarios = ref<boolean>(false)
 const getUsuarios = async () => {

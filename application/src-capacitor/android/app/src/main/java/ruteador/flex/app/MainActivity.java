@@ -1,4 +1,4 @@
-package org.capacitor.quasar.app;
+package ruteador.flex.app;
 
 import com.getcapacitor.BridgeActivity;
 

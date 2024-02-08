@@ -37,20 +37,20 @@
 
 const { google }: any = window;
 
-import { ref, onMounted, toRefs, defineEmits, computed, nextTick, watch } from 'vue';
-import { formatearGoogleAddress, geoposicionar, formatearGeposiciones } from 'src/utils/Google'
+import { ref, onMounted, toRefs, defineEmits, computed, watch } from 'vue';
+import { formatearGoogleAddress, geoposicionar } from 'src/utils/Google'
 import ListAutoCompleteGoogle from 'src/modules/Recorrido/components/ListAutoCompleteGoogle.vue'
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useQuasar } from 'quasar';
 import RecorridoRepository from 'src/repositories/Recorrido.repository';
-import Compressor from 'compressorjs';
+
 import { useRouter } from 'vue-router';
 import { useRecorridoStore } from 'src/stores/Recorrido';
 import { storeToRefs } from 'pinia';
 import { useUsuarioStore } from 'src/stores/Usuario'
-import { base64ToFile } from 'src/utils/Image'
+import { base64ToFile, compressImage } from 'src/utils/Image'
 import { getId } from 'src/utils/Util';
 
 const usuarioStore = useUsuarioStore()
@@ -195,8 +195,8 @@ if(image.base64String){
   const filename = getId() + "." + format; // Combi
   const mimeType = "image/" + format; // Tipo MIME
   
-  const file = await base64ToFile(base64String, filename, mimeType);
-
+  const file = await compressImage(await base64ToFile(base64String, filename, mimeType));
+  console.log(file)
   let formData = new FormData();
   formData.append('file', file, filename);
 
@@ -222,7 +222,8 @@ if(image.base64String){
   }
 
  } catch (error) {
-  alert(JSON.stringify(error))
+  console.log(error)
+  
  } finally {
   detectandoPropiedades.value = false
  
@@ -231,22 +232,6 @@ if(image.base64String){
 
 };
 
-const compressImage = (file: File): Promise<File> => {
-return new Promise((resolve, reject) => {
-  new Compressor(file, {
-    quality: 0.2,
-    maxWidth: 720, // Máximo ancho permitido
-    maxHeight: 720, // Máxima altura permitida
-    success(result : File) {
-      resolve(result);
-    },
-    error(err) {
-      console.error(err.message);
-      reject(err);
-    },
-  });
-});
-};
 
 </script>
 

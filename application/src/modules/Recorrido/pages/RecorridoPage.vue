@@ -110,7 +110,7 @@
         <skeleton-paradas :mostrar="cargandoRecorrido" />
         
         <!-- detalle del viaje -->
-        <div v-if="tieneParadas && recorrido && recorrido.distancia && recorrido.duracion" class="flex row q-gutter-sm">
+        <div v-if="!cargandoRecorrido && tieneParadas && recorrido && recorrido.distancia && recorrido.duracion" class="flex row q-gutter-sm">
           <q-icon
           size="xs"
           name="directions_car"

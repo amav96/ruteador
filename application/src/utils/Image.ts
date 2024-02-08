@@ -1,3 +1,5 @@
+import Compressor from 'compressorjs';
+
 export function base64ToFile(base64String: string, filename: string, mimeType: string): Promise<File> {
     return new Promise((resolve, reject) => {
         // Decodifica la cadena base64 en un ArrayBuffer
@@ -21,3 +23,20 @@ export function base64ToFile(base64String: string, filename: string, mimeType: s
         resolve(file);
     });
 }
+
+export const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      new Compressor(file, {
+        quality: 0.2,
+        maxWidth: 720, // Máximo ancho permitido
+        maxHeight: 720, // Máxima altura permitida
+        success(result : File) {
+          resolve(result);
+        },
+        error(err) {
+          console.error(err.message);
+          reject(err);
+        },
+      });
+    });
+    };
