@@ -7,7 +7,7 @@ export default class RecorridoRepository {
 
   async optimizar(data: OptimizarRecorridoRequestModel) 
   : Promise<{ 
-    recorrido: ParadaModel[],
+    paradas: ParadaModel[],
     duracion: string,
     distancia: string,
     polyline: string
@@ -15,6 +15,20 @@ export default class RecorridoRepository {
     try {
       const response = await request({
           url: API_BASE_URL + '/api/recorridos/optimizar',
+          method: 'POST',
+          data,
+          auth: true
+        });
+      return response.data;
+    } catch (error) {
+        throw error
+    }
+  }
+
+  async getPolyline(data: OptimizarRecorridoRequestModel){
+    try {
+      const response = await request({
+          url: API_BASE_URL + '/api/recorridos/polyline',
           method: 'POST',
           data,
           auth: true
@@ -57,7 +71,6 @@ export default class RecorridoRepository {
       throw error
     }
   }
-
 
   async updateOrigen(data : UpdateOrigenRequest, recorridoId : number){
     try {

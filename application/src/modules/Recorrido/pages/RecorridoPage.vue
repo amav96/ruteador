@@ -705,14 +705,14 @@
         recorrido_id: Number(recorridoId.value),
         rider_id: usuario.id
       })
-      const { recorrido: recorridoServer, duracion, distancia, polyline } = response;
-      if(recorridoServer){
-        paradas.value = [...recorridoServer]
+      const { paradas: paradasServer, duracion, distancia, polyline } = response;
+      if(paradasServer){
+        paradas.value = [...paradasServer]
         if(recorrido.value){
           recorrido.value.optimizado = 1;
           if(duracion) recorrido.value.duracion = duracion;
           if(distancia) recorrido.value.distancia = distancia;
-          if(polyline) recorrido.value.polyline = polyline;
+          recorrido.value.polyline = polyline;
           
         }
       

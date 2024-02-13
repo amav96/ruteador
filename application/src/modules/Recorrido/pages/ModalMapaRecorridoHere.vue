@@ -24,20 +24,23 @@
 import { ParadaModel } from 'src/models/Parada.model';
 import { ref, watch, toRefs, reactive, onMounted, computed, nextTick } from 'vue';
 import { useRecorridoStore } from 'src/stores/Recorrido'
-import { useUsuarioStore } from 'src/stores/Usuario'
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import RecorridoRepository from 'src/repositories/Recorrido.repository';
 import UsuarioRepository from 'src/repositories/Usuario.repository';
+import { useUsuarioStore } from 'src/stores/Usuario'
+
+
+const usuarioStore = useUsuarioStore()
+
+const recorridoRepository = new RecorridoRepository();
 
 const router = useRouter();
 const route = useRoute();
 
-const recorridoRepository = new RecorridoRepository();
 
 const { google } : any = window;
 
-const usuarioStore = useUsuarioStore()
 const recorridoStore = useRecorridoStore()
 const { recorrido, paradas } = storeToRefs(recorridoStore)
 
@@ -71,113 +74,87 @@ const paradasVisitables = computed<ParadaModel[]>(() => paradas?.value)
 const openModal = ref<boolean>(true)
 
 const bounds = ref<any>()
-const googleMaps = reactive<any>({
+const hereMaps = reactive<any>({
     map: '',
-    markerMain: '',
-    markers: []
+    ui: '',
+    markers: [],
+    polyline: null
 })
 
 const infoWindow = ref<any>(null)
 
 const iniciarMapa = async () => {
-    const { origen_actual_lat, origen_actual_lng } = recorrido.value;
-    bounds.value = new google.maps.LatLngBounds();
-    const myPosition = { lat: origen_actual_lat, lng: origen_actual_lng };
-    googleMaps.map = new google.maps.Map(document.getElementById('map'), {
-        center: myPosition,
-        zoom: 14,
+
+    const platform = new H.service.Platform({
+        'apikey': 'TOnNjKWqJj6OGDQwp5o9c3qVlLV27GJ8D7ACh8o1OiA'
     });
 
-    googleMaps.markerMain = new google.maps.Marker({
-        position: myPosition,
-        map: googleMaps.map,
-        icon: `https://api.devuelvoya.com/images/icons/yellow-marker.png`,
+    const defaultLayers = platform.createDefaultLayers();
+    const map = new H.Map(document.getElementById('map'),
+        defaultLayers.vector.normal.map,{
+        center: {lat: recorrido.value.origen_actual_lat, lng:recorrido.value.origen_actual_lng},
+        zoom: 12,
+        pixelRatio: window.devicePixelRatio || 1
     });
-    let path : any = '';
-    
-    if(recorrido.value.polyline){
-        path = google.maps.geometry.encoding.decodePath(recorrido.value.polyline);
-    } else {
-       
-        const response = await recorridoRepository.getPolyline({
+
+    const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+    const ui = H.ui.UI.createDefault(map, defaultLayers);
+
+    window.addEventListener('resize', () => map.getViewPort().resize());
+
+    hereMaps.map = map;
+    hereMaps.ui = ui;
+
+    crearMarcadorPosiciones(map);
+}
+
+const crearMarcadorPosiciones = async (map: any) => {
+    paradasVisitables.value.forEach((point) => {
+        const coord = { lat: point.lat, lng: point.lng };
+        crearMarcador(map, coord, point);
+    });
+
+    marcarFinalRecorrido(map);
+
+    const response = await recorridoRepository.getPolyline({
             recorrido_id: recorrido.value.id,
             rider_id: usuarioStore.usuario.id
         });
         const { polyline } = response;
         if(polyline){
             recorrido.value.polyline = polyline
-            console.log(polyline)
-            path = google.maps.geometry.encoding.decodePath(polyline);
+           
+            const lineString = H.geo.LineString.fromFlexiblePolyline(polyline);
+            const polylineObj = new H.map.Polyline(lineString, { style: { lineWidth: 4 }});
+            map.addObject(polylineObj);
+            // const polylineObj = new H.map.Polyline(strip, { style: { lineWidth: 4 }});
+            
+            // path = google.maps.geometry.encoding.decodePath(polyline);
         }
-    }
-    // Decodificar la cadena de la polilínea para obtener las coordenadas
 
-
-    crearMarcadorPosiciones()
-    
-   
-    googleMaps.routePolyline = new google.maps.Polyline({
-        path: path,
-        geodesic: true,
-        strokeColor: '#145DA0',
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
-        map: googleMaps.map
-    });
-
-    // Mostrar la polilínea en el mapa
-    googleMaps.routePolyline.setMap(googleMaps.map);
-
-    const coord = new google.maps.LatLng(myPosition);
-    bounds.value.extend(coord);
-    googleMaps.map.fitBounds(bounds.value);
-    infoWindow.value = new google.maps.InfoWindow();
 }
 
-const crearMarcadorPosiciones = () => {
-    paradasVisitables.value.forEach((point) => {
-        const coord = new google.maps.LatLng(point.lat, point.lng);
-        bounds.value.extend(coord);
-        crearMarcador(coord, point);
-        googleMaps.map.fitBounds(bounds.value);
-    });
-
-    marcarFinalRecorrido()
-}
-
-const marcarFinalRecorrido = () => {
-    let iconCustom = `https://api.devuelvoya.com/images/icons/yellow-marker.png`;
+const marcarFinalRecorrido = (map: any) => {
     const { destino_lat, destino_lng } = recorrido.value
-    const coord = new google.maps.LatLng(destino_lat, destino_lng);
+    const coord = { lat: destino_lat, lng: destino_lng };
 
-    const marker = new google.maps.Marker({
-        position: coord,
-        map: googleMaps.map,
-        icon: iconCustom,
-    });
-    googleMaps.markers.push(marker);
+    const marker = new H.map.Marker(coord);
+    map.addObject(marker);
 }
 
-const crearMarcador = (coord : any, point : ParadaModel) => {
+const crearMarcador = (map: any ,coord : any, point : ParadaModel) => {
     
-    const html = popUp(point)
-   
-    let icon = point.parada_estado.codigo === 'visitado' ? 'green-marker.png' : point.parada_estado.tipo === 'negativo' ? 'red-marker.png' : 'blue-marker.png'
-    let urlIcon = `https://api.devuelvoya.com/images/icons/${icon}`;
+    
+    const marker = new H.map.Marker(coord);
+    map.addObject(marker);
 
-    const marker = new google.maps.Marker({
-        position: coord,
-        map: googleMaps.map,
-        icon: urlIcon,
-    });
-
-    google.maps.event.addListener(marker, 'click', () => {
-       infoWindow.value.setContent(html);
-       infoWindow.value.open(googleMaps.map, marker);
-
-      });
-
-    googleMaps.markers.push(marker);
+    // marker.addEventListener('tap', () => {
+    //     const html = popUp(point);
+    //     const infoBubble = new H.ui.InfoBubble(coord, {
+    //         content: html
+    //     });
+    //     ui.addBubble(infoBubble);
+    // });
 }
 
 const popUp = (point: ParadaModel) => {

@@ -185,6 +185,7 @@ const callback = async () => {
         }
         
     } catch (error) {
+        alert(JSON.stringify(error))
         console.log(error)
     } finally {
         formLoading.value = false

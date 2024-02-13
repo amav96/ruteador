@@ -190,6 +190,7 @@ const getCliente = async () => {
             clienteForm.value.tipo_documento_id = cliente.tipo_documento_id
             clienteForm.value.numero_documento = cliente.numero_documento
             clienteForm.value.nombre = cliente.nombre
+            clienteForm.value.observaciones = cliente.observaciones
             const { clientes_numeros } = cliente;
             if(clientes_numeros && clientes_numeros?.length > 0){
                 clientesNumerosForm.value = []

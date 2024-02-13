@@ -94,23 +94,19 @@
                     />
                 </div>
 
-                <GoogleLogin 
-                popup-type="TOKEN"
-                :callback="callback">
-                    <div class="flex justify-center">
-                        <q-btn
-                        :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : '', 'text-black']"
-                        rounded 
-                        color="white"
-                        label="Registrarme con Google" 
-                        type="button"
-                       
-                        :disabled="formLoading"
-                        >
-                            <img style="width: 25px;margin-left: 10px;" :src="google" />
-                        </q-btn>
-                    </div>
-                </GoogleLogin>
+                <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width', 'flex justify-center']" >
+                    <q-btn
+                    :class="['full-width text-black']"
+                    rounded 
+                    color="white"
+                    label="Registrarme con Google" 
+                    type="button"
+                    @click="callback"
+                    :disabled="formLoading"
+                    >
+                        <img style="width: 25px;margin-left: 10px;" :src="google" />
+                    </q-btn>
+                </div>
             </q-form>
 
             <DialogLoading :open="formLoading" text="Registrando..." />
@@ -206,9 +202,10 @@ const completarRegistro = (usuario: UsuarioModel, token: string) => {
 }
 
 const callback = async () => {
-   
+    console.log("sfds")
     try {
         const googleData = await GoogleAuth.signIn();
+       
         formLoading.value = true
         if(googleData && googleData.authentication){
             const {  accessToken }  = googleData.authentication;

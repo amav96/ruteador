@@ -10,6 +10,7 @@
         "profile",
         "email"
       ],
+      "androidClientId": "258214718434-rrole8msmiuh271n5eu8l2eqloss3smn.apps.googleusercontent.com",
       "clientId": "258214718434-rrole8msmiuh271n5eu8l2eqloss3smn.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
     },
