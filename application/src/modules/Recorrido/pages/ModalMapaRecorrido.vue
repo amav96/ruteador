@@ -56,7 +56,7 @@ onMounted(async () => {
     if(recorrido.value){
         iniciarMapa();
         asignarEventos()
-    }
+    } 
 });
 
 const asignarEventos = () => {
@@ -77,22 +77,24 @@ const googleMaps = reactive<any>({
     markers: []
 })
 
+interface Coordinates {
+    lat: number | null;
+    lng: number | null;
+}
+
 const infoWindow = ref<any>(null)
 
 const iniciarMapa = async () => {
     const { origen_actual_lat, origen_actual_lng } = recorrido.value;
     bounds.value = new google.maps.LatLngBounds();
-    const myPosition = { lat: origen_actual_lat, lng: origen_actual_lng };
+    const myPosition: Coordinates = { lat: origen_actual_lat, lng: origen_actual_lng };
     googleMaps.map = new google.maps.Map(document.getElementById('map'), {
         center: myPosition,
         zoom: 14,
     });
 
-    googleMaps.markerMain = new google.maps.Marker({
-        position: myPosition,
-        map: googleMaps.map,
-        icon: `https://api.devuelvoya.com/images/icons/yellow-marker.png`,
-    });
+    marcadorInicialRecorrido(myPosition);
+   
     let path : any = '';
     
     if(recorrido.value.polyline){
@@ -106,16 +108,13 @@ const iniciarMapa = async () => {
         const { polyline } = response;
         if(polyline){
             recorrido.value.polyline = polyline
-            console.log(polyline)
             path = google.maps.geometry.encoding.decodePath(polyline);
         }
     }
     // Decodificar la cadena de la polilínea para obtener las coordenadas
 
-
     crearMarcadorPosiciones()
     
-   
     googleMaps.routePolyline = new google.maps.Polyline({
         path: path,
         geodesic: true,
@@ -145,6 +144,19 @@ const crearMarcadorPosiciones = () => {
     marcarFinalRecorrido()
 }
 
+
+const marcadorInicialRecorrido = (myPosition: Coordinates) => {
+    
+
+    googleMaps.markerMain = new google.maps.Marker({
+        position: myPosition,
+        map: googleMaps.map,
+        icon: `https://api.devuelvoya.com/images/icons/yellow-marker.png`,
+       
+    });
+
+}
+
 const marcarFinalRecorrido = () => {
     let iconCustom = `https://api.devuelvoya.com/images/icons/yellow-marker.png`;
     const { destino_lat, destino_lng } = recorrido.value
@@ -154,21 +166,27 @@ const marcarFinalRecorrido = () => {
         position: coord,
         map: googleMaps.map,
         icon: iconCustom,
+        
     });
     googleMaps.markers.push(marker);
 }
 
-const crearMarcador = (coord : any, point : ParadaModel) => {
+const crearMarcador = (coord : any, parada : ParadaModel) => {
     
-    const html = popUp(point)
+    const html = popUp(parada)
    
-    let icon = point.parada_estado.codigo === 'visitado' ? 'green-marker.png' : point.parada_estado.tipo === 'negativo' ? 'red-marker.png' : 'blue-marker.png'
-    let urlIcon = `https://api.devuelvoya.com/images/icons/${icon}`;
-
+    let icon = parada.parada_estado.codigo === 'visitado' ? 'green-marker.png' : parada.parada_estado.tipo === 'negativo' ? 'red-marker.png' : 'blue-marker.png'
+  
+    var label = {
+        text: parada.orden.toString(),
+        color: "white",
+        fontSize: "13px",
+    };
     const marker = new google.maps.Marker({
         position: coord,
         map: googleMaps.map,
-        icon: urlIcon,
+        icon: markerImage("white", "#651fff"),
+        label: label
     });
 
     google.maps.event.addListener(marker, 'click', () => {
@@ -178,6 +196,20 @@ const crearMarcador = (coord : any, point : ParadaModel) => {
       });
 
     googleMaps.markers.push(marker);
+}
+
+const markerImage = (strokeColor: string, pinColor: string, labelOriginFilled?: any) => {
+    var pinSVGFilled = "M 12,2 C 8.1340068,2 5,5.1340068 5,9 c 0,5.25 7,13 7,13 0,0 7,-7.75 7,-13 0,-3.8659932 -3.134007,-7 -7,-7 z";
+    return {  // https://developers.google.com/maps/documentation/javascript/reference/marker#MarkerLabel
+        path: pinSVGFilled,
+        anchor: new google.maps.Point(12,17),
+        fillOpacity: 1,
+        fillColor: pinColor,
+        strokeWeight: 1,
+        strokeColor: strokeColor,
+        scale: 2,
+        labelOrigin: labelOriginFilled ?? new google.maps.Point(12,9)
+    }
 }
 
 const popUp = (point: ParadaModel) => {

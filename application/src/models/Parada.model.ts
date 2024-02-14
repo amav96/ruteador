@@ -44,6 +44,7 @@ export interface ParadaModel {
     id: number;
     lat: string;
     lng: string;
+    orden: number;
     localidad: string;
     provincia: string;
     recorrido_id: number;
