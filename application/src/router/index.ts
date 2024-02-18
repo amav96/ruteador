@@ -5,10 +5,35 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router';
-
 import routes from './routes';
-
 import { useUsuarioStore } from 'src/stores/Usuario'
+import { Preferences } from '@capacitor/preferences';
+
+import { App } from '@capacitor/app';
+
+let appInBackground: boolean = false;
+
+let currentPath = '/';
+
+const setPath = async (path: any) => {
+  currentPath = path;
+  await Preferences.set({ key: '_path', value: currentPath });
+};
+
+const getPath = async () : Promise<any> => {
+  return await Preferences.get({ key: '_path'});
+};
+
+App.addListener('appStateChange', ({ isActive }) => {
+  
+  if (isActive) {
+    // La aplicación está en primer plano
+    appInBackground = false;
+  } else {
+    // La aplicación está en segundo plano
+    appInBackground = true;
+  }
+});
 
 /*
  * If not building with SSR mode, you can
@@ -35,6 +60,11 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach(async (to, from, next) => {
+    if(to.path && to.path !== "/"){
+      setPath(to.path);
+    }
+    
+
     const usuarioStore = useUsuarioStore()
     const {
       usuarioAutenticado,
@@ -57,27 +87,28 @@ export default route(function (/* { store, ssrContext } */) {
               if(autorizado(to.meta.gate as string)){
                 next()
               } else {
-                console.log("no")
                 next('/sin-permisos')
               }
-              
             }
           }
-      
-        
+
       } else {
         next('/autenticacion/login')
       }
     } else {
-      if(to.path === "/"){
-        next('recorridos/listado-recorrido');
+      if (to.path === "/") {
+        let storedPath = await getPath();
+        if(storedPath.value){
+          next(storedPath.value);
+        } else {
+          next('recorridos/listado-recorrido');
+        }
+        
       } else {
         next();
       }
-      
-      
     }
-   
+
   })
 
   return Router;

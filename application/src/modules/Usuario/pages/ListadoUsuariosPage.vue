@@ -1,12 +1,14 @@
 <template>
     <div class="q-pa-md">
     <q-table
-      flat bordered
+      flat 
+      bordered
       title="Usuarios"
       :rows="usuarios"
       :columns="columns"
       row-key="name"
       hide-pagination
+      :rows-per-page-options="[20]"
     >
       <template v-slot:body="props">
         <q-tr :props="props" >
@@ -30,6 +32,18 @@
           </q-td>
           <q-td key="usuario_consumo.cantidad_informes" :props="props"> 
             {{ props.row.usuario_consumo ? props.row.usuario_consumo.cantidad_informes : '' }} 
+          </q-td>
+          <q-td key="usuario_consumo.consumo_polyline" :props="props"> 
+            {{ props.row.usuario_consumo ? props.row.usuario_consumo.consumo_polyline : '' }} 
+          </q-td>
+          <q-td key="usuario_consumo.cantidad_polyline" :props="props"> 
+            {{ props.row.usuario_consumo ? props.row.usuario_consumo.cantidad_polyline : '' }} 
+          </q-td>
+          <q-td key="paradas_total" :props="props"> 
+            {{ props.row.paradas_total ? props.row.paradas_total : '' }} 
+          </q-td>
+          <q-td key="paradas_hoy" :props="props"> 
+            {{ props.row.paradas_hoy ? props.row.paradas_hoy : '' }} 
           </q-td>
         </q-tr>
       </template>
@@ -86,7 +100,11 @@ const columns : any = [
   { name: 'usuario_consumo.consumo_optimizar', align: 'center', label: 'Importe Optimizaciones', field: 'usuario_consumo.consumo_optimizar' },
   { name: 'usuario_consumo.cantidad_detectar', align: 'center', label: 'Visiones', field: 'usuario_consumo.cantidad_detectar' },
   { name: 'usuario_consumo.consumo_detectar', align: 'center', label: 'Importe vision', field: 'usuario_consumo.consumo_detectar' },
+  { name: 'usuario_consumo.cantidad_polyline', align: 'center', label: 'Polylines', field: 'usuario_consumo.cantidad_polyline' },
+  { name: 'usuario_consumo.consumo_polyline', align: 'center', label: 'Importe polyline', field: 'usuario_consumo.consumo_polyline' },
   { name: 'usuario_consumo.cantidad_informes', align: 'center', label: 'Informes generados', field: 'usuario_consumo.cantidad_informes' },
+  { name: 'paradas_total', align: 'center', label: 'Paradas total', field: 'paradas_total' },
+  { name: 'paradas_hoy', align: 'center', label: 'Paradas hoy', field: 'paradas_hoy' },
 ]
 
 
@@ -102,6 +120,7 @@ const getUsuarios = async () => {
         const usuariosServer = await usuarioRepository.get(params);
         if('data' in usuariosServer){
             const { data, current_page, total, last_page, next_page_url, prev_page_url } = usuariosServer 
+            console.log(total)
             usuarios.value = data
             pagination.page = current_page
             pagination.total = total

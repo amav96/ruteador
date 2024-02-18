@@ -8,6 +8,10 @@ export interface UsuarioConsumoModel {
     consumo_optimizar: number;
     cantidad_detectar: number;
     consumo_detectar: number;
+    cantidad_polyline: number;
+    consumo_polyline: number;
+    paradas_hoy: number;
+    paradas_total: number;
     usuario_id: number;
     created_at: string;
     updated_at: string

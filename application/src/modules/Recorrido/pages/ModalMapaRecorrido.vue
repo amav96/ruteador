@@ -28,7 +28,7 @@ import { useUsuarioStore } from 'src/stores/Usuario'
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import RecorridoRepository from 'src/repositories/Recorrido.repository';
-import UsuarioRepository from 'src/repositories/Usuario.repository';
+import raceFlag from 'src/assets/checkered-flag.png'
 
 const router = useRouter();
 const route = useRoute();
@@ -88,9 +88,16 @@ const iniciarMapa = async () => {
     const { origen_actual_lat, origen_actual_lng } = recorrido.value;
     bounds.value = new google.maps.LatLngBounds();
     const myPosition: Coordinates = { lat: origen_actual_lat, lng: origen_actual_lng };
+    
     googleMaps.map = new google.maps.Map(document.getElementById('map'), {
         center: myPosition,
         zoom: 14,
+        styles: [
+            {
+                featureType: "poi",
+                stylers: [{ visibility: "off" }]
+            }
+        ]
     });
 
     marcadorInicialRecorrido(myPosition);
@@ -144,30 +151,47 @@ const crearMarcadorPosiciones = () => {
     marcarFinalRecorrido()
 }
 
+const raceIcon = {
+        url: raceFlag,
+        scaledSize: new google.maps.Size(50, 50) // Aquí puedes ajustar el tamaño deseado
+    };
 
 const marcadorInicialRecorrido = (myPosition: Coordinates) => {
     
+    // var label = {
+    //     text: "A",
+    //     color: "white",
+    //     fontSize: "13px",
+    // };
 
     googleMaps.markerMain = new google.maps.Marker({
         position: myPosition,
         map: googleMaps.map,
-        icon: `https://api.devuelvoya.com/images/icons/yellow-marker.png`,
-       
+        // icon: markerImage("white", "#000"),
+        icon: raceIcon,
+        // label: label
     });
 
 }
 
 const marcarFinalRecorrido = () => {
-    let iconCustom = `https://api.devuelvoya.com/images/icons/yellow-marker.png`;
     const { destino_lat, destino_lng } = recorrido.value
     const coord = new google.maps.LatLng(destino_lat, destino_lng);
 
+    // var label = {
+    //     text: "B",
+    //     color: "white",
+    //     fontSize: "13px",
+    // };
+    
     const marker = new google.maps.Marker({
         position: coord,
         map: googleMaps.map,
-        icon: iconCustom,
-        
+        // icon: markerImage("white", "#000"),
+        icon: raceIcon,
+        // label: label
     });
+
     googleMaps.markers.push(marker);
 }
 
@@ -175,17 +199,28 @@ const crearMarcador = (coord : any, parada : ParadaModel) => {
     
     const html = popUp(parada)
    
-    let icon = parada.parada_estado.codigo === 'visitado' ? 'green-marker.png' : parada.parada_estado.tipo === 'negativo' ? 'red-marker.png' : 'blue-marker.png'
+    let iconColor = parada.parada_estado.codigo === 'visitado' 
+                ? '#0BDA51' 
+                : parada.parada_estado.tipo === 'negativo' 
+                    ? '#C70039' 
+                    : '#651fff'
+    let text = parada.parada_estado.codigo === 'visitado' 
+                ? ' '
+                : parada.parada_estado.tipo === 'negativo' 
+                    ? ' ' 
+                    // #C70039
+                    : parada.orden.toString()
   
     var label = {
-        text: parada.orden.toString(),
+        text,
         color: "white",
         fontSize: "13px",
     };
+
     const marker = new google.maps.Marker({
         position: coord,
         map: googleMaps.map,
-        icon: markerImage("white", "#651fff"),
+        icon: markerImage("white", iconColor),
         label: label
     });
 

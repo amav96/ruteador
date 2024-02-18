@@ -199,7 +199,6 @@
         <dialog-loading :open="actualizandoRecorridoEstado" text="Actualizando recorrido" />
 
         <router-view
-          @parada-seleccionada="paradaSeleccionada"
           @origen-seleccionado="origenSeleccionado"
           @destino-seleccionado="destinoSeleccionado"
           @actualizar-estado-parada="actualizarEstadoParada"
@@ -341,56 +340,7 @@
     router.push({ name: 'buscar-direccion' });
   };
   
-  const paradaSeleccionada = async (data: GooglePlacesAutocompleteResponseModel) => {
-    
-    if(data.id){
-      actualizarParada(data)
-    } else {
-      agregarParada(data)
-    }
-    
-  };
-  
-  const agregarParada = async (data: GooglePlacesAutocompleteResponseModel) => {
-   
-    const { geometry: { location : { lat , lng} } , formatted_address } = data;
-    const resultadoFormateo = formatearGoogleAddress(data.address_components) 
-    const {
-      localidad,
-      provincia,
-      codigo_postal,
-    } = resultadoFormateo
-
-    try {
-
-      if(usuario){
-      const response = await paradaRepository.create({
-        recorrido_id: Number(recorridoId.value),
-        lat: lat(),
-        lng: lng(),
-        direccion_formateada: direccionLegible(resultadoFormateo, formatted_address),
-        rider_id: usuario.id,
-        codigo_postal: codigo_postal ?? '',
-        localidad: localidad ?? '',
-        provincia: provincia ?? '',
-      });
-      const { parada } = response;
-
-      if(parada){
-        paradas.value.unshift(parada)
-        if(recorrido.value){
-          recorrido.value.optimizado = 0;
-        }
-      }
-    }
-      
-    } catch (error) {
-        console.log(error)
-    }
-
-  };
-
-
+  // NO BORRAR, ESTE METODO SERVIRA DE GUIA PARA ACTUALIZAR
   const actualizarParada = async (data: GooglePlacesAutocompleteResponseModel) => {
     const { geometry: { location : { lat , lng} } , formatted_address, id } = data;
     const resultadoFormateo = formatearGoogleAddress(data.address_components) 
@@ -600,7 +550,6 @@
   }
 
   const colorParada = (parada: ParadaModel) : string => {
-
     if(parada.parada_estado_id === PARADA_ESTADOS.PREPARADO || parada.parada_estado_id === PARADA_ESTADOS.EN_CAMINO){
       return 'grey-6'
     } else if(parada.parada_estado.tipo === 'positivo'){

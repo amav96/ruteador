@@ -1,5 +1,8 @@
 <template>
     <div class="flex column justify-center">
+        <div class="text-h6 q-mx-sm">
+          Listado de recorridos 
+        </div>
         <q-card
         v-if="cargandoRecorrido"
         v-for="(sk, index) in skeletonRecorridos" 
@@ -40,7 +43,6 @@
                     <div class="flex row items-center">
                       <div class="text-body1 text-weight-bold"> Paradas </div>
                       <div 
-                      v-if="recorrido.paradas && recorrido.paradas.length > 0" 
                       class=" q-ml-xs"> 
                           {{ recorrido.paradas.length }} 
                       </div>
@@ -49,10 +51,16 @@
                       <div class="text-body1 text-weight-bold"> Inicio </div>
                       <div class="q-ml-xs"> {{  recorrido.inicio }}</div>
                     </div>
+                    <div v-if="recorrido.finalizado" class="flex row items-center">
+                      <div class="text-body1 text-weight-bold"> Finalizado </div>
+                      <div class="q-ml-xs"> {{  recorrido.finalizado }}</div>
+                    </div>
                     <div class="flex row items-center">
-                      <div class="text-body1 text-weight-bold"> Estado </div>
+                      
                       <q-chip  
-                      :style="`background:${recorrido.recorrido_estado.color};`">
+                      square 
+                      class="text-weight-medium"
+                      :style="`background:${recorrido.recorrido_estado.color};margin:4px 0px;`">
                       {{ recorrido.recorrido_estado.nombre }} 
                       </q-chip>
                     </div>

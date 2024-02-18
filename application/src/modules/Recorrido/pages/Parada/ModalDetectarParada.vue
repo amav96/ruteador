@@ -90,11 +90,7 @@ import AutoCompleteGoogleInput from 'src/modules/Recorrido/components/Parada/Aut
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute, routerKey } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { ItemModel, ItemRequestModel } from 'src/models/Item.model';
-import { ParadaModel } from 'src/models/Parada.model';
-import { ClienteRequestModel, ClienteModel } from 'src/models/Cliente.model';
-import ItemRepository from 'src/repositories/Item.repository'
-import ClienteRepository from 'src/repositories/Cliente.repository'
+import { ItemModel } from 'src/models/Item.model';
 import { useRecorridoStore } from 'src/stores/Recorrido';
 import { storeToRefs } from 'pinia';
 import { reactive } from 'vue';
@@ -103,14 +99,32 @@ import { GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import ParadaRepository from 'src/repositories/Parada.repository';
 
-const paradaRepository = new ParadaRepository();
+import guardarParadaComposable from 'src/modules/Recorrido/composables/GuardarParadaComposable'
+import { ClienteModel } from 'src/models/Cliente.model';
+
+const {
+  agregarParadaDetectada,
+  clienteGuardable,
+  crearCliente,
+  crearItem,
+  mostrarInformacionContacto,
+  mostrarInformacionPaquete,
+  formItemRef,
+  formContactoRef,
+  itemForm,
+  clienteForm,
+  clientesNumerosForm,
+  guardandoCliente,
+  guardandoItem,
+  cargandoFomularios,
+ } = await guardarParadaComposable()
 
 const emit = defineEmits<{
   (e: 'actualizarParada', data: boolean): void
 }>()
 
 const recorridoStore = useRecorridoStore()
-const { propiedadesDetectadas, recorrido, paradas } = storeToRefs(recorridoStore)
+const { propiedadesDetectadas } = storeToRefs(recorridoStore)
 
 const itemAutoCompletable = reactive<ItemModel | any>({})
 const clienteAutoCompletable = reactive<ClienteModel | any>({})
@@ -174,8 +188,7 @@ onMounted(async () => {
 
 })
 
-const itemRepository = new ItemRepository()
-const clienteRepository = new ClienteRepository();
+const paradaRepository = new ParadaRepository();
 
 const usuarioStore = useUsuarioStore()
 
@@ -186,23 +199,9 @@ const breakpoint = computed(() => $q.screen)
 const route = useRoute();
 const router = useRouter();
 
-const mostrarInformacionContacto = ref<boolean>(true)
-const mostrarInformacionPaquete = ref<boolean>(true)
-
 const dialog =  ref(true)
 const maximizedToggle =  ref(true)
 
-const formItemRef = ref<any>(null)
-const formContactoRef = ref<any>(null)
-
-const itemForm = ref<ItemRequestModel | null>(null)
-const clienteForm = ref<ClienteRequestModel | null>(null)
-const clientesNumerosForm = ref<any>(null)
-
-const guardandoCliente = ref<boolean>(false)
-const guardandoItem = ref<boolean>(false)
-
-const cargandoFomularios = ref<boolean>(false)
 const recorridoId = computed(() => route.params.recorrido_id)
 const manejarData = async () => {
    if(Object.keys(direccion.data).length === 0){
@@ -291,76 +290,10 @@ const manejarData = async () => {
         timer = void 0
         router.push({name: 'recorrido',  params: { recorrido_id: recorridoId.value}})
     }
-
-}
-
-const clienteGuardable = () : boolean => {
-    if(clienteForm.value){
-
-    const {
-        tipo_documento_id,
-        numero_documento,
-        nombre
-    } = clienteForm.value
-
-    return (!!tipo_documento_id && numero_documento !== null && numero_documento !== undefined) || 
-            (clientesNumerosForm.value.some((numero: any) => numero.numero !== null) || nombre)
-    }
-
-    return false;
-}
-
-const crearCliente = async () : Promise<ClienteModel | null> => {
-    let response = null
-    guardandoCliente.value = true;
-    try {
-        
-        // @ts-ignore
-        clienteForm.value.clientes_numeros = clientesNumerosForm.value.filter((n: any) => n.numero !== undefined && n.numero !== null&&  n.numero !== '')
-        // @ts-ignore
-        response = await clienteRepository.create(clienteForm.value)
-
-    } catch (error) {
-        console.log(error)
-    } finally {
-        guardandoCliente.value = false;
-    }
-    return response
-}
-
-const crearItem = async (cliente_id?: number | null) => {
-    if(itemForm.value){
-        try {
-            guardandoItem.value = true;
-            if(cliente_id){
-                itemForm.value.cliente_id = cliente_id
-            }
-            const response = await itemRepository.create(itemForm.value);
-            
-        } catch (error  : any) {
-            const { data } = error;
-            let mensaje = data && data.message ?  data.message : 'No se creo correctamente';
-            $q.notify({
-                type: 'negative',
-                message: mensaje,
-                position: 'top',
-                timeout: 15000
-            })
-            guardandoItem.value = false;
-        }
-    } 
 }
 
 const paradaSeleccionada = (data: GooglePlacesAutocompleteResponseModel) => {
     direccion.data = data
-}
-
-const agregarParadaDetectada = (data: ParadaModel) => {
- 
-    paradas.value.unshift(data)
-    if(recorrido.value){
-      recorrido.value.optimizado = 0;
-    }
 }
 
 onBeforeUnmount(() => {

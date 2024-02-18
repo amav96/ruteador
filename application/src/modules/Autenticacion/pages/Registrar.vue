@@ -180,7 +180,6 @@ const onSubmit = async () => {
         }
 
     } catch (error : any) {
-        alert(JSON.stringify(error))
         const { data } = error;
         
         let mensaje = data && data.message ?  data.message : 'No se pudo registrar correctamente';
