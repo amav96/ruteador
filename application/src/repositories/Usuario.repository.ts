@@ -19,5 +19,6 @@ export default class UsuarioRepository {
       throw error
     }
   }
+  // async marcarActualizado
 
 }

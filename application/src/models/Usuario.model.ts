@@ -25,7 +25,9 @@ export interface UsuarioModel {
     updated_at: string;
     empresas: EmpresaModel[];
     pais: PaisModel,
-    usuarioConsumo : UsuarioConsumoModel
+    usuarioConsumo : UsuarioConsumoModel,
+    actualizacion: string,
+    version: string
 }
 
 export interface UsuarioPaginacionModel {
