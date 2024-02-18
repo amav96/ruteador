@@ -71,27 +71,7 @@
                 Comprobantes de parada
             </div>
 
-            <imagenes-comprobantes 
-            v-if="parada"
-            modelo="ParadaComprobante"
-            :comprobantes="parada.comprobantes"
-            :pathBucket="S3BUCKETLAGUAGUA"
-            :imagen-eliminable="!estadoParadaMostrable"
-            @actualizar-comprobantes="parada.comprobantes = $event"
-            />
-
             <q-separator v-if="tieneItems && parada && parada?.comprobantes.length > 0" spaced />
-
-            <!-- agregar comprobante a parada -->
-            <div v-if="!trayendoParada && !tieneItems && paqueteEntregable" 
-            class="flex row items-center q-gutter-x-sm q-px-sm q-my-sm">
-                <div>
-                    <q-icon size="sm" name="photo_camera" />
-                </div> 
-                <div @click="takePicture()" >
-                    <q-btn round size="xs" color="deep-purple-13" icon="add" />
-                </div>
-            </div>
 
             <!-- listado de paquetes -->
             <template v-if="tieneItems">
@@ -209,7 +189,7 @@
                 label="Confirmar"  
                 color="deep-purple-13" 
                 v-close-popup
-                @click="items.length === 0 ? notificarParadaPositiva()  : notificarItemPositivo()"
+                @click="notificarItemPositivo"
                  />
                 </q-card-actions>
             </q-card>
@@ -236,11 +216,11 @@
                 
                 <q-list  bordered separator >
                     <q-item  
-                    v-for="(estado, index) in items.length === 0 ? paradasEstados : itemEstadosFiltrados"
+                    v-for="(estado, index) in itemEstadosFiltrados"
                     :key="index"
                     clickable 
                     v-ripple
-                    @click="items.length === 0 ? notificarParadaNegativa(estado) : notificarItemNegativo(estado)"
+                    @click="notificarItemNegativo(estado)"
                     >
                         <q-item-section>{{ estado.nombre }}</q-item-section>
                     </q-item>
@@ -276,19 +256,17 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
-import { ParadaModel, ParadaEstadoModel,  UrlTemporariaParadaComprobanteResponseModel } from 'src/models/Parada.model';
+import { ParadaModel, } from 'src/models/Parada.model';
 import { ItemModel, ItemEstadoModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
-import { ITEMS_ESTADOS, ITEMS_TIPOS, PARADA_ESTADOS } from 'src/utils/DataProviders'
+import { ITEMS_ESTADOS, ITEMS_TIPOS } from 'src/utils/DataProviders'
 import { useQuasar } from 'quasar';
-import { useUsuarioStore } from 'src/stores/Usuario'
 import {useDataProvider} from 'src/composables/DataProvider'
 import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.vue';
 import ImagenesComprobantes from '../../components/Parada/ImagenesComprobantes.vue';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { uploadFileToS3 } from 'src/utils/AWS'
-import Compressor from 'compressorjs';
 import { getId } from 'src/utils/Util';
 import { base64ToFile, compressImage } from 'src/utils/Image';
 
@@ -301,8 +279,6 @@ const S3BUCKETLAGUAGUA : string = process.env.S3BUCKETLAGUAGUA as string
 const paradaRepository = new ParadaRepository();
 const itemRepository = new ItemRepository();
 
-const usuarioStore = useUsuarioStore()
-
 const route = useRoute();
 const router = useRouter();
 
@@ -314,7 +290,6 @@ const {
 const { 
     itemsEstados,
     getItemsEstados,
-    paradasEstados,
     getParadasEstados
 } = useDataProvider()
 
@@ -342,7 +317,6 @@ const tieneItems = computed(() => items.value.length > 0)
 const trayendoParada = ref<boolean>(false);
 
 const getParada = async () => {
-
     trayendoParada.value = true;
 
     try {
@@ -388,28 +362,6 @@ onMounted(() => {
 const navegar = async (lat: string, lng: string) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     window.open(url);
-
-    // if(parada.value?.parada_estado.codigo === 'visitado'){
-    //     return 
-    // }
-
-    // if(items.value.length > 0){
-    //     const [item] = items.value
-    //     const { id } = item;
-    //     const request : any = {
-    //         parada_id: parada.value?.id as number,
-    //         item_estado_id: ITEMS_ESTADOS.EN_CAMINO 
-    //     }
-    //     await itemRepository.updateEstado(request, id);
-    // } else {
-    //     const { usuario: { id } } = usuarioStore
-    //     const request = {
-    //         parada_estado_id: PARADA_ESTADOS.EN_CAMINO,
-    //         rider_id: id
-    //     } 
-    //     await paradaRepository.updateEstado(request, Number(parada.value?.id));
-    // }
-    
 }
 
 const abrirConfirmar = ref<boolean>(false)
@@ -469,54 +421,6 @@ const notificarItemNegativo = async (itemEstado: ItemEstadoModel) => {
     }
 }
 
-const notificarParadaPositiva = async () => {
-    if(parada.value){
-      try {
-        const { usuario: { id } } = usuarioStore
-        cargandoActualizarEstado.value = true;
-        const request = {
-            parada_estado_id: PARADA_ESTADOS.VISITADO,
-            rider_id: id
-        }
-        const response = await paradaRepository.updateEstado(request, parada.value.id);
-        if(response.parada){
-            emit('actualizarEstadoParada', response.parada)
-         mostrarMensajePositivo.value = true
-        }
-        
-      } catch (error) {
-        
-      } finally {
-            cargandoActualizarEstado.value = false;
-        }
-    }
-}
-
-const notificarParadaNegativa = async (paradaEstado: ParadaEstadoModel) => {
-    if(parada.value){
-      try {
-        const { usuario: { id } } = usuarioStore
-        cargandoActualizarEstado.value = true;
-        const request = {
-            parada_estado_id: paradaEstado.id,
-            rider_id: id
-        }
-        const response = await paradaRepository.updateEstado(request, parada.value.id);
-        mostrarMensajeNegativo.value = true
-        if(response.parada){
-            emit('actualizarEstadoParada', response.parada)
-        }
-        
-      } catch (error) {
-        
-      } finally {
-            cargandoActualizarEstado.value = false;
-        }
-    }
-}
-
-// const paqueteEntregable = computed(() => true)
-
 const paqueteEntregable = computed(() => (items.value.length === 0 && parada.value?.parada_estado.codigo !== 'visitado') ||  
     items.value.some((i) => i.item_estado.codigo !== 'entregado' && i.item_estado.codigo !== 'retirado')
 )
@@ -550,8 +454,6 @@ const takePicture = async (item?: ItemModel) => {
         
     if(item){
         generarUrlItemComprobante(filename, file, item)
-    } else {
-        generarUrlParadaComprobante(filename, file)
     }
    } catch (error) {
     cargandoComprobante.value = false
@@ -562,8 +464,6 @@ const takePicture = async (item?: ItemModel) => {
 
 const cargandoComprobante = ref<boolean>(false)
 const generarUrlItemComprobante = async (nombre_archivo: string, file: File, item: ItemModel) => {
-
-    
     let response : UrlTemporariaItemComprobanteResponseModel | null = null
     try {
         response = await itemRepository.generarUrlTemporariaComprobante({
@@ -593,39 +493,6 @@ const generarUrlItemComprobante = async (nombre_archivo: string, file: File, ite
             }
         } else {
             cargandoComprobante.value = false
-        }
-    }
-}
-
-const generarUrlParadaComprobante = async (nombre_archivo: string, file: File) => {
-    if(parada.value){
-
-        let response : UrlTemporariaParadaComprobanteResponseModel | null = null
-        try {
-            response = await paradaRepository.generarUrlTemporariaComprobante({
-                nombre_archivo,
-                parada_id: parada.value.id 
-            })
-        } catch (error) {
-            cargandoComprobante.value = false
-        }
-
-        if(response){
-            const { storage, comprobante }  = response;
-            if(storage){
-                try {
-                    await uploadFileToS3(storage.url, file);
-                    parada.value.comprobantes.push(comprobante)
-                    
-                } catch (error) {
-                    const { id } = comprobante;
-                    await itemRepository.eliminarItemComprobante(id)
-                } finally {
-                    cargandoComprobante.value = false
-                }
-            } else {
-                cargandoComprobante.value = false
-            }
         }
     }
 }

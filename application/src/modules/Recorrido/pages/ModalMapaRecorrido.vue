@@ -258,7 +258,7 @@ const popUp = (point: ParadaModel) => {
                     <span class="text-subtitle1 text-weight-medium"> ${point.localidad ?? ''} </span>
                 </div>
                 <button 
-                class="bg-blue text-white btnManag rounded-borders q-pa-xs text-weight-medium text-subtitle1" 
+                class="bg-deep-purple-13 text-white btnManag rounded-borders q-pa-xs text-weight-medium text-subtitle1" 
                 id="btnNavegar" 
                 parada-id="${point.id}" 
                 onclick="window.navegar(event)"

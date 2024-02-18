@@ -98,22 +98,5 @@ export default class ParadaRepository {
       }
     }
   
-    async generarUrlTemporariaComprobante(data: UrlTemporariaParadaComprobanteRequestModel)
-    :Promise< UrlTemporariaParadaComprobanteResponseModel> {
-  
-      try {
-        const response = await request({
-          url: API_BASE_URL + '/api/paradas-comprobantes/url-temporaria',
-          method: 'POST',
-          data,
-          auth: true
-        });
-        return response.data;
-  
-      } catch (error) {
-        throw error
-      }
-  
-    }
 
 }
