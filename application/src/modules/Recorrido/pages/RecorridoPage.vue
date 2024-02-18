@@ -194,6 +194,11 @@
                 </q-card-actions>
             </q-card>
         </q-dialog>
+
+        <actualizar-app 
+        v-if="usuario.version !== nuevaVersion()"
+        :url="usuario.actualizacion"
+        />
        
         <dialog-loading :open="optimizandoRecorrido" text="Optimizando recorrido" />
         <dialog-loading :open="actualizandoRecorridoEstado" text="Actualizando recorrido" />
@@ -224,6 +229,8 @@
   import { useRecorridoStore } from 'src/stores/Recorrido'
   import { PARADA_ESTADOS, RECORRIDO_ESTADOS } from 'src/utils/DataProviders';
   import { storeToRefs } from 'pinia';
+  import ActualizarApp from 'src/modules/Recorrido/components/ActulizarApp.vue'
+  import { nuevaVersion } from 'src/utils/Version'
 
   const router = useRouter();
   const route = useRoute();
@@ -257,7 +264,9 @@
 
   const recorridoId = computed(() => route.params.recorrido_id)
 
-  onMounted(() => getRecorrido());
+  onMounted(() => {
+    getRecorrido()
+  });
   
   const cargandoRecorrido = ref<boolean>(false)
   const getRecorrido = async () => {
@@ -514,7 +523,6 @@
   
   onMounted(async () => {
     geoId = Geolocation.watchPosition({}, (newPosition, err) => {
-     
       position.value = newPosition;
     });
   });
