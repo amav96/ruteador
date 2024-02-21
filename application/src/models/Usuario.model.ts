@@ -24,6 +24,7 @@ export interface UsuarioModel {
     created_at: string;
     updated_at: string;
     empresas: EmpresaModel[];
+    pais_id: number;
     pais: PaisModel,
     usuarioConsumo : UsuarioConsumoModel,
     actualizacion: string,
@@ -41,4 +42,11 @@ export interface UsuarioPaginacionModel {
     prev_page_url: string
 }
 
+export interface UpdateUsuarioRequest {
+    nombre: string;
+    pais_id: number
+}
+export interface UpdateUsuarioResponse extends UpdateUsuarioRequest {
+    pais: PaisModel
+}
 

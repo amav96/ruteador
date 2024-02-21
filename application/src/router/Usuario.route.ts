@@ -2,7 +2,7 @@ export default [
     {
         path: '/usuarios',
         redirect: '/usuarios/listado',
-        meta: { requiresAuth: true, gate: 'listar_usuarios' },
+        meta: { requiresAuth: true, gate: 'administracion_usuarios_listado' },
         component: () => import('src/layouts/MainLayout.vue'),
         children: [
           {
@@ -16,7 +16,7 @@ export default [
       path: '/usuario',
       redirect: '/usuario/me',
       meta: { requiresAuth: true,  },
-      component: () => import('src/layouts/MainLayout.vue'),
+      component: () => import('src/layouts/FreeLayout.vue'),
       children: [
         {
           path: 'me/:usuario_id',
