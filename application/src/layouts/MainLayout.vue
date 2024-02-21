@@ -70,8 +70,19 @@
             </q-item>
             <q-separator />
 
+            <q-item @click="router.push({name: 'me' , params: { usuario_id : usuarioStore.usuario.id}})" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="person" />
+              </q-item-section>
+
+              <q-item-section>
+                Perfil
+              </q-item-section>
+            </q-item>
+            <q-separator /> 
+
           
-            <q-item v-if="usuarioStore.autorizado()" @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
+            <q-item v-if="usuarioStore.autorizado(Permisos.ADMINISTRACION_USUARIOS_LISTADO)" @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
               <q-item-section avatar>
                 <q-icon color="deep-purple-13" name="people" />
               </q-item-section>
@@ -113,6 +124,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
+import Permisos from 'src/utils/Permisos';
 
 const autenticacionRepository = new AutenticacionRepository();
 

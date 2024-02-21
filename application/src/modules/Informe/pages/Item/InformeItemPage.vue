@@ -155,7 +155,7 @@ const { usuario } = usuarioStore;
 
 onBeforeMount(() => {
     if(usuario.id !== Number(usuarioId.value)){
-        if(!usuario.permisos.some((p: string) => p === Permisos.ADMINISTRACION_USUARIOS_LISTAR)){
+        if(!usuario.permisos.some((p: string) => p === Permisos.ADMINISTRACION_USUARIOS_LISTADO)){
             router.push({name: 'listado-recorrido'})
         }
     }
