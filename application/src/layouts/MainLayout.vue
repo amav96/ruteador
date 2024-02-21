@@ -59,6 +59,17 @@
             </q-item>
             <q-separator />
 
+            <q-item @click="router.push({name: 'items-tablero' , params: { usuario_id : usuarioStore.usuario.id}})" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="attach_money" />
+              </q-item-section>
+
+              <q-item-section>
+                Tablero
+              </q-item-section>
+            </q-item>
+            <q-separator />
+
             <q-item v-if="usuarioStore.autorizado()" @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
               <q-item-section avatar>
                 <q-icon color="deep-purple-13" name="people" />

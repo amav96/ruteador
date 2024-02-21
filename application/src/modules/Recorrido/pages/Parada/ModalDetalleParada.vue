@@ -65,12 +65,6 @@
                 </div>
             </div>
 
-            <div v-if="tieneItems && parada && parada?.comprobantes.length > 0"
-            class="q-mx-sm text-subtitle1 text-weight-medium"
-            >
-                Comprobantes de parada
-            </div>
-
             <q-separator v-if="tieneItems && parada && parada?.comprobantes.length > 0" spaced />
 
             <!-- listado de paquetes -->
@@ -99,6 +93,9 @@
                                 </div>
                                 <div class="q-mb-xs">
                                     Tipo: <span class="text-weight-medium" >{{ item.item_tipo.nombre }}</span>
+                                </div>
+                                <div v-if=" item.gestionado_transformado" class="q-mb-xs">
+                                    Entregado: <span class="text-weight-medium" >{{ item.gestionado_transformado }}</span>
                                 </div>
                                 <div class="q-mb-xs" v-if="item.cliente && item.cliente.numero_documento">
                                     <span class="text-weight-medium" >{{ item.cliente.tipo_documento?.nombre }} {{ item.cliente.numero_documento }}</span>
@@ -220,7 +217,7 @@
                     :key="index"
                     clickable 
                     v-ripple
-                    @click="notificarItemNegativo(estado)"
+                    @click="items.length > 0 ? notificarItemNegativo(estado) : notificarParadaNegativa(estado)"
                     >
                         <q-item-section>{{ estado.nombre }}</q-item-section>
                     </q-item>
@@ -256,12 +253,11 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
-import { ParadaModel, } from 'src/models/Parada.model';
+import { ParadaEstadoModel, ParadaModel, } from 'src/models/Parada.model';
 import { ItemModel, ItemEstadoModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import GoogleIframeMap from 'src/components/General/GoogleIframeMap.vue';
 import DialogLoading from 'src/components/General/DialogLoading.vue'
 import { ITEMS_ESTADOS, ITEMS_TIPOS } from 'src/utils/DataProviders'
-import { useQuasar } from 'quasar';
 import {useDataProvider} from 'src/composables/DataProvider'
 import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.vue';
 import ImagenesComprobantes from '../../components/Parada/ImagenesComprobantes.vue';
@@ -269,6 +265,9 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { uploadFileToS3 } from 'src/utils/AWS'
 import { getId } from 'src/utils/Util';
 import { base64ToFile, compressImage } from 'src/utils/Image';
+import { useUsuarioStore } from 'src/stores/Usuario'
+
+const usuarioStore = useUsuarioStore()
 
 const emit = defineEmits<{
   (e: 'actualizarEstadoParada', value: ParadaModel): void
@@ -295,9 +294,6 @@ const {
 
 const itemEstadosFiltrados = computed(() => itemsEstados.value.filter((i: ItemEstadoModel) => i.tipo === 'negativo'))
 
-const $q = useQuasar();
-const breakpoint = computed(() => $q.screen)
-
 const dialog =  ref(true)
 const maximizedToggle =  ref(true)
 
@@ -307,6 +303,7 @@ const goToAgregarPaquete = () => {
 
 const goToEditarItemCliente = () => {
     const [item] = items.value
+   
     const { cliente_id, id: item_id } = item;
     router.push({name: 'editar-item-cliente', params: { item_id, cliente_id }})
 }
@@ -398,6 +395,7 @@ const notificarItemPositivo = async () => {
 }
 
 const notificarItemNegativo = async (itemEstado: ItemEstadoModel) => {
+   
     abrirConfirmar.value = false
     const [item] = items.value
     const { id } = item;
@@ -418,6 +416,29 @@ const notificarItemNegativo = async (itemEstado: ItemEstadoModel) => {
         
     } finally {
         cargandoActualizarEstado.value = false;
+    }
+}
+
+const notificarParadaNegativa = async (paradaEstado: ParadaEstadoModel) => {
+    if(parada.value){
+      try {
+        const { usuario: { id } } = usuarioStore
+        cargandoActualizarEstado.value = true;
+        const request = {
+            parada_estado_id: paradaEstado.id,
+            rider_id: id
+        }
+        const response = await paradaRepository.updateEstado(request, parada.value.id);
+        mostrarMensajeNegativo.value = true
+        if(response.parada){
+            emit('actualizarEstadoParada', response.parada)
+        }
+        
+      } catch (error) {
+        
+      } finally {
+            cargandoActualizarEstado.value = false;
+        }
     }
 }
 

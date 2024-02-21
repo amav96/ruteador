@@ -27,7 +27,8 @@ export interface UsuarioModel {
     pais: PaisModel,
     usuarioConsumo : UsuarioConsumoModel,
     actualizacion: string,
-    version: string
+    version: string,
+    permisos: string[]
 }
 
 export interface UsuarioPaginacionModel {

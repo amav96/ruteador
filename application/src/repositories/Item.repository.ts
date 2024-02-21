@@ -1,16 +1,18 @@
-import { ItemEstadoRequestModel, ItemModel, ItemRequestModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
+import { InformeExcelResponse, InformeItemRequest, InformeResponse, ItemEstadoRequestModel, ItemModel, ItemRequestModel, UrlTemporariaItemComprobanteRequestModel, UrlTemporariaItemComprobanteResponseModel } from 'src/models/Item.model';
 import request from 'src/utils/ApiResponse.helper';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
 export default class ItemRepository {
 
-  async get(item_id: number | string): Promise<ItemModel[]>{
-
+  async get(item_id?: number | string, form?: any): Promise<ItemModel[]>{
+    let url = item_id ? `/${item_id}` : ''
+   
     try {
       const response = await request({
-        url: API_BASE_URL + '/api/items/' + item_id,
+        url: API_BASE_URL + '/api/items' + url,
         method: 'GET',
-        auth: true
+        auth: true,
+        params: form
       });
       return response.data;
 
@@ -98,5 +100,37 @@ export default class ItemRepository {
     }
 
   }
+
+  async getInformeItems(form: InformeItemRequest): Promise<InformeResponse>{
+    try {
+      const response = await request({
+        url: API_BASE_URL + '/api/informes-items/gestion',
+        method: 'POST',
+        data: form,
+        auth: true
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getInformeItemsExcel(form: InformeItemRequest): Promise<InformeExcelResponse>{
+    try {
+      const response = await request({
+        url: API_BASE_URL + '/api/informes-items/gestion/excel',
+        method: 'POST',
+        data: form,
+        auth: true
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  
 
 }
