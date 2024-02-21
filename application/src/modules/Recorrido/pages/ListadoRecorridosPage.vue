@@ -60,7 +60,7 @@
                       <q-chip  
                       square 
                       class="text-weight-medium"
-                      :style="`background:${recorrido.recorrido_estado.color};margin:4px 0px;`">
+                      :style="`background:${recorrido.recorrido_estado.color};margin:4px 0px;color:white`">
                       {{ recorrido.recorrido_estado.nombre }} 
                       </q-chip>
                     </div>
