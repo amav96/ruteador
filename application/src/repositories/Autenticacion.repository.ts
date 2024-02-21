@@ -3,9 +3,14 @@ import { LoginModel, GoogleAuthLoginRequest, RegistrarRequestModel, GoogleAuthRe
 import { UsuarioModel } from 'src/models/Usuario.model';
 import { API_BASE_URL } from 'src/utils/BaseUrl'
 
+interface LoginResponse {
+    usuario: UsuarioModel;
+    token: string;
+}
+
 export default class AutenticacionRepository {
 
-    async login(form: LoginModel): Promise<{usuario: UsuarioModel, token: string}> {
+    async login(form: LoginModel): Promise<LoginResponse> {
         try {
             const response = await request({
                 url: API_BASE_URL +'/api/auth/login',
@@ -20,7 +25,7 @@ export default class AutenticacionRepository {
     
     }
 
-    async registrar(form: RegistrarRequestModel): Promise<{usuario: UsuarioModel, token: string}> {
+    async registrar(form: RegistrarRequestModel): Promise<LoginResponse> {
         try {
             const response = await request({
                 url: API_BASE_URL +'/api/auth/registrar',
@@ -35,7 +40,7 @@ export default class AutenticacionRepository {
     
     }
 
-    async googleAuthLogin(form: GoogleAuthLoginRequest): Promise<{usuario: UsuarioModel, token: string}> {
+    async googleAuthLogin(form: GoogleAuthLoginRequest): Promise<LoginResponse> {
         try {
             const response = await request({
                 url: API_BASE_URL +'/api/oauth/google-auth/login',
@@ -49,7 +54,7 @@ export default class AutenticacionRepository {
     
     }
 
-    async googleAuthRegistrar(form: GoogleAuthRegistrarRequest): Promise<{usuario: UsuarioModel, token: string}> {
+    async googleAuthRegistrar(form: GoogleAuthRegistrarRequest): Promise<LoginResponse> {
         try {
             const response = await request({
                 url: API_BASE_URL +'/api/oauth/google-auth/registrar',
@@ -83,6 +88,21 @@ export default class AutenticacionRepository {
             const response =  await request({
                 url: API_BASE_URL +'/api/auth/logout',
                 method: 'POST',
+                auth: true
+              });
+              
+            return response.data;
+
+        } catch (error: any) {
+            throw error
+        }
+    }
+
+    async usurpar(usuarioId: number) : Promise<LoginResponse> {
+        try {
+            const response =  await request({
+                url: API_BASE_URL +'/api/auth/usurpar/' + usuarioId,
+                method: 'GET',
                 auth: true
               });
               

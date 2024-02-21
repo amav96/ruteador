@@ -73,7 +73,7 @@ export const useUsuarioStore = defineStore('usuario', {
       await Preferences.remove({ key: _TOKEN });
     },
     autorizado(permiso?: string | string[]){
-      return this.usuario?.permisos.some((p: string) => p === permiso)
+      return this.usuario?.permisos?.some((p: string) => p === permiso)
     }
   },
 })

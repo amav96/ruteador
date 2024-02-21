@@ -45,6 +45,17 @@
           <q-td key="paradas_hoy" :props="props"> 
             {{ props.row.paradas_hoy ? props.row.paradas_hoy : '' }} 
           </q-td>
+          <q-td v-if="puederUsurpar" key="acciones" :props="props"> 
+            <q-btn-dropdown size="xs" color="primary" label="">
+              <q-list>
+                <q-item clickable v-close-popup >
+                  <q-item-section @click="usurpar(props.row)">
+                    <q-item-label>Usurpar</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
+          </q-td>
         </q-tr>
       </template>
     </q-table>
@@ -66,6 +77,22 @@ import { onMounted } from 'vue';
 import UsuarioRepository from 'src/repositories/Usuario.repository';
 import { UsuarioModel } from 'src/models/Usuario.model';
 import { reactive , ref, computed, watch } from 'vue';
+import { useUsuarioStore } from 'src/stores/Usuario'
+import Permisos from 'src/utils/Permisos';
+import { useQuasar } from 'quasar';
+import AutenticacionRepository from 'src/repositories/Autenticacion.repository';
+import { useRouter } from 'vue-router';
+import { Browser } from '@capacitor/browser';
+
+const router = useRouter();
+
+const autenticacionRepository = new AutenticacionRepository();
+
+const $q = useQuasar()
+let timer : any
+
+const usuarioStore = useUsuarioStore()
+const { autorizado } = usuarioStore;
 
 const usuarioRepository = new UsuarioRepository()
 
@@ -91,9 +118,12 @@ if(pagination.next_page_url || pagination.prev_page_url){
 }
 })
 
+const puederUsurpar = computed(() => {
+  return autorizado(Permisos.ADMINISTRACION_USURPAR_USUARIOS)
+})
+
 const usuarios = ref<UsuarioModel[]>([])
 const columns : any = [
-
   { name: 'email', align: 'center', label: 'Email', field: 'email'},
   { name: 'nombre', align: 'center', label: 'Nombre', field: 'nombre'},
   { name: 'usuario_consumo.cantidad_optimizar', align: 'center', label: 'Optimizaciones', field: 'usuario_consumo.cantidad_optimizar' },
@@ -105,8 +135,8 @@ const columns : any = [
   { name: 'usuario_consumo.cantidad_informes', align: 'center', label: 'Informes generados', field: 'usuario_consumo.cantidad_informes' },
   { name: 'paradas_total', align: 'center', label: 'Paradas total', field: 'paradas_total' },
   { name: 'paradas_hoy', align: 'center', label: 'Paradas hoy', field: 'paradas_hoy' },
+  puederUsurpar ? { name: 'acciones', align: 'center', label: 'Acciones', field: 'acciones' } : {}
 ]
-
 
 const trayendoUsuarios = ref<boolean>(false)
 const getUsuarios = async () => {
@@ -134,6 +164,38 @@ const getUsuarios = async () => {
     } finally {
         trayendoUsuarios.value = false;
     }
+}
+
+const usurpando = ref<boolean>(false);
+const usurpar = async (usuarioUsurpar: UsuarioModel) => {
+ 
+  if(usurpando.value)  return
+
+  try {
+    usurpando.value = true;
+    $q.loading.show()
+
+    const response = await autenticacionRepository.usurpar(usuarioUsurpar.id);
+    const { usuario: usuarioServer , token } = response;
+    if(usuarioServer && token){
+        $q.loading.hide()
+        completarLogin(usuarioServer, token)
+    }
+
+  } catch (error) {
+    
+  } finally {
+    usurpando.value = false;
+    $q.loading.hide()
+  }
+}
+
+const completarLogin = async (usuarioUsurpado: UsuarioModel, token: string) => {
+    usuarioStore.setUsuario(usuarioUsurpado);
+    usuarioStore.setToken(token);
+    setTimeout(() => {
+      router.push({name: 'listado-recorrido'})
+    }, 500);
 }
 
 </script>

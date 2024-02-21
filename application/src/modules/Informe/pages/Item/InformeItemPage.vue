@@ -137,7 +137,7 @@ import { format, addDays } from 'date-fns';
 import { Browser } from '@capacitor/browser';
 import ItemRepository from 'src/repositories/Item.repository';
 import { EmpresaModel } from 'src/models/Empresa.model';
-import ListadoItem from 'src/modules/Informe/components/Item/ListadoItem.vue';
+
 
 interface Filtros {
     fecha_inicio: string;
