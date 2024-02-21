@@ -102,17 +102,6 @@
                         clearable
                         @popup-hide="mostrarDialogFiltros = false;"
                         />
-
-                        <q-input
-                        v-model="filtros.track_id"
-                        type="text"
-                        placeholder="Nro envio" 
-                        dense 
-                        filled
-                        class="q-mb-sm full-width informe-input" 
-                        color="deep-purple-13"
-                        clearable
-                        />
                     </div>
                 </q-card>
             </q-dialog>
@@ -125,6 +114,7 @@
             transition-hide="slide-down"
             >
                 <item 
+                v-if="itemDetalle"
                 :item="itemDetalle"
                 @close="cerrarDialogDetalle"
                  />
@@ -156,7 +146,6 @@ interface Filtros {
     empresa: EmpresaModel | null;
     page: number,
     busqueda: string,
-    track_id: string
 }
 
 const route = useRoute();
@@ -197,7 +186,6 @@ const filtros = ref<Filtros>({
     empresa: null,
     page: 1,
     busqueda: '',
-    track_id: ''
 });
 const next_page_url = ref<string | null>(null)
 const mostrarDialogFiltros = ref<boolean>(false)
@@ -276,11 +264,6 @@ watch(busquedaObserver, (value: string) => {
     debouncedGetItems();
 })
 
-const trackIdObserver = computed(() => filtros.value.track_id)
-watch(trackIdObserver, (value: string) => {
-    filtros.value.page = 1;
-    debouncedGetItems();
-})
 
 const scrolling = async (data: any) => {
     let position = data.ref.getScrollPercentage();
