@@ -196,8 +196,10 @@ const marcarFinalRecorrido = () => {
 }
 
 const crearMarcador = (coord : any, parada : ParadaModel) => {
-    
     const html = popUp(parada)
+    if(parada.direccion_formateada === 'Av. Independencia 1500'){
+        console.log(JSON.parse(JSON.stringify(parada)))
+    }
    
     let iconColor = parada.parada_estado.codigo === 'visitado' 
                 ? '#0BDA51' 
@@ -210,7 +212,9 @@ const crearMarcador = (coord : any, parada : ParadaModel) => {
                     ? ' ' 
                     // #C70039
                     : parada.orden.toString()
-  
+    if(parada.direccion_formateada === 'Av. Independencia 1500'){
+        console.log(parada.parada_estado.codigo === 'visitado' )
+    }
     var label = {
         text,
         color: "white",

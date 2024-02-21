@@ -110,7 +110,6 @@ onMounted(() => {
     });
 });
 
-
 const autenticacionRepository = new AutenticacionRepository();
 const usuarioStore = useUsuarioStore()
 

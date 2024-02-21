@@ -115,7 +115,7 @@ const maximizedToggle =  ref(true)
 
 const formItemRef = ref<any>(null)
 const formContactoRef = ref<any>(null)
-
+console.log(route.params)
 const isItemEditMode = computed(() => route.name === 'editar-item-cliente' && !!route.params.item_id)
 const isClienteEditMode = computed(() => route.name === 'editar-item-cliente' && !!route.params.cliente_id)
 
@@ -230,7 +230,7 @@ const crearItem = async (cliente_id?: number | null) => {
             if(cliente_id){
                 itemForm.value.cliente_id = cliente_id
             }
-            const response = await itemRepository.create(itemForm.value);
+            await itemRepository.create(itemForm.value);
             emit('actualizarParada', true)
             router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
             
@@ -256,7 +256,7 @@ const actualizarItem = async (cliente_id?: number | null) => {
             if(cliente_id){
                 itemForm.value.cliente_id = cliente_id
             }
-            const response = await itemRepository.update(itemForm.value, route.params.item_id as string);
+            await itemRepository.update(itemForm.value, route.params.item_id as string);
             emit('actualizarParada', true)
             router.push({name: 'parada', params: { parada_id: route.params.parada_id}})
            
