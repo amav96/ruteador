@@ -9,7 +9,7 @@
             class="full-width q-mb-lg q-pa-sm back-map">
                 <q-btn  @click="back"  round color="white" class="text-deep-purple-13" icon="arrow_back" />
             </div>
-            <div id="map" class="map map-recorrido bg-white "></div>
+            <div id="map-recorrido" class="map-recorrido bg-white "></div>
         </q-card>
     </q-dialog>
 </template>
@@ -36,7 +36,7 @@ const recorridoStore = useRecorridoStore()
 const { recorrido, paradas } = storeToRefs(recorridoStore)
 
 watch(paradas, (value) => {
-    let domMap = document.getElementById('map')
+    let domMap = document.getElementById('map-recorrido')
     if(domMap && value && value.length > 0){
         iniciarMapa()
         asignarEventos()
@@ -83,7 +83,7 @@ const iniciarMapa = async () => {
     bounds.value = new google.maps.LatLngBounds();
     const myPosition: Coordinates = { lat: origen_actual_lat, lng: origen_actual_lng };
     
-    googleMaps.map = new google.maps.Map(document.getElementById('map'), {
+    googleMaps.map = new google.maps.Map(document.getElementById('map-recorrido'), {
         center: myPosition,
         zoom: 14,
         styles: [
@@ -205,10 +205,7 @@ const crearMarcador = (coord : any, parada : ParadaModel) => {
                 : parada.parada_estado.tipo === 'negativo' 
                     ? ' ' 
                     // #C70039
-                    : parada.orden.toString()
-    if(parada.direccion_formateada === 'Av. Independencia 1500'){
-        console.log(parada.parada_estado.codigo === 'visitado' )
-    }
+                    : parada.orden? parada.orden.toString() : ' ';
     var label = {
         text,
         color: "white",
@@ -286,9 +283,9 @@ const back = () => {
 
 </script>
 
-<style >
+<style  >
 
-.map{
+.map-recorrido{
     position: fixed !important;
     height: 100% !important;
     width: 100% !important;
@@ -299,7 +296,7 @@ const back = () => {
 }
 .map-recorrido .gm-svpc{
     visibility: hidden;
-}
+} 
 
 .back-map{
     position: fixed;

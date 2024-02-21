@@ -68,6 +68,7 @@ const selected = (item: GooglePlacesAutocompleteResponseModel) => {
     .then(({ results } : any) => {
       if(results[0]){
         if(destination.value){
+          
           emit('destinoSeleccionado', results[0])
         } else {
           emit('paradaSeleccionada', results[0])

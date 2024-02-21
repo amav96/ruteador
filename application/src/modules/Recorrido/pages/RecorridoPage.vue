@@ -489,6 +489,7 @@
   };
 
   const destinoSeleccionado = async (value : GooglePlacesAutocompleteResponseModel) => {
+   
     const {formatted_address, geometry } = value;
       destino.value.formatted_address = formatted_address;
       destino.value.data = {

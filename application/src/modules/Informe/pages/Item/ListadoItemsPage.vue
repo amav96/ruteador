@@ -5,7 +5,7 @@
         
             <q-input
             v-model="filtros.busqueda"
-            placeholder="Ingrese dirección o localidad"
+            placeholder="Ingrese busqueda"
             type="text"
             rounded 
             outlined 
@@ -46,6 +46,13 @@
                 <div class="q-ml-sm"> Cargando </div>
             </div>
 
+            <div
+            v-if="!trayendoItems && items.length === 0 "
+            class="flex justify-center"
+            >
+                No hay resultados para esta busqueda
+            </div>
+
             <q-scroll-area
             v-if="items"
             style=""  
@@ -57,7 +64,7 @@
                 @item="abrirDialogDetalle($event)"
                  />
             </q-scroll-area>
-
+            
             <div v-if="trayendoItems && items.length > 0" class="flex row justify-center full-width items-center q-mt-sm">
                 <q-spinner-ios
                 color="primary"
@@ -177,9 +184,9 @@ onMounted(async () => {
 
 
 // @ts-ignore
-const fechaInicial = format(addDays(new Date(), -7), 'yyyy-MM-dd', { timeZone: usuario.pais.time_zone ?? 'America/Argentina/Buenos_Aires' });
+const fechaInicial = format(addDays(new Date(), -7), 'yyyy-MM-dd', { timeZone: usuario.pais?.time_zone ?? 'America/Argentina/Buenos_Aires' });
 // @ts-ignore
-const fechaFinal = format(new Date(), 'yyyy-MM-dd', { timeZone: usuario.pais.time_zone ?? 'America/Argentina/Buenos_Aires' });
+const fechaFinal = format(new Date(), 'yyyy-MM-dd', { timeZone: usuario.pais?.time_zone ?? 'America/Argentina/Buenos_Aires' });
 const filtros = ref<Filtros>({
     fecha_inicio: fechaInicial,
     fecha_fin: fechaFinal,
@@ -214,7 +221,7 @@ const getItems = async () => {
                 ...filtros.value,
                 empresa_id: (filtros.value.empresa?.id ?? null)
             },
-            incluir: ["itemEstado","cliente","parada", "itemProveedor" , "itemTipo", "comprobantes"],
+            incluir: ["itemEstado","cliente.clientesNumeros","parada", "itemProveedor" , "itemTipo", "comprobantes"],
             creado_por: usuario.id
         }
       

@@ -525,4 +525,5 @@ const generarUrlItemComprobante = async (nombre_archivo: string, file: File, ite
 .q-chip {
     margin: 0px;
 }
+
 </style>

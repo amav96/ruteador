@@ -174,7 +174,7 @@ onMounted(async () => {
 })
 
 // @ts-ignore
-const fechaActual = format(new Date(), 'yyyy-MM-dd', { timeZone: usuario.pais.time_zone ?? 'America/Argentina/Buenos_Aires' });
+const fechaActual = format(new Date(), 'yyyy-MM-dd', { timeZone: usuario.pais?.time_zone ?? 'America/Argentina/Buenos_Aires' });
 const filtros = ref<Filtros>({
     fecha_inicio: fechaActual,
     fecha_fin: fechaActual,

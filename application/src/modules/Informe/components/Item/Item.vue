@@ -66,6 +66,32 @@
                         {{ item.track_id  }} 
                     </q-item-section>
                 </q-item>
+                <template v-if="item.cliente">
+                    <q-item v-if="item.cliente.nombre"  class="item-list">
+                        <q-item-section class="text-weight-medium" >Destinatario</q-item-section>
+                        <q-item-section avatar>
+                            {{ item.cliente.nombre  }} 
+                        </q-item-section>
+                    </q-item>
+                    <q-item v-if="item.cliente.numero_documento"  class="item-list">
+                        <q-item-section class="text-weight-medium" >Documento</q-item-section>
+                        <q-item-section avatar>
+                            {{ item.cliente.numero_documento  }} 
+                        </q-item-section>
+                    </q-item>
+                    <template v-if="item.cliente.clientes_numeros && item.cliente.clientes_numeros.length > 0">
+                        <q-item  
+                        v-for="(contacto, index) in item.cliente.clientes_numeros" 
+                        :key="index"
+                        class="item-list">
+                            <q-item-section class="text-weight-medium" >Telefono </q-item-section>
+                            <q-item-section avatar>
+                                {{ contacto.numero  }} 
+                            </q-item-section>
+                        </q-item>
+                    </template>
+                    
+                </template>
             </q-list>  
 
             <div v-if="item.comprobantes.length > 0"

@@ -21,6 +21,7 @@
     <list-auto-complete-google
     :prediction="predictionList"
     :origin="origin"
+    :destination="destination"
     @parada-seleccionada="paradaSeleccionada($event)"
     @origen-seleccionado="$emit('origenSeleccionado', $event)"
     @destino-seleccionado="$emit('destinoSeleccionado', $event)"
@@ -133,7 +134,6 @@ const service = ref<any>(null)
 const initService = (): void => {
 
 if (!pacInput.value) {
-
   return; // Salir si pacInput no está disponible
 }
 
@@ -150,6 +150,7 @@ watch(address, (newVal: string, oldValue) => {
     const request : any = {
       input: newVal,
     };
+   
     if(usuario.pais?.iso){
       request.componentRestrictions = {
         country: usuario.pais?.iso.toLowerCase()
