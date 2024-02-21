@@ -675,8 +675,8 @@
       
         $q.notify({
           type: 'positive',
-          message: 'Recorrido optimizado',
-          timeout: 1500
+          message: 'Recorrido y listado optimizado ',
+          timeout: 2500
         })
 
       }

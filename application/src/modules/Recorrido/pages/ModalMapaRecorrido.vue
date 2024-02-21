@@ -4,18 +4,12 @@
         persistent
         :maximized="true"
         >
-        <q-card>
+       <q-card>
             <div 
-            @click="back" 
-            class="full-width q-mb-lg q-pa-sm">
-                <q-icon 
-                name="arrow_back" 
-                color="deep-purple-13"
-                size="sm"
-                
-                />
+            class="full-width q-mb-lg q-pa-sm back-map">
+                <q-btn  @click="back"  round color="white" class="text-deep-purple-13" icon="arrow_back" />
             </div>
-            <div id="map" class="map"></div>
+            <div id="map" class="map map-recorrido bg-white "></div>
         </q-card>
     </q-dialog>
 </template>
@@ -292,12 +286,25 @@ const back = () => {
 
 </script>
 
-<style scoped>
+<style >
 
 .map{
     position: fixed !important;
-    height: 80% !important;
+    height: 100% !important;
     width: 100% !important;
+}
+
+.map-recorrido .gmnoprint {
+    visibility: hidden;
+}
+.map-recorrido .gm-svpc{
+    visibility: hidden;
+}
+
+.back-map{
+    position: fixed;
+    z-index: 1000;
+   
 }
 
 </style>

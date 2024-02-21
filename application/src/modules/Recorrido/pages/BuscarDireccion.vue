@@ -21,11 +21,12 @@
         />
         <template v-if="creandoParada">
           <div
-          :class="['flex row justify-between text-weight-bold text-h6 q-mb-xs q-mt-sm q-pa-sm  cursor-pointer', breakpoint.xs ? 'full-width' : '']">
+          :class="['flex row justify-between items-center q-mb-xs q-mt-sm q-pa-sm  cursor-pointer', breakpoint.xs ? 'full-width' : '']">
               <div
               @click="mostrarInformacionPaquete = !mostrarInformacionPaquete" 
+              
               >
-                  Paquete
+                  <span class="text-weight-bold text-h6">Paquete</span> <span class="text-h6">(Opcional)</span>
               </div>
               <div>
                   <q-icon 
@@ -42,11 +43,12 @@
           </div>
           
           <div 
-          :class="['flex row justify-between text-weight-bold text-h6 q-my-lg cursor-pointer q-pa-sm ', breakpoint.xs ? 'full-width' : '']">
+          :class="['flex row justify-between items-center q-my-lg cursor-pointer q-pa-sm ', breakpoint.xs ? 'full-width' : '']">
               <div 
               @click="mostrarInformacionContacto = !mostrarInformacionContacto" 
+              
               >
-                  Contacto
+                  <span class="text-weight-bold text-h6"> Contacto</span> <span class="text-h6">(Opcional)</span>
               </div>
               <div>
                   <q-icon 
