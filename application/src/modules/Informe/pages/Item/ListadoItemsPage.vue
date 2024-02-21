@@ -52,7 +52,10 @@
             class="flex column no-wrap full-height"
             @scroll="scrolling"
             >
-                <listado-item :items="items" />
+                <listado-item 
+                :items="items"
+                @item="abrirDialogDetalle($event)"
+                 />
             </q-scroll-area>
 
             <div v-if="trayendoItems && items.length > 0" class="flex row justify-center full-width items-center q-mt-sm">
@@ -114,6 +117,19 @@
                 </q-card>
             </q-dialog>
 
+            <q-dialog
+            v-model="dialogoItemDetalle"
+            persistent
+            :maximized="true"
+            transition-show="slide-up"
+            transition-hide="slide-down"
+            >
+                <item 
+                :item="itemDetalle"
+                @close="cerrarDialogDetalle"
+                 />
+            </q-dialog>
+
             </div>
         </q-page-container>
     </q-layout>
@@ -121,18 +137,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, onBeforeMount } from 'vue';
-import {  MetricasItem, ItemPaginationModel, ItemModel } from 'src/models/Item.model';
+import {  ItemPaginationModel, ItemModel } from 'src/models/Item.model';
 import { useDataProvider } from 'src/composables/DataProvider';
 import debounce from 'src/utils/Debounce'
 import { useRoute, useRouter } from 'vue-router';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import Permisos  from 'src/utils/Permisos'
 import { format, addDays } from 'date-fns';
-import { Browser } from '@capacitor/browser';
 import ItemRepository from 'src/repositories/Item.repository';
 import { EmpresaModel } from 'src/models/Empresa.model';
 import ListadoItem from 'src/modules/Informe/components/Item/ListadoItem.vue';
 import { nextTick } from 'vue';
+import Item from 'src/modules/Informe/components/Item/Item.vue'
 
 interface Filtros {
     fecha_inicio: string;
@@ -210,7 +226,7 @@ const getItems = async () => {
                 ...filtros.value,
                 empresa_id: (filtros.value.empresa?.id ?? null)
             },
-            incluir: ["ItemEstado","cliente","parada", "itemProveedor" , "itemTipo"],
+            incluir: ["itemEstado","cliente","parada", "itemProveedor" , "itemTipo", "comprobantes"],
             creado_por: usuario.id
         }
       
@@ -276,6 +292,17 @@ const scrolling = async (data: any) => {
    
 }
 
+const dialogoItemDetalle = ref<boolean>(false)
+const itemDetalle = ref<ItemModel | null>(null)
+const abrirDialogDetalle = (item: ItemModel) => {
+    itemDetalle.value = item;
+    dialogoItemDetalle.value = true
+}
+
+const cerrarDialogDetalle = () => {
+    itemDetalle.value = null;
+    dialogoItemDetalle.value = false
+}
 
 </script>
 

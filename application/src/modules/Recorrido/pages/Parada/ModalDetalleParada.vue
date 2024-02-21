@@ -7,7 +7,7 @@
       transition-hide="slide-down"
     >
       <q-card class="text-black flex column no-wrap justify-between"  >
-        <div class>
+        <div >
             <div class="full-width q-pa-sm">
                 <q-icon 
                 @click="router.push({name: 'recorrido', params: { recorrido_id: route.params.recorrido_id}})" 
