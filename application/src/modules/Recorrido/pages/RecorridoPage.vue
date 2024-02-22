@@ -196,7 +196,7 @@
         </q-dialog>
 
         <actualizar-app 
-        v-if="usuario.version !== nuevaVersion()"
+        v-if="usuario?.version !== nuevaVersion()"
         :url="usuario.actualizacion"
         />
        
@@ -235,13 +235,14 @@
   const router = useRouter();
   const route = useRoute();
 
+
   const $q = useQuasar();
   const breakpoint = computed(() => $q.screen)
   const usuarioStore = useUsuarioStore()
   const {
       usuario
   } = usuarioStore
-  
+
   const recorridoRepository = new RecorridoRepository();
   const paradaRepository = new ParadaRepository();
   
