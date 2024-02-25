@@ -6,7 +6,8 @@ import { UsuarioModel } from 'src/models/Usuario.model';
 
 interface UsuarioStoreModel{
     usuario : UsuarioModel,
-    token : string
+    token : string,
+    autenticandoUsuario : boolean
 }
 
 let _TOKEN = "_token"
@@ -17,7 +18,8 @@ export const useUsuarioStore = defineStore('usuario', {
     state: () =>
     ({
       usuario: null as unknown as UsuarioModel,
-      token: ""
+      token: "",
+      autenticandoUsuario: false
     } as UsuarioStoreModel),
 
   actions: {
@@ -39,13 +41,16 @@ export const useUsuarioStore = defineStore('usuario', {
     async getUsuario(){
       if(!this.usuario){
         try {
+          this.autenticandoUsuario = true;
           const response = await autenticacionRepository.autenticado()
           this.setUsuario(response.autenticado)
           this.getToken()
           return this.usuario
-          // const token = await Preferences.get({ key: _RECORRIDO });
         } catch (error) {
             console.log(error)
+        } finally {
+            this.autenticandoUsuario = false;
+          
         }
       } else {
         return this.usuario

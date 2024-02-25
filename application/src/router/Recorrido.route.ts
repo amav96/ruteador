@@ -2,7 +2,6 @@ export default [
     {
         path: '/recorridos',
         redirect: '/recorridos/crear-recorrido',
-        meta: { requiresAuth: true},
         component: () => import('src/layouts/MainLayout.vue'),
         children: [
           { 
@@ -14,6 +13,7 @@ export default [
           { 
             path: ':recorrido_id', 
             name: 'recorrido',
+            meta: { requiresAuth: true},
             component: () => import('src/modules/Recorrido/pages/RecorridoPage.vue'), 
             children: [
               {

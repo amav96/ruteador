@@ -60,15 +60,18 @@ const props = defineProps({
 const { prediction, origin, destination } = toRefs(props);
 
 const selected = (item: GooglePlacesAutocompleteResponseModel) => {
+
   const {
     place_id
   } = item
   geocoder
   .geocode({ placeId: place_id })
     .then(({ results } : any) => {
+      
       if(results[0]){
-        if(destination.value){
-          
+        if(origin.value){
+          emit('origenSeleccionado', results[0])
+        } else if(destination.value){
           emit('destinoSeleccionado', results[0])
         } else {
           emit('paradaSeleccionada', results[0])

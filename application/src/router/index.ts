@@ -64,7 +64,6 @@ export default route(function (/* { store, ssrContext } */) {
       setPath(to.path);
     }
     
-
     const usuarioStore = useUsuarioStore()
     const {
       usuarioAutenticado,

@@ -89,8 +89,9 @@
               <q-skeleton class="full-width q-mt-xs" type="text" />
             </template>
             <template v-else-if="tieneParadas">
+              <!-- @click="router.push({name: 'mapa-paradas'})" -->
               <q-btn 
-              @click="router.push({name: 'mapa-paradas'})" 
+              @click="abrirMapa"
               :disabled="optimizandoRecorrido" 
               round 
               color="deep-purple-13" 
@@ -123,7 +124,7 @@
           <div 
           v-for="(parada, index) in paradas" 
           :key="index"
-          @click="goToActualizarParada(parada, parada.id)"
+          @click="goToDetalleParada(parada)"
           >
             <q-item clickable v-ripple :class="[
               'list-group-item rounded-borders q-my-sm', 
@@ -199,6 +200,15 @@
         v-if="usuario?.version !== nuevaVersion()"
         :url="usuario.actualizacion"
         />
+        
+        <modal-mapa-recorrido
+        :usuarioPosicionActual="position"
+        v-show="mostrarMapa"
+        :open="mostrarMapa"
+        @close="cerrarMapa"
+        @go-to-detalle-parada="goToDetalleParada"
+        ref="modalMapaRecorridoRef"
+        />
        
         <dialog-loading :open="optimizandoRecorrido" text="Optimizando recorrido" />
         <dialog-loading :open="actualizandoRecorridoEstado" text="Actualizando recorrido" />
@@ -216,7 +226,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import RecorridoRepository from 'src/repositories/Recorrido.repository';
   import ParadaRepository from 'src/repositories/Parada.repository';
-  import { computed, onMounted, ref, onBeforeUnmount } from 'vue';
+  import { computed, onMounted, ref, onBeforeUnmount, nextTick } from 'vue';
   import { Geolocation } from '@capacitor/geolocation';
   import { useQuasar } from 'quasar';
   import { AutoGpsModel, GooglePlacesAutocompleteResponseModel } from 'src/models/Google.model';
@@ -231,10 +241,11 @@
   import { storeToRefs } from 'pinia';
   import ActualizarApp from 'src/modules/Recorrido/components/ActulizarApp.vue'
   import { nuevaVersion } from 'src/utils/Version'
+  import { Preferences } from '@capacitor/preferences';
+  import ModalMapaRecorrido from 'src/modules/Recorrido/pages/ModalMapaRecorrido.vue'
 
   const router = useRouter();
   const route = useRoute();
-
 
   const $q = useQuasar();
   const breakpoint = computed(() => $q.screen)
@@ -265,12 +276,13 @@
 
   const recorridoId = computed(() => route.params.recorrido_id)
 
-  onMounted(() => {
-    getRecorrido()
+  onMounted(async () => {
+    await getRecorrido()
+    estabaMapaAbierto()
   });
   
   const cargandoRecorrido = ref<boolean>(false)
-  const getRecorrido = async () => {
+  const getRecorrido = async () : Promise<any> => {
     const {
       recorrido_id
     } = route.params
@@ -338,6 +350,8 @@
       } else {
         router.push({name: 'listado-recorrido'})
       }
+
+      return response
       
     } catch (error) {
       
@@ -388,10 +402,13 @@
     }
   };
   
-  const goToActualizarParada = (data: any, id: number) => {
+  const goToDetalleParada = (data: ParadaModel) => {
+    if(mostrarMapa.value){
+      mostrarMapa.value = false
+    }
     router.push({
       name: 'parada',
-      params: { parada_id: id },
+      params: { parada_id: data.id },
     });
 
   };
@@ -417,6 +434,7 @@
   
   const origenSeleccionado = async (value : GooglePlacesAutocompleteResponseModel | AutoGpsModel) => {
     let origen_formateado : string = ''
+    recorrido.value.optimizado = 0;
     if ('formatted_address' in value) {
       const {formatted_address, geometry } = value;
       origen.value.formatted_address = formatted_address;
@@ -429,6 +447,7 @@
     } else if('auto' in value){
       if(position.value?.coords){
         const { latitude , longitude } = position.value.coords
+       
         const geo = await geoposicionar(latitude, longitude)
         geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
         const geoFormateado = formatearGeposiciones(geo);
@@ -436,8 +455,8 @@
         origen.value.formatted_address = 'Tu ubicación'
         origen_formateado = geoFormateado.formatted_address
         origen.value.data = {
-          lat: geoFormateado.lat,
-          lng: geoFormateado.lng,
+          lat: latitude,
+          lng: longitude,
         }
       }
 
@@ -476,7 +495,6 @@
       recorrido.value.origen_actual_lat = origen.value.data.lat
       recorrido.value.origen_actual_lng = origen.value.data.lng
       recorrido.value.origen_actual_formateado = origen_formateado
-
       
     } catch (error) {
 
@@ -499,7 +517,7 @@
       }
 
       try {
-
+        recorrido.value.optimizado = 0;
         await recorridoRepository.updateDestino(
         {
           destino_lat: destino.value.data.lat ?? 0,
@@ -511,6 +529,7 @@
         recorrido.value.destino_lat = destino.value.data.lat ?? 0
         recorrido.value.destino_lng = destino.value.data.lng ?? 0
         recorrido.value.destino_formateado = destino.value.formatted_address ?? ''
+        
 
       } catch (error) {
         $q.notify({
@@ -520,13 +539,23 @@
       }
   };
   
-  const position = ref<any>({});  
+  const position = ref<any>(null);  
   let geoId: any;
-  
+
   onMounted(async () => {
-    geoId = Geolocation.watchPosition({}, (newPosition, err) => {
+    geoId = Geolocation.watchPosition(
+      {
+        enableHighAccuracy: true,
+      }
+      , (newPosition, err) => {
       position.value = newPosition;
     });
+  });
+
+  onBeforeUnmount(() => {
+      if (geoId) {
+        Geolocation.clearWatch({ id: geoId });
+      }
   });
   
   onBeforeUnmount(() => {
@@ -600,6 +629,7 @@
   };
 
   const optimizandoRecorrido = ref<boolean>(false);
+  const modalMapaRecorridoRef = ref<any>()
   const optimizarRecorrido = async () => {
     if(!recorridoId.value){
       return
@@ -620,7 +650,7 @@
       });
       return
     } 
-    
+   
     optimizandoRecorrido.value = true;
     // 1) si el origen es automatico, obtener la posicion y chequear si es diferente a la posicon actual, si es diferente,
     // actualizar las posiciones actuales del recorrido 
@@ -628,10 +658,6 @@
       try {
 
         const { latitude , longitude } = position.value.coords
-        const { origen_actual_lat , origen_actual_lng } = recorrido.value
-
-        if(latitude !== origen_actual_lat && longitude !== origen_actual_lng){
-
           const geo = await geoposicionar(latitude, longitude)
           geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
           const geoFormateado = formatearGeposiciones(geo);
@@ -646,7 +672,7 @@
           recorrido.value.origen_actual_lat = latitude
           recorrido.value.origen_actual_lng = longitude
           recorrido.value.origen_actual_formateado = geoFormateado.formatted_address
-        }
+        
 
       } catch (error) {
         optimizandoRecorrido.value = false;
@@ -686,6 +712,8 @@
       
     }  finally {
       optimizandoRecorrido.value = false;
+      modalMapaRecorridoRef.value.mapaIniciado = false
+      
     }
 
   }
@@ -711,6 +739,28 @@
    }
    
   }
+
+  const mostrarMapa = ref<boolean>(false)
+  const viewMapaKey = '_viewMap'
+  const abrirMapa = () => {
+    Preferences.set({ key: viewMapaKey, value: "1" });
+    mostrarMapa.value = true;
+  }
+
+  const cerrarMapa = async () => {
+    await Preferences.remove({ key: viewMapaKey });
+    mostrarMapa.value = false;
+  }
+
+  const estabaMapaAbierto = async() => {
+    const mapaAbierto = await Preferences.get({key: viewMapaKey})
+    if(mapaAbierto.value){
+      await nextTick();
+      abrirMapa()
+    }
+   
+  }
+
   </script>
   
   <style>
