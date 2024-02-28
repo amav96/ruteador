@@ -259,7 +259,9 @@ const descargarInforme = async () => {
     } catch (error) {
         
     } finally {
-        descargandoInforme.value = false;
+        setTimeout(() => {
+            descargandoInforme.value = false;
+        }, 1000);
     }
 }
 

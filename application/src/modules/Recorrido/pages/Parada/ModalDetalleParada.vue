@@ -229,14 +229,20 @@
 
         <!-- realizado correctamente -->
         <modal-respuesta-accion
-        :open="mostrarMensajePositivo"
+        v-if="mostrarMensajePositivo"
         :recorrido_id="Number(recorrido_id)"
+        :parada_id="Number(route.params.parada_id)"
+        :paradas="recorridoStore.paradas"
+        @close="mostrarMensajePositivo = false;"
         />
 
         <modal-respuesta-accion
-        :open="mostrarMensajeNegativo"
+        v-if="mostrarMensajeNegativo"
         bg-color="bg-red-13"
         :recorrido_id="Number(recorrido_id)"
+        :parada_id="Number(route.params.parada_id)"
+        :paradas="recorridoStore.paradas"
+        @close="mostrarMensajeNegativo = false;"
         />
 
       </q-card>
@@ -248,9 +254,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter, useRoute, routerKey } from 'vue-router'
 import ParadaRepository from 'src/repositories/Parada.repository'
 import ItemRepository from 'src/repositories/Item.repository'
 import { ParadaEstadoModel, ParadaModel, } from 'src/models/Parada.model';
@@ -266,7 +271,9 @@ import { uploadFileToS3 } from 'src/utils/AWS'
 import { getId } from 'src/utils/Util';
 import { base64ToFile, compressImage } from 'src/utils/Image';
 import { useUsuarioStore } from 'src/stores/Usuario'
+import { useRecorridoStore } from 'src/stores/Recorrido';
 
+const recorridoStore = useRecorridoStore()
 const usuarioStore = useUsuarioStore()
 
 const emit = defineEmits<{
@@ -282,9 +289,12 @@ const route = useRoute();
 const router = useRouter();
 
 const {
-  parada_id,
   recorrido_id
 } = route.params
+
+watch(route, (newValue: any) => {
+    getParada()
+})
 
 const { 
     itemsEstados,
@@ -331,7 +341,7 @@ const getParada = async () => {
             ]
         }
         
-        const response  = await paradaRepository.getParada(params, parada_id as string)
+        const response  = await paradaRepository.getParada(params, route.params.parada_id as string)
         const [paradaServer] = response
         if(paradaServer){
             parada.value = paradaServer
@@ -369,10 +379,12 @@ const mostrarMensajeNegativo = ref<boolean>(false)
 const abrirSeleccionarMotivoNegativo = ref<boolean>(false)
 
 const notificarItemPositivo = async () => {
+    
     abrirConfirmar.value = false
     const [item] = items.value
     const { id } = item;
     const item_estado_id = item.item_tipo_id === ITEMS_TIPOS.ENTREGA ? ITEMS_ESTADOS.ENTREGADO : ITEMS_ESTADOS.RETIRADO
+   
     const request = {
         item_estado_id,
         parada_id: parada.value?.id as number,

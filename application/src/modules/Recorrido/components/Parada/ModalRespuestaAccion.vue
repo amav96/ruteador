@@ -28,16 +28,31 @@
                         />
                     </div>
                 </div>
-                <div :class="[breakpoint?.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-lg']" >
+                <div class="full-width">
+                    <div :class="[breakpoint?.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-sm']" >
                     <q-btn
                     unelevated 
                     rounded 
                     color="white"
-                    label="Seguir recorrido" 
+                    label="Listado recorrido" 
                     type="buttom"
                     class="full-width text-black"
                     @click="router.push({name: 'recorrido', params: { recorrido_id: recorrido_id}})"
                     />
+                    </div>
+                    <div 
+                    v-if="siguienteParadaId"
+                    :class="[breakpoint?.xs ? 'full-width' : 'media-width', 'flex justify-center q-my-sm']" >
+                        <q-btn
+                        unelevated 
+                        rounded 
+                        color="white"
+                        label="Siguiente parada" 
+                        type="buttom"
+                        class="full-width text-black"
+                        @click="goToSiguienteParada"
+                        />
+                    </div>
                 </div>
                 
             </q-card>
@@ -45,20 +60,26 @@
 </template>
 
 <script setup lang="ts">
-import { watch, computed} from 'vue';
+import {  computed} from 'vue';
 import { toRefs } from 'vue';
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import { ParadaModel } from 'src/models/Parada.model';
+const emit = defineEmits<{
+  (e: 'close', data: boolean): void
+}>()
 
 interface ModalRespuestaAccionProps {
-    open: boolean,
-    recorrido_id: number
+    // open: boolean,
+    recorrido_id: number,
+    parada_id: number,
     text?: string,
     bgColor?: string,
     textColor?: string
     iconTop?: string
-    iconBottom?: string
+    iconBottom?: string,
+    paradas: ParadaModel[]
 }
 
 const router = useRouter();
@@ -67,7 +88,7 @@ const $q = useQuasar();
 const breakpoint = computed(() => $q.screen)
 
 const props = withDefaults(defineProps<ModalRespuestaAccionProps>(), {
-  open: false,
+//   open: false,
   text: 'Realizado correctamente',
   bgColor: 'bg-green-14',
   textColor: 'text-white',
@@ -75,12 +96,24 @@ const props = withDefaults(defineProps<ModalRespuestaAccionProps>(), {
   iconBottom: 'inventory'
 });
 
-const { open, recorrido_id, text, bgColor,textColor , iconTop, iconBottom   } = toRefs(props);
+const {recorrido_id, text, bgColor,textColor , iconTop, iconBottom, paradas, parada_id   } = toRefs(props);
 
-const mostrarRespuestaInformacion = ref<boolean>(false)
-watch(open, ( val: boolean) => {
-    mostrarRespuestaInformacion.value = val
+const mostrarRespuestaInformacion = ref<boolean>(true)
+const siguienteParadaId  = computed<number | null>(() => {
+    let siguiente = paradas.value.findIndex((p: ParadaModel) => p.id === parada_id.value) + 1
+    if(siguiente > -1){
+        if(paradas.value[siguiente].parada_estado.codigo !== 'visitado' && paradas.value[siguiente].parada_estado.tipo !== 'negativo'){
+            return paradas.value[siguiente].id
+        }
+    }
+    return null;
 })
+
+const goToSiguienteParada = () => {
+    router.push({name: 'parada', params: { parada_id: siguienteParadaId.value}})
+    emit("close", false)
+}
+
 
 </script>
 

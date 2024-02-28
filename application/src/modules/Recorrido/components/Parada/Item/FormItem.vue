@@ -17,7 +17,7 @@
             label="Agencia paqueteria"
             color="deep-purple-6"
             v-model="itemForm.empresa_id" 
-            :options="usuarioStore.usuario.empresas" 
+            :options="empresas" 
             option-label="nombre"
             option-value="id"
             emit-value
@@ -123,13 +123,14 @@ const itemForm = ref<ItemRequestModel>({
 })
 
 const {
-
     getItemsTipos,
     itemsTipos,
     getProveedoresItems,
     proveedoresItems,
     itemsEstados,
-    getItemsEstados
+    getItemsEstados,
+    getEmpresas,
+    empresas,
 } = useDataProvider()
 
 onMounted(async() => {
@@ -137,6 +138,7 @@ onMounted(async() => {
     await getItemsTipos()
     await getProveedoresItems()
     await getItemsEstados()
+    await getEmpresas()
     // Solo para editar
     await getItem();
     if(item.value){
