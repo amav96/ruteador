@@ -195,7 +195,7 @@
                 </q-card-actions>
             </q-card>
         </q-dialog>
-
+        
         <actualizar-app 
         v-if="usuario?.version !== nuevaVersion()"
         :url="usuario.actualizacion"

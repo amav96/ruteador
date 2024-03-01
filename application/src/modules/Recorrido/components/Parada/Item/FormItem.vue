@@ -164,7 +164,7 @@ const getItem = async () => {
         try {
             trayendoItem.value = true;
             emit("formularioCargado", true)
-            const response = await itemRepository.get(item_id.value, { creado_por: usuarioStore.usuario.id});
+            const response = await itemRepository.get(item_id.value, { rider_id: usuarioStore.usuario.id});
             if(response.length > 0){
                 const [ item ] = response;
                 itemForm.value.track_id = item.track_id

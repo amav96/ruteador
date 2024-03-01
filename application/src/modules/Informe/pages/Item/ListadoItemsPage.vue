@@ -222,7 +222,7 @@ const getItems = async () => {
                 empresa_id: (filtros.value.empresa?.id ?? null)
             },
             incluir: ["itemEstado","cliente.clientesNumeros","parada", "itemProveedor" , "itemTipo", "comprobantes"],
-            creado_por: usuario.id
+            rider_id: usuario.id
         }
       
         trayendoItems.value = true;

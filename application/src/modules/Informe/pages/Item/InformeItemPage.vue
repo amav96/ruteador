@@ -207,7 +207,7 @@ const getInformeItems = async () => {
                 empresa_id: (filtros.value.empresa?.id ?? null)
             },
             incluir: ["ItemEstado","cliente","parada", "itemProveedor" , "itemTipo"],
-            creado_por: usuario.id
+            rider_id: usuario.id
         });
         const { metricas: metricasServer, items: itemsServer } = response;
         metricas.value = metricasServer;
@@ -250,7 +250,7 @@ const descargarInforme = async () => {
                 empresa_id: (filtros.value.empresa?.id ?? null)
             },
             incluir: ["ItemEstado","cliente","parada", "itemProveedor" , "itemTipo"],
-            creado_por: usuario.id
+            rider_id: usuario.id
         });
         const { url } = response;
         if(url){

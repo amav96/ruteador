@@ -36,7 +36,7 @@ export interface ItemModel {
     updated_at: string;
     empresa_id: number;
     empresa: EmpresaModel;
-    creado_por: number;
+    rider_id: number;
     item_estado: ItemEstadoModel;
     item_proveedor: ProveedorItemModel;
     item_tipo: TipoItemModel;
@@ -93,7 +93,7 @@ export interface InformeItemRequest {
     fecha_fin: string;
     page: number;
     incluir: string[],
-    creado_por: number
+    rider_id: number
 }
 
 export interface MetricasItem {
