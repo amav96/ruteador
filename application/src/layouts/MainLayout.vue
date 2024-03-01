@@ -36,39 +36,45 @@
       >
         <q-scroll-area class="fit">
           <q-list padding class="menu-list">
-            
-            <q-item @click="router.push({name: 'listado-recorrido'})" clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon color="deep-purple-13" name="route" />
-              </q-item-section>
 
-              <q-item-section>
-                Recorridos
-              </q-item-section>
-            </q-item>
-            <q-separator />
+            <template v-if="autorizado(Permisos.OPERACION_LISTAR_MIS_RECORRIDOS)">
+              <q-item @click="router.push({name: 'listado-recorrido'})" clickable v-ripple>
+                <q-item-section avatar>
+                  <q-icon color="deep-purple-13" name="route" />
+                </q-item-section>
 
-            <q-item @click="router.push({name: 'crear-recorrido'})" clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon color="deep-purple-13" name="map" />
-              </q-item-section>
+                <q-item-section>
+                  Recorridos
+                </q-item-section>
+              </q-item>
+              <q-separator />
+            </template>
 
-              <q-item-section>
-                Crear recorrido
-              </q-item-section>
-            </q-item>
-            <q-separator />
+            <template v-if="autorizado(Permisos.OPERACION_CREAR_RECORRIDO)">
+              <q-item @click="router.push({name: 'crear-recorrido'})" clickable v-ripple>
+                <q-item-section avatar>
+                  <q-icon color="deep-purple-13" name="map" />
+                </q-item-section>
 
-            <q-item @click="router.push({name: 'items-tablero' , params: { usuario_id : usuarioStore.usuario.id}})" clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon color="deep-purple-13" name="attach_money" />
-              </q-item-section>
+                <q-item-section>
+                  Crear recorrido
+                </q-item-section>
+              </q-item>
+              <q-separator />
+            </template>
 
-              <q-item-section>
-                Mi gestión
-              </q-item-section>
-            </q-item>
-            <q-separator />
+            <template v-if="autorizado(Permisos.OPERACION_LISTAR_MIS_ITEMS)">
+              <q-item @click="router.push({name: 'items-tablero' , params: { usuario_id : usuarioStore.usuario.id}})" clickable v-ripple>
+                <q-item-section avatar>
+                  <q-icon color="deep-purple-13" name="attach_money" />
+                </q-item-section>
+
+                <q-item-section>
+                  Mi gestión
+                </q-item-section>
+              </q-item>
+              <q-separator />
+            </template>
 
             <q-item @click="router.push({name: 'me' , params: { usuario_id : usuarioStore.usuario.id}})" clickable v-ripple>
               <q-item-section avatar>
@@ -82,16 +88,18 @@
             <q-separator /> 
 
           
-            <q-item v-if="usuarioStore.autorizado(Permisos.ADMINISTRACION_USUARIOS_LISTADO)" @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon color="deep-purple-13" name="people" />
-              </q-item-section>
+            <template v-if="autorizado(Permisos.ADMINISTRACION_USUARIOS_LISTADO)">
+              <q-item @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>
+                <q-item-section avatar>
+                  <q-icon color="deep-purple-13" name="people" />
+                </q-item-section>
 
-              <q-item-section>
-                Usuarios
-              </q-item-section>
-            </q-item>
-            <q-separator />
+                <q-item-section>
+                  Usuarios
+                </q-item-section>
+              </q-item>
+              <q-separator />
+            </template>
 
             <q-item @click="cerrarSesion" clickable v-ripple>
               <q-item-section avatar>
@@ -128,6 +136,9 @@ import Permisos from 'src/utils/Permisos';
 
 const autenticacionRepository = new AutenticacionRepository();
 
+const usuarioStore = useUsuarioStore()
+const { logout, autorizado } = usuarioStore
+
 const router = useRouter();
 const route = useRoute();
 
@@ -137,14 +148,13 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
-const usuarioStore = useUsuarioStore()
+
 
 const cerrandoSesion = ref<boolean>(false)
 const cerrarSesion = async () => {
 
   if(cerrandoSesion.value) return
 
-  const { logout, autorizado } = usuarioStore
   try {
     cerrandoSesion.value = true;
     await autenticacionRepository.logout()

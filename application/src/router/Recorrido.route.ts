@@ -1,3 +1,5 @@
+import Permisos from 'src/utils/Permisos';
+
 export default [
     {
         path: '/recorridos',
@@ -7,7 +9,7 @@ export default [
           { 
             path: 'listado', 
             name: 'listado-recorrido',
-            meta: { requiresAuth: true},
+            meta: { requiresAuth: true , gate: Permisos.OPERACION_LISTAR_MIS_RECORRIDOS },
             component: () => import('src/modules/Recorrido/pages/ListadoRecorridosPage.vue'), 
           },
           { 
