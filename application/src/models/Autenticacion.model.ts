@@ -8,6 +8,7 @@ export interface RegistrarRequestModel {
     email: string;
     password: string;
     pais_id: number;
+    rol_id: number
 }
 
 export interface GoogleAuthLoginRequest {

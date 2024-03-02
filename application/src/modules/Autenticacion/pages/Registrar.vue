@@ -14,6 +14,21 @@
                     <div class="full-width text-h6 q-mb-lg text-deep-purple-6 text-center">
                         <strong>Registrar mi cuenta</strong>
                     </div>
+                    
+                    <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'media-width']" >
+                        <q-select
+                        label="Tipo de cuenta"
+                        color="deep-purple-6"
+                        v-model="formLogin.rol_id"
+                        :options="roles"
+                        option-label="label"
+                        option-value="id"
+                        emit-value
+                        map-options
+                        />
+                      
+                    </div>
+
                     <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width']" >
                         <q-input 
                         v-model="formLogin.nombre" 
@@ -52,31 +67,33 @@
                     </div>
 
                     <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'media-width']" >
-                    <q-select
-                    label="Codigo area"
-                    color="deep-purple-6"
-                    v-model="formLogin.pais_id"
-                    :options="paises"
-                    option-label="nombre"
-                    option-value="id"
-                    emit-value
-                    map-options
-                    >
-                    <template v-slot:option="scope">
-                        <q-item v-bind="scope.itemProps">
-                            <q-item-section>
-                                <q-item-label>{{ scope.opt.nombre }}</q-item-label>
-                            </q-item-section>
-                            <q-item-section avatar>
-                                <q-avatar>
-                                    <img :src="`https://flagsapi.com/${scope.opt.bandera}/flat/64.png`">
-                                </q-avatar>
-                            </q-item-section>
-                        </q-item>
-                    </template>
-                    </q-select>
+                        <q-select
+                        label="Pais"
+                        color="deep-purple-6"
+                        v-model="formLogin.pais_id"
+                        :options="paises"
+                        option-label="nombre"
+                        option-value="id"
+                        emit-value
+                        map-options
+                        >
+                        <template v-slot:option="scope">
+                            <q-item v-bind="scope.itemProps">
+                                <q-item-section>
+                                    <q-item-label>{{ scope.opt.nombre }}</q-item-label>
+                                </q-item-section>
+                                <q-item-section avatar>
+                                    <q-avatar>
+                                        <img :src="`https://flagsapi.com/${scope.opt.bandera}/flat/64.png`">
+                                    </q-avatar>
+                                </q-item-section>
+                            </q-item>
+                        </template>
+                        </q-select>
                     </div>
-                    <div @click="router.push({name: 'login'})" :class="['text-deep-purple-6 row full-width text-subtitle1', breakpoint.xs ? 'justify-end' : 'justify-center']">
+
+
+                    <div @click="router.push({name: 'login'})" :class="['text-deep-purple-6 row full-width text-subtitle1 q-mt-sm', breakpoint.xs ? 'justify-end' : 'justify-center']">
                         <strong>¿Ya tenes cuenta? Iniciar sesión</strong>
                     </div>
                     
@@ -157,15 +174,23 @@ onMounted(async() => {
     await getPaises()
 })
 
+const roles = [
+    { id: 4, label : "Quiero entregar y retirar paqueteria" },
+    { id: 2, label : "Tengo mi agencia" },
+    { id: 3, label : "Soy operador de agencia" },
+    { id: 5, label : "Tengo tienda y necesito entregadores" },
+]
+
 const formLogin = reactive<RegistrarRequestModel>({
     nombre: '',
     email: '',
     password: '',
-    pais_id: 1
+    pais_id: 1,
+    rol_id : 4
 })
 const formLoading = ref<boolean>(false);
 
-const formularioVacio = computed(() => !formLogin.email || !formLogin.password || !formLogin.nombre)
+const formularioVacio = computed(() => !formLogin.email || !formLogin.password || !formLogin.nombre || !formLogin.rol_id)
 
 const isPwd = ref<boolean>(true);
 

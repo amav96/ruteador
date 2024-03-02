@@ -1,3 +1,5 @@
+import Permisos from 'src/utils/Permisos';
+
 export default [
     {
         path: '/informes',
@@ -6,6 +8,7 @@ export default [
         component: () => import('src/layouts/MainLayout.vue'),
         children: [
           {
+            meta: { gate: Permisos.OPERACION_LISTAR_MIS_ITEMS},
             path: 'items-tablero/:usuario_id',
             name: 'items-tablero',
             component: () => import('src/modules/Informe/pages/Item/InformeItemPage.vue'), 
