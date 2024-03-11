@@ -51,7 +51,8 @@ const props = defineProps({
 });
 
 const { lat, lng } = toRefs(props);
-const baseUrl = 'https://www.google.com/maps/embed/v1/place?key=AIzaSyDasdhwGs_A9SbZUezcx9VhSSGkxl46bko&q=';
+const key  = process.env.VUE_APP_GOOGLE_MAPS_API_KEY 
+const baseUrl = `https://www.google.com/maps/embed/v1/place?key=${key}&q=`;
 const srcMap = ref('');
 const loading = ref(true);
 const emit = defineEmits(['renderMap']);

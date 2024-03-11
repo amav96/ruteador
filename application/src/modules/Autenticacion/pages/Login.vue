@@ -13,7 +13,7 @@
                         class="q-mb-lg q-mt-md"
                     />
                     <div class="full-width text-h6 q-mb-lg text-deep-purple-6 text-center">
-                        <strong>Ingresar a mi cuenta</strong>
+                        <strong>Ingresar a mi cuenta a</strong>
                     </div>
                     
                     <div :class="[breakpoint.xs || breakpoint.sm ? 'full-width' : 'small-width']" >
