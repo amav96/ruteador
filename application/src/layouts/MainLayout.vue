@@ -35,6 +35,15 @@
         :breakpoint="500"
       >
         <q-scroll-area class="fit">
+          <div v-if="usuarioStore.usuario" class="flex justify-center q-my-sm" >
+            <q-chip>
+              <q-avatar color="deep-purple-12" text-color="white">
+                {{ usuarioStore.usuario.nombre.substring(0,1) }}
+              </q-avatar>
+               {{ usuarioStore.usuario.nombre }}
+            </q-chip>
+          </div>
+
           <q-list padding class="menu-list">
 
             <template v-if="autorizado(Permisos.OPERACION_LISTAR_MIS_RECORRIDOS)">
@@ -86,6 +95,50 @@
               </q-item-section>
             </q-item>
             <q-separator /> 
+
+            <q-item @click="router.push({name: 'empresas-sociedades' })" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="people" />
+              </q-item-section>
+
+              <q-item-section>
+                Sociedades 
+              </q-item-section>
+            </q-item>
+            <q-separator /> 
+
+            <q-item @click="router.push({name: 'invitaciones-empresa' })" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="handshake" />
+              </q-item-section>
+
+              <q-item-section>
+                Invitaciones 
+              </q-item-section>
+            </q-item>
+            <q-separator /> 
+
+            <q-item @click="router.push({name: 'empresas' })" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="business" />
+              </q-item-section>
+
+              <q-item-section>
+                Mi empresa
+              </q-item-section>
+            </q-item>
+            <q-separator /> 
+
+            <q-item @click="router.push({name: 'empresa' })" clickable v-ripple>
+              <q-item-section avatar>
+                <q-icon color="deep-purple-13" name="local_mall" />
+              </q-item-section>
+
+              <q-item-section>
+                Socios
+              </q-item-section>
+            </q-item>
+            <q-separator />
 
           
             <template v-if="autorizado(Permisos.ADMINISTRACION_USUARIOS_LISTADO)">

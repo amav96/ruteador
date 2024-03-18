@@ -175,9 +175,7 @@ onMounted(async() => {
 })
 
 const roles = [
-    { id: 4, label : "Quiero entregar y retirar paqueteria" },
-    { id: 2, label : "Tengo mi agencia" },
-    { id: 3, label : "Soy operador de agencia" },
+    { id: 2, label : "Quiero entregar y retirar paqueteria" },
     { id: 5, label : "Tengo tienda y necesito entregadores" },
 ]
 
@@ -186,7 +184,7 @@ const formLogin = reactive<RegistrarRequestModel>({
     email: '',
     password: '',
     pais_id: 1,
-    rol_id : 4
+    rol_id : 2
 })
 const formLoading = ref<boolean>(false);
 

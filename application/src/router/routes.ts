@@ -4,6 +4,8 @@ import UsuarioRoute from './Usuario.route';
 import AutenticacionRoute from './Autenticacion.route';
 import RecorridoRoute from './Recorrido.route';
 import ItemRoute from './Item.route';
+import EmpresaRoute from './Empresa.route';
+import InvitacionEmpresaRoute from './InvitacionEmpresa.route';
 
 const routes: RouteRecordRaw[] = [
   ...RecorridoRoute,
@@ -11,6 +13,8 @@ const routes: RouteRecordRaw[] = [
   ...UsuarioRoute,
   ...InformesRoute,
   ...ItemRoute,
+  ...EmpresaRoute,
+  ...InvitacionEmpresaRoute,
   // Always leave this as last one,
   // but you can also remove it
   {
