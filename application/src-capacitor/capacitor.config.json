@@ -3,7 +3,9 @@
   "appName": "Ruteador",
   "webDir": "www",
   "bundledWebRuntime": false,
-  "server": {},
+  "server": {
+    "url": "http://172.22.0.7:3001"
+  },
   "plugins": {
     "GoogleAuth": {
       "scopes": [

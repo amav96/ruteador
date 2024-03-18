@@ -13,6 +13,7 @@ const proveedoresItems = ref<any>([])
 const itemsEstados = ref<any>([])
 const paradasEstados = ref<any>([])
 const paises = ref<any>([])
+const roles = ref<any>([])
 
 export function useDataProvider() {
 
@@ -96,6 +97,18 @@ export function useDataProvider() {
     }
    }
 
+   const getRoles = async (params: any = {}) => {
+    if(roles.value.length === 0){
+        const response = await dataProviderRepository.getRoles(params);
+        roles.value = response;
+        return roles.value
+    } else {
+        return roles.value
+    }
+   }
+
+   
+
   return { 
     getTipoDocumentos,
     tiposDocumentos,
@@ -112,6 +125,8 @@ export function useDataProvider() {
     paradasEstados,
     getParadasEstados,
     paises,
-    getPaises
+    getPaises,
+    roles,
+    getRoles
    }
 }

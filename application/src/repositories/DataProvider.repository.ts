@@ -126,4 +126,20 @@ export default class DataProviderRepository {
       }
     }
 
+    async getRoles(params: any){
+      try {
+        const response = await request({
+          url: API_BASE_URL + `/api/roles`,
+          method: 'GET',
+          auth: true,
+          params
+        });
+   
+        return response.data;
+  
+      } catch (error) {
+        throw error
+      }
+    }
+
 }
