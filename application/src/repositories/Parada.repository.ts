@@ -41,8 +41,27 @@ export default class ParadaRepository {
       try {
           const response = await request({
             url: API_BASE_URL + '/api/paradas/estado/' + paradaId,
-            method: 'PATCH',
-            data,
+            method: 'POST',
+            data: {...data, ...{_method: 'PATCH'}} ,
+            auth: true
+          });
+    
+          return response.data;
+    
+        } catch (error) {
+          throw error
+        }
+    }
+
+    async updateHoraLlegadaEstimada(horaLlegadaEstimada: string, paradaId: number | string): Promise<{parada: ParadaModel}> {
+      try {
+          const response = await request({
+            url: API_BASE_URL + '/api/paradas/hora-llegada-estimada/' + paradaId,
+            method: 'POST',
+            data: {
+              hora_llegada_estimada: horaLlegadaEstimada,
+              _method: 'PATCH'
+            } ,
             auth: true
           });
     

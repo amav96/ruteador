@@ -40,6 +40,7 @@ const request = (call: ApiRequest): Promise<ApiResponse> => {
         };
 
         const onError = (err: AxiosError) => {
+            console.log(JSON.stringify(err))
             reject({
                 data: err.response?.data,
                 status: err.response?.status,

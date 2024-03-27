@@ -24,9 +24,9 @@ export default class UsuarioRepository {
     try {
       const response = await request({
         url: API_BASE_URL + `/api/usuarios/${usuarioId}`,
-        method: 'PATCH',
+        method: 'POST',
         auth: true,
-        data: form 
+        data: {...form, ...{_method: 'PATCH'}} 
       });
  
       return response.data;

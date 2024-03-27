@@ -15,7 +15,8 @@ export interface ItemRequestModel {
     rider_id?: number
     destinatario?: string
     item_estado_id: number
-    cliente_id?: number
+    cliente_id?: number;
+    
 }
 
 
@@ -40,7 +41,7 @@ export interface ItemModel {
     item_estado: ItemEstadoModel;
     item_proveedor: ProveedorItemModel;
     item_tipo: TipoItemModel;
-    parada?: ParadaModel
+    parada: ParadaModel
     comprobantes: ItemComprobanteModel[]
 }
 

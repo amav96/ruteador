@@ -128,18 +128,6 @@
               </q-item-section>
             </q-item>
             <q-separator /> 
-
-            <q-item @click="router.push({name: 'empresa' })" clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon color="deep-purple-13" name="local_mall" />
-              </q-item-section>
-
-              <q-item-section>
-                Socios
-              </q-item-section>
-            </q-item>
-            <q-separator />
-
           
             <template v-if="autorizado(Permisos.ADMINISTRACION_USUARIOS_LISTADO)">
               <q-item @click="router.push({name: 'listado-usuarios'})" clickable v-ripple>

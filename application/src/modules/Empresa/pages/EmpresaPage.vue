@@ -103,8 +103,13 @@ import EmpresaRepository from 'src/repositories/Empresa.repository';
 import { computed, onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { routerKey, useRouter } from 'vue-router';
+import { ROLES } from 'src/utils/DataProviders';
+import { useUsuarioStore } from 'src/stores/Usuario';
+import { storeToRefs } from 'pinia';
 
 const router = useRouter();
+const usuarioStore = useUsuarioStore()
+const { usuario } = storeToRefs(usuarioStore);
 
 const empresaRepository = new EmpresaRepository();
 
@@ -121,7 +126,11 @@ const trayendoEmpresas = ref<boolean>(false)
 const getEmpresas = async () => {
     try {
         trayendoEmpresas.value = true;
-        const response = await empresaRepository.get();
+      
+        const response = await empresaRepository.get({
+            rol_id: ROLES.ADMINISTRADOR_AGENCIA,
+            usuario_empresa_id: usuario.value.id
+        });
       
         if(response && response.length > 0){
             empresas.value = response

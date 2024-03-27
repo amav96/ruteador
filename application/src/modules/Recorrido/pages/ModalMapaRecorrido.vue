@@ -19,6 +19,7 @@ import { storeToRefs } from 'pinia';
 import RecorridoRepository from 'src/repositories/Recorrido.repository';
 import raceFlag from 'src/assets/checkered-flag.png'
 import circulo from 'src/assets/circulo.png'
+import { getHoraLlegadaEstimada } from 'src/utils/Util';
 
 const emit = defineEmits(['close', 'goToDetalleParada']);
 
@@ -271,6 +272,7 @@ const markerImage = (strokeColor: string, pinColor: string, labelOriginFilled?: 
 }
 
 const popUpHtml = (point: ParadaModel) => {
+  
     const html = `
             <div class="flex column q-mr-md q-mb-sm">
                 <div class="q-mb-xs text-weight-medium text-subtitle1">
@@ -279,6 +281,10 @@ const popUpHtml = (point: ParadaModel) => {
                 <div class="q-mb-xs text-weight-medium text-subtitle1" >
                     Localidad : 
                     <span class="text-subtitle1 text-weight-medium"> ${point.localidad ?? ''} </span>
+                </div>
+                <div class="q-mb-xs text-weight-medium text-subtitle1" >
+                    Hora llegada : 
+                    <span class="text-subtitle1 text-weight-medium"> ${getHoraLlegadaEstimada(point.hora_llegada_estimada)} </span>
                 </div>
                 <button 
                 class="bg-deep-purple-13 text-white btnManag rounded-borders q-pa-xs text-weight-medium text-subtitle1" 

@@ -11,6 +11,7 @@ export interface ParadaRequestModel {
     provincia: string;
     rider_id: number,
     tipo_domicilio?: string
+    hora_llegada_estimada?: string
 }
 
 export interface ParadaEstadoRequestModel {
@@ -45,6 +46,7 @@ export interface ParadaModel {
     lat: string;
     lng: string;
     orden: number;
+    hora_llegada_estimada: string;
     localidad: string;
     provincia: string;
     recorrido_id: number;

@@ -29,6 +29,7 @@
                         @terminar-relacion="terminarRelacion"
                         />
                     </div>
+
                     <div v-else-if="!trayendoUsuariosEmpresas">
                         <q-card 
                         style="border-radius:10px;" 
@@ -79,6 +80,7 @@ import UsuarioPage from 'src/modules/Usuario/pages/UsuarioPage.vue';
 import { UsuarioEmpresaModel } from 'src/models/UsuarioEmpresa.model';
 import { isRegularExpressionLiteral } from 'typescript';
 import { ErrorModel, PaginationModel } from 'src/models/Helper.model';
+import { ROLES } from 'src/utils/DataProviders';
 
 const route = useRoute();
 const router = useRouter();
@@ -126,6 +128,7 @@ const getUsuariosEmpresas = async () => {
         const response = await usuarioEmpresaRepository.get({ 
             page: pagination.page,
             empresa_id: empresaId.value,
+            
             incluir: ['rol', 'empresa', 'usuario', 'invitacion.invitador'],
             eliminadas: true
         });

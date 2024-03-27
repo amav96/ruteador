@@ -22,6 +22,23 @@ export default class ItemRepository {
     
   }
 
+  async getUltimoItem(params: any): Promise<ItemModel>{
+    
+    try {
+      const response = await request({
+        url: API_BASE_URL + `/api/items/ultimo/item`,
+        method: 'GET',
+        auth: true,
+        params
+      });
+      return response.data;
+
+    } catch (error) {
+      throw error
+    }
+    
+  }
+
   async create(data : ItemRequestModel): Promise<any>{
 
     try {
@@ -58,8 +75,8 @@ export default class ItemRepository {
     try {
       const response = await request({
         url: API_BASE_URL + '/api/items/estado/' + item_id,
-        method: 'PATCH',
-        data,
+        method: 'POST',
+        data: {...data, ...{_method: 'PATCH'}} ,
         auth: true
       });
       return response.data;

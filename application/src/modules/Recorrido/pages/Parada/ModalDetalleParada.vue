@@ -82,6 +82,9 @@
                                         {{ item.cliente?.nombre ?? item.destinatario }}
                                     </span>
                                 </div>
+                                <div v-if="parada" class="q-mb-xs">
+                                    Hora estimada llegada: <span class="text-weight-medium" >{{ getHoraLlegadaEstimada(parada.hora_llegada_estimada) }}</span>
+                                </div>
                                 <div class="q-mb-xs">
                                     Numero envio: <span class="text-weight-medium" >{{ item.track_id }}</span>
                                 </div>
@@ -268,7 +271,7 @@ import ModalRespuestaAccion from '../../components/Parada/ModalRespuestaAccion.v
 import ImagenesComprobantes from '../../components/Parada/ImagenesComprobantes.vue';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { uploadFileToS3 } from 'src/utils/AWS'
-import { getId } from 'src/utils/Util';
+import { getHoraLlegadaEstimada, getId } from 'src/utils/Util';
 import { base64ToFile, compressImage } from 'src/utils/Image';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import { useRecorridoStore } from 'src/stores/Recorrido';
@@ -292,8 +295,13 @@ const {
   recorrido_id
 } = route.params
 
-watch(route, (newValue: any) => {
-    getParada()
+watch(route, (newValue: any, oldValue) => {
+    const { params: { parada_id: paradaIdNew, recorrido_id: recorridoIdNew }} = newValue
+    const { params: { parada_id: paradaIdOld, recorrido_id: recorridoIdOld }} = oldValue
+    if(paradaIdNew !== paradaIdOld || recorridoIdNew !== recorridoIdOld){
+        getParada()
+    }
+  
 })
 
 const { 
@@ -529,6 +537,7 @@ const generarUrlItemComprobante = async (nombre_archivo: string, file: File, ite
         }
     }
 }
+
 
 </script>
 

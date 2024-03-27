@@ -103,7 +103,7 @@ import guardarParadaComposable from 'src/modules/Recorrido/composables/GuardarPa
 import { ClienteModel } from 'src/models/Cliente.model';
 
 const {
-  agregarParadaDetectada,
+  agregarParada,
   clienteGuardable,
   crearCliente,
   crearItem,
@@ -242,7 +242,7 @@ const manejarData = async () => {
             tipo_domicilio
         });
         const { parada } = response;
-        agregarParadaDetectada(parada)
+        agregarParada(parada)
         
         const {
             usuario : { id: usuarioId }

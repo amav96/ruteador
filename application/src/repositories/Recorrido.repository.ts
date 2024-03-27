@@ -76,14 +76,15 @@ export default class RecorridoRepository {
     try {
       const response = await request({
         url: API_BASE_URL +  `/api/recorridos/origen/${recorridoId}`,
-        method: 'PATCH',
-        data,
+        method: 'POST',
+        data: { ...data, ...{ _method: 'PATCH'}},
         auth: true
       });
- 
+      
       return response.data;
 
     } catch (error) {
+      
       throw error
     }
   }
@@ -92,8 +93,8 @@ export default class RecorridoRepository {
     try {
       const response = await request({
         url: API_BASE_URL +  `/api/recorridos/origen-actual/${recorridoId}`,
-        method: 'PATCH',
-        data,
+        method: 'POST',
+        data: {...data, ...{_method: 'PATCH'}} ,
         auth: true
       });
  
@@ -108,8 +109,8 @@ export default class RecorridoRepository {
     try {
       const response = await request({
         url:  API_BASE_URL + `/api/recorridos/destino/${recorridoId}`,
-        method: 'PATCH',
-        data,
+        method: 'POST',
+        data: {...data, ...{_method: 'PATCH'}} ,
         auth: true
       });
  
@@ -124,7 +125,8 @@ export default class RecorridoRepository {
     try {
       const response = await request({
         url: API_BASE_URL + `/api/recorridos/origen-remover/${recorridoId}`,
-        method: 'PATCH',
+        method: 'POST',
+        data: {_method: 'PATCH'} ,
         auth: true
       });
       return response.data;
@@ -139,7 +141,8 @@ export default class RecorridoRepository {
 
       const response = await request({
         url: API_BASE_URL + `/api/recorridos/destino-remover/${recorridoId}`,
-        method: 'PATCH',
+        method: 'POST',
+        data: {_method: 'PATCH'} ,
         auth: true
       });
 
@@ -155,8 +158,8 @@ export default class RecorridoRepository {
       
       const response = await request({
         url:  API_BASE_URL + `/api/recorridos/${recorridoId}/estado`,
-        method: 'PATCH',
-        data,
+        method: 'POST',
+        data: {...data,...{_method: 'PATCH'}} ,
         auth: true
       });
       

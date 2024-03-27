@@ -91,6 +91,7 @@ import { ClienteRequestModel, ClienteModel } from 'src/models/Cliente.model';
 import { useUsuarioStore } from 'src/stores/Usuario'
 import ItemRepository from 'src/repositories/Item.repository'
 import ClienteRepository from 'src/repositories/Cliente.repository'
+import ParadaRepository from 'src/repositories/Parada.repository';
 
 const emit = defineEmits<{
   (e: 'actualizarParada', data: boolean): void
@@ -98,6 +99,7 @@ const emit = defineEmits<{
 
 const itemRepository = new ItemRepository()
 const clienteRepository = new ClienteRepository();
+const paradaRepository = new ParadaRepository();
 
 const usuarioStore = useUsuarioStore()
 
@@ -115,9 +117,9 @@ const maximizedToggle =  ref(true)
 
 const formItemRef = ref<any>(null)
 const formContactoRef = ref<any>(null)
-console.log(route.params)
 const isItemEditMode = computed(() => route.name === 'editar-item-cliente' && !!route.params.item_id)
 const isClienteEditMode = computed(() => route.name === 'editar-item-cliente' && !!route.params.cliente_id)
+const paradaId = computed(() => route.params.parada_id)
 
 const itemForm = ref<ItemRequestModel | null>(null)
 const clienteForm = ref<ClienteRequestModel | null>(null)
@@ -133,8 +135,14 @@ const manejarData = async () => {
         usuario : { id: usuarioId }
     } = usuarioStore
 
+    let hora_llegada_estimada = '';
+    
     if(formItemRef.value && 'itemForm' in formItemRef.value){
         itemForm.value = formItemRef.value.itemForm
+        if(formItemRef.value.day && formItemRef.value.time){
+            hora_llegada_estimada = formItemRef.value.day + ' ' + formItemRef.value.time
+            await actualizarHoraLLegadaEstimada(hora_llegada_estimada);
+        }
     }
 
     if(formContactoRef.value && 'clienteForm' in formContactoRef.value){
@@ -271,6 +279,10 @@ const actualizarItem = async (cliente_id?: number | null) => {
         }
     } 
 
+}
+
+const actualizarHoraLLegadaEstimada = async (hora_llegada_estimada: string) => {
+    const response = await paradaRepository.updateHoraLlegadaEstimada(hora_llegada_estimada, paradaId.value as string)
 }
 
 </script>

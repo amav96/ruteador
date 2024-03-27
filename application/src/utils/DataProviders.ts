@@ -24,3 +24,10 @@ export const RECORRIDO_ESTADOS = {
     FINALIZADO: 3,
     CANCELADO: 4
 }
+
+export const ROLES = {
+    ADMINISTRADOR_SISTEMA: 1,
+    ADMINISTRADOR_AGENCIA: 2,
+    RIDER: 3,
+    VENDEDOR: 4
+}

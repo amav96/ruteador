@@ -97,7 +97,7 @@ import ParadaRepository from 'src/repositories/Parada.repository';
 import guardarParadaComposable from 'src/modules/Recorrido/composables/GuardarParadaComposable'
 
 const {
-  agregarParadaDetectada,
+  agregarParada,
   clienteGuardable,
   crearCliente,
   crearItem,
@@ -170,7 +170,7 @@ const manejarData = async () => {
 
   const { usuario } = usuarioStore;
     if(!usuario) return
-
+    
     try {
         $q.loading.show()
         const { geometry: { location : { lat , lng} } , formatted_address } = direccion.data;
@@ -181,8 +181,7 @@ const manejarData = async () => {
             codigo_postal,
         } = resultadoFormateo
 
-
-        const response = await paradaRepository.create({
+        let request = {
             recorrido_id: Number(recorridoId.value),
             lat: (typeof lat === 'function' ? lat() : lat),
             lng: (typeof lng === 'function' ? lng() : lng),
@@ -193,13 +192,22 @@ const manejarData = async () => {
             provincia: provincia ?? '',
             // TODO:
             // tipo_domicilio
-        });
+        }
+        if(formItemRef.value && 'itemForm' in formItemRef.value){
+            if(formItemRef.value.day && formItemRef.value.time){
+                request.hora_llegada_estimada = formItemRef.value.day + ' ' + formItemRef.value.time
+            }
+        }
+
+        const response = await paradaRepository.create(request);
+
         const { parada } = response;
-        agregarParadaDetectada(parada)
+        agregarParada(parada)
         
         const {
             usuario : { id: usuarioId }
         } = usuarioStore
+        
         
         if(formItemRef.value && 'itemForm' in formItemRef.value){
             itemForm.value = formItemRef.value.itemForm
@@ -246,10 +254,15 @@ const manejarData = async () => {
 
 }
 
+const actualizarHoraLLegadaEstimada = async (hora_llegada_estimada: string, paradaId: number) => {
+    const response = await paradaRepository.updateHoraLlegadaEstimada(hora_llegada_estimada, paradaId)
+}
+
+
 onBeforeUnmount(() => {
     if (timer !== void 0) {
-    clearTimeout(timer)
-    $q.loading.hide()
+        clearTimeout(timer)
+        $q.loading.hide()
     }
 })
 

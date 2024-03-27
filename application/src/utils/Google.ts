@@ -93,6 +93,7 @@ export const geoposicionar = async (lat?: string, lng?: string, address?: string
       params,
       // @ts-ignore
     })
+    console.log(response)
 
     return response.data
 

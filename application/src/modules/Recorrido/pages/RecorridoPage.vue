@@ -449,7 +449,11 @@
         const { latitude , longitude } = position.value.coords
        
         const geo = await geoposicionar(latitude, longitude)
-        geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
+        let results = geo.results.filter((g: any) => g.types.includes('street_address'))
+
+        if(results.length > 0){
+          geo.results = results
+        }
         const geoFormateado = formatearGeposiciones(geo);
         
         origen.value.formatted_address = 'Tu ubicación'
@@ -479,7 +483,7 @@
     }
   
     try {
-      
+    
       await recorridoRepository.updateOrigen(
       {
         origen_lat: origen.value.data.lat,
@@ -497,7 +501,7 @@
       recorrido.value.origen_actual_formateado = origen_formateado
       
     } catch (error) {
-
+      console.log(error)
      $q.notify({
          type: 'warning',
          message: JSON.stringify(error),
@@ -654,27 +658,33 @@
     optimizandoRecorrido.value = true;
     // 1) si el origen es automatico, obtener la posicion y chequear si es diferente a la posicon actual, si es diferente,
     // actualizar las posiciones actuales del recorrido 
+    console.log(position.value)
     if(autoOrigen.value && position.value.coords){
       try {
-
+        
         const { latitude , longitude } = position.value.coords
           const geo = await geoposicionar(latitude, longitude)
-          geo.results = geo.results.filter((g: any) => g.types.includes('street_address'))
-          const geoFormateado = formatearGeposiciones(geo);
-          await recorridoRepository.updateOrigenActual(
-          {
-            origen_actual_lat: latitude,
-            origen_actual_lng: longitude,
-            origen_actual_formateado: geoFormateado.formatted_address
-          }, 
-          Number(recorridoId.value));
+          let results = geo.results.filter((g: any) => g.types.includes('street_address'))
+          
+          if(results.length > 0){
+            console.log(results)
+            geo.results = results
+          
+            const geoFormateado = formatearGeposiciones(geo);
+            await recorridoRepository.updateOrigenActual(
+            {
+              origen_actual_lat: latitude,
+              origen_actual_lng: longitude,
+              origen_actual_formateado: geoFormateado.formatted_address
+            }, 
+            Number(recorridoId.value));
 
-          recorrido.value.origen_actual_lat = latitude
-          recorrido.value.origen_actual_lng = longitude
-          recorrido.value.origen_actual_formateado = geoFormateado.formatted_address
-        
-
+            recorrido.value.origen_actual_lat = latitude
+            recorrido.value.origen_actual_lng = longitude
+            recorrido.value.origen_actual_formateado = geoFormateado.formatted_address
+          }
       } catch (error) {
+        console.log(error)
         optimizandoRecorrido.value = false;
         $q.notify({
             type: 'warning',

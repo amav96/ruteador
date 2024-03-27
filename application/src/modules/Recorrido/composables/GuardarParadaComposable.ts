@@ -41,7 +41,7 @@ export default function useGuardarParada() {
     const guardandoItem = ref<boolean>(false)
     const cargandoFomularios = ref<boolean>(false)
 
-    const agregarParadaDetectada = (data: ParadaModel) => {
+    const agregarParada = (data: ParadaModel) => {
  
         paradas.value.unshift(data)
         if(recorrido.value){
@@ -108,7 +108,7 @@ export default function useGuardarParada() {
     
 
     return {
-        agregarParadaDetectada,
+        agregarParada,
         clienteGuardable,
         crearCliente,
         crearItem,

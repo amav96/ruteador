@@ -31,6 +31,7 @@
 <script setup>
 import {
   toRefs, computed, ref, watch, defineEmits,
+  onMounted,
 } from 'vue';
 
 const props = defineProps({
@@ -51,7 +52,7 @@ const props = defineProps({
 });
 
 const { lat, lng } = toRefs(props);
-const key  = process.env.VUE_APP_GOOGLE_MAPS_API_KEY 
+const key  = process.env.VUE_APP_GOOGLE_MAPS_API_KEY_COTO 
 const baseUrl = `https://www.google.com/maps/embed/v1/place?key=${key}&q=`;
 const srcMap = ref('');
 const loading = ref(true);
@@ -75,9 +76,12 @@ const verifyCoordinates = () => {
   }
 };
 
-verifyCoordinates();
+onMounted(() => {
+  verifyCoordinates();
+})
 watch(() => props.lat, (newVal) => {
   if (newVal) {
+    console.log(newVal)
     srcMap.value = `${baseUrl}${lat.value},${lng.value}`;
   }
 });
